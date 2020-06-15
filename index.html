@@ -447,6 +447,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">echo "Hello Asciidoctor"</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>\$sqrt(4) = 2\$</p>
+</div>
+<div class="paragraph">
+<p>Water (\$H_2O\$) is a critical component.</p>
+</div>
 <div class="imageblock">
 <div class="content">
 <img src="asciidoctor-diagram.svg" alt="asciidoctor diagram" width="540" height="280">
@@ -455,11 +461,35 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-06-11 07:27:41 UTC
+Last updated 2020-06-15 01:20:08 UTC
 </div>
 </div>
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
 <script src="/.highlightjs/highlight.min.js"></script>
 <script>hljs.initHighlighting()</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  messageStyle: "none",
+  tex2jax: {
+    inlineMath: [["\\(", "\\)"]],
+    displayMath: [["\\[", "\\]"]],
+    ignoreClass: "nostem|nolatexmath"
+  },
+  asciimath2jax: {
+    delimiters: [["\\$", "\\$"]],
+    ignoreClass: "nostem|noasciimath"
+  },
+  TeX: { equationNumbers: { autoNumber: "none" } }
+})
+MathJax.Hub.Register.StartupHook("AsciiMath Jax Ready", function () {
+  MathJax.InputJax.AsciiMath.postfilterHooks.Add(function (data, node) {
+    if ((node = data.script.parentNode) && (node = node.parentNode) && node.classList.contains('stemblock')) {
+      data.math.root.display = "block"
+    }
+    return data
+  })
+})
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>配置树梅派WIFI</title>
+<title>Git提交准则</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,36 +439,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>配置树梅派WIFI</h1>
+<h1>Git提交准则</h1>
 </div>
 <div id="content">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>使用 <code>wpa_passphrase</code> 生成 <code>wpa_supplicant</code> 配置</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs"># wpa_passphrase &lt;ssid&gt; [passphrase]
-wpa_passphrase ipool wodemima</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>将生成结果添加到 <code>/etc/wpa_supplicant/wpa_supplicant.conf</code> 中</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="plantext" class="language-plantext hljs">country=CN
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-
-network={
-	ssid="iPool"
-	psk=074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0
-}</code></pre>
-</div>
-</div>
-</li>
-</ol>
+<div class="paragraph">
+<p><a href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines" class="bare">https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines</a></p>
 </div>
 </div>
 <div id="footer">
