@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Git</title>
+<title>Spring Data JPA</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,47 +439,68 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Git</h1>
+<h1>Spring Data JPA</h1>
 </div>
 <div id="content">
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://git-scm.com/book/zh/v2/">Git Book</a></p>
-</li>
-<li>
-<p><a href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines">Angular的Git提交规范</a></p>
-</li>
-<li>
-<p>Git In Action</p>
-</li>
-<li>
-<p>克隆仓库后默认本地只有master我该如何切换到指定分支进行工作？</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs"># git checkout -b asciidoc origin/asciidoc
-git checkout -b local_branch_name origin/remote_target_branch_name&lt;/code&gt;&lt;/pre&gt;</code></pre>
+<div class="sect1">
+<h2 id="_实体映射">实体映射</h2>
+<div class="sectionbody">
+
 </div>
 </div>
-</li>
-<li>
-<p>想要恢复很久之前删除的文件怎么弄？</p>
+<div class="sect1">
+<h2 id="_概念">概念</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_cascade">Cascade</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">git log --diff-filter=D --summary</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="java" class="language-java hljs">CascadeType[] cascade() default {};</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_joincolumn">JoinColumn</h3>
+<div class="paragraph">
+<p>与其他关联关系主键配合使用，用来表示外键字段。</p>
+</div>
+<div class="paragraph">
+<p>如果把当前实体类看作一张表的DDL的话，那么以下代码等同于声明一个外键字段。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="java" class="language-java hljs">public class Child {
+  @ManyToOne
+  @JoinColumn(name="xxx_id")
+  Parent parent;
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>之后在输出中按文件名查找，找到对应提交ID。</p>
+<p>与此同时另一个实体（表DDL）中需要声明（@OneToMany(mappedBy="parent")）</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs"># git checkout a264e181b712474c461498d7d8fde0de93dc7a97~1 index.html
-git checkout commit_id~1 filename</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="java" class="language-java hljs">public class Parent {
+  @ManyToOne(mappedBy="parent")
+  Child child;
+}</code></pre>
 </div>
 </div>
-</li>
-</ul>
+</div>
+<div class="sect2">
+<h3 id="_多对多">多对多</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_一对多">一对多</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_一对一">一对一</h3>
+
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
