@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>PostgreSQL</title>
+<title>virt-manager</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,27 +439,36 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>PostgreSQL</h1>
+<h1>virt-manager</h1>
 </div>
 <div id="content">
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-使用时会受用户拥有权限影响
-</td>
-</tr>
-</table>
+<div class="listingblock">
+<div class="title">set root password</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">sudo virt-customize -a CentOS2.qcow2 --root-password password:12345</code></pre>
+</div>
 </div>
 <div class="listingblock">
-<div class="title">取消或终结等待的事务</div>
+<div class="title">backing</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="sql" class="language-sql hljs">SELECT * FROM pg_stat_activity WHERE state = 'active'; // select actived
-SELECT pg_cancel_backend(14412); // cancel
-SELECT pg_terminate_backend(14459); /terminate</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">qemu-img create -f qcow2 -F qcow2 -b ./CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2 CentOS2.qcow2</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">provision new virtual machine</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">sudo virt-install \
+	--virt-type kvm
+	--name centos-test2 \
+	-ram- 1024 \
+	--disk CentOS2.qcow2 \
+	--network type=direct,source=enp0s25,source_mode=bridge,model=virtio \
+	--os-type=linux \
+	--os-variant=centos8 \
+	--import \
+	--noautoconsole
+
+sudo virt-install --virt-type kvm --name centos-test2 --ram 1024 --disk CentOS2.qcow2 --network type=direct,source=enp0s25,source_mode=bridge,model=virtio --os-type=linux --os-variant=centos8 --import --noautoconsole</code></pre>
 </div>
 </div>
 </div>

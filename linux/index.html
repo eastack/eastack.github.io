@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Untitled</title>
+<title>文件分割</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -462,16 +462,40 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>set proxy</p>
 </div>
+<div class="paragraph">
+<p>注意https_proxy后边连接哪里就是 <code>http</code></p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">export http_proxy="http://127.0.0.1:1234"
-export https_proxy="http://127.0.0.1:1234"</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">export http_proxy="http://192.168.50.54:1080"
+export https_proxy="http://192.168.50.54:1080"</code></pre>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_文件分割">文件分割</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">指定分割后文件大小</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">split -b 10m server.log waynelog</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_kvm虚拟机与宿主及共享粘贴板">KVM虚拟机与宿主及共享粘贴板</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">sudo apt install spice-vdagent</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-08-13 14:16:28 UTC
+Last updated 2020-09-15 09:03:18 UTC
 </div>
 </div>
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
