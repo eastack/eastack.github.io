@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Git提交准则</title>
+<title>Clipboard</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,117 +439,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Git提交准则</h1>
+<h1>Clipboard</h1>
 </div>
 <div id="content">
-<div id="preamble">
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines" class="bare">https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines</a></p>
-</div>
-<div class="paragraph">
-<p>关于如何格式化Git提交信息，我们有非常精确的规则。
-这为我们带来了更具易读性的提交信息，从而让我们在查看项目历史时更易理解。
-而且，我们使用Git提交信息生成AngularJS的更新日志。</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_git提交信息格式">Git提交信息格式</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>每个commit包含一个header一个body和一个footer。
-header具有特殊格式，其包含一个type一个scope和一个subject：</p>
-</div>
-<div class="listingblock">
+<div class="imageblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="plantext" class="language-plantext hljs">&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
-&lt;BLANK LINE&gt;
-&lt;body&gt;
-&lt;BLANK LINE&gt;
-&lt;footer&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>header</strong> 是必须有的，而 <strong>header</strong> 中的 <strong>scope</strong> 是可选的。</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_type">Type</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Commit Message Format
-Each commit message consists of a header, a body and a footer. The header has a special format that includes a type, a scope and a subject:</p>
-</div>
-<div class="paragraph">
-<p>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
-&lt;BLANK LINE&gt;
-&lt;body&gt;
-&lt;BLANK LINE&gt;
-&lt;footer&gt;
-The header is mandatory and the scope of the header is optional.</p>
-</div>
-<div class="paragraph">
-<p>Any line of the commit message cannot be longer than 100 characters! This allows the message to be easier to read on GitHub as well as in various git tools.</p>
-</div>
-<div class="paragraph">
-<p>Revert
-If the commit reverts a previous commit, it should begin with revert: , followed by the header of the reverted commit. In the body it should say: This reverts commit &lt;hash&gt;., where the hash is the SHA of the commit being reverted.</p>
-</div>
-<div class="paragraph">
-<p>Type
-Must be one of the following:</p>
-</div>
-<div class="paragraph">
-<p>feat: A new feature
-fix: A bug fix
-docs: Documentation only changes
-style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-refactor: A code change that neither fixes a bug nor adds a feature
-perf: A code change that improves performance
-test: Adding missing or correcting existing tests
-chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
-Scope
-The scope could be anything specifying place of the commit change. For example $location, $browser, $compile, $rootScope, ngHref, ngClick, ngView, etc&#8230;&#8203;</p>
-</div>
-<div class="paragraph">
-<p>You can use * when the change affects more than a single scope.</p>
-</div>
-<div class="paragraph">
-<p>Subject
-The subject contains succinct description of the change:</p>
-</div>
-<div class="paragraph">
-<p>use the imperative, present tense: "change" not "changed" nor "changes"
-don&#8217;t capitalize first letter
-no dot (.) at the end
-Body
-Just as in the subject, use the imperative, present tense: "change" not "changed" nor "changes". The body should include the motivation for the change and contrast this with previous behavior.</p>
-</div>
-<div class="paragraph">
-<p>Footer
-The footer should contain any information about Breaking Changes and is also the place to reference GitHub issues that this commit closes.</p>
-</div>
-<div class="paragraph">
-<p>Breaking Changes should start with the word BREAKING CHANGE: with a space or two newlines. The rest of the commit message is then used for this.</p>
-</div>
-<div class="paragraph">
-<p>A detailed explanation can be found in this document.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_references">References</h2>
-<div class="sectionbody">
-<div class="ulist bibliography">
-<ul class="bibliography">
-<li>
-<p><a id="GitCommitGuidelines"></a>[GitCommitGuidelines] Andy Hunt &amp; Dave Thomas. The Pragmatic Programmer:
-From Journeyman to Master. Addison-Wesley. 1999.</p>
-</li>
-</ul>
-</div>
+<img src="asciidoctor-diagram.svg" alt="asciidoctor diagram" width="250" height="154">
 </div>
 </div>
 </div>
