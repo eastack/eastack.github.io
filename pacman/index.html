@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>开启树梅派的SSH</title>
+<title>Pacman</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,18 +439,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>开启树梅派的SSH</h1>
+<h1>Pacman</h1>
 </div>
 <div id="content">
-<div class="paragraph">
-<p>向内存卡中写入系统映像后，挂载 <code>/dev/sdx1</code> 。
-然后在挂载磁盘根路径下创建一个名为 <code>SSH</code> 的空文件，便可以使树梅派在开机时自动启动 <code>SSH</code> 服务器。</p>
+<div class="listingblock">
+<div class="title">删除无用包</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">sudo pacman -R $(sudo pacman -Qdt | cut -d ' ' -f 1)</code></pre>
+</div>
 </div>
 <div class="listingblock">
+<div class="title">列出所已安装有包</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">sudo mount /dev/sda1 /mnt
-sudo touch /mnt/SSH
-sudo umount /dev/sda1</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">pacman -Q | cut -d ' ' -f 1</code></pre>
 </div>
 </div>
 </div>

@@ -454,16 +454,21 @@ wpa_passphrase ipool wodemima</code></pre>
 </div>
 </li>
 <li>
-<p>将生成结果添加到 <code>/etc/wpa_supplicant/wpa_supplicant.conf</code> 中</p>
+<p>将生成结果添加到 <code>/boot/wpa_supplicant.conf</code> 文件中</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="plantext" class="language-plantext hljs">country=CN
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+<pre class="highlightjs highlight nowrap"><code data-lang="plantext" class="language-plantext hljs">ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
+country=CN
+
+network={
+	ssid="iPool_2G"
+	psk="074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0"
+}
 
 network={
 	ssid="iPool"
-	psk=074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0
+	psk="074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0"
 }</code></pre>
 </div>
 </div>
@@ -473,7 +478,7 @@ network={
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-27 03:09:58 UTC
+Last updated 2020-10-10 06:52:29 UTC
 </div>
 </div>
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
