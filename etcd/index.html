@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Pacman</title>
+<title>etcd</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,20 +439,24 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Pacman</h1>
+<h1>etcd</h1>
 </div>
 <div id="content">
-<div class="listingblock">
-<div class="title">删除无用包</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">sudo pacman -R $(sudo pacman -Qdt | cut -d ' ' -f 1)</code></pre>
+<div class="paragraph">
+<p>--initial-advertise-peer-urls list of this member&#8217;s peer URLs to advertise to the rest of the cluster.
+广播给集群其他成员的peer地址？</p>
 </div>
+<div class="paragraph">
+<p>--listen-peer-urls list of URLs to listen on for peer traffic.
+监听对等节点流量的URL列表</p>
 </div>
-<div class="listingblock">
-<div class="title">列出所已安装有包</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">pacman -Q | cut -d ' ' -f 1</code></pre>
+<div class="paragraph">
+<p>--listen-client-urls list of URLs to listen on for client traffic.
+监听客户端网络流量的URL列表</p>
 </div>
+<div class="paragraph">
+<p>--advertise-client-urls list of this member&#8217;s client URLs to advertise to the public.
+The client URLs advertised should be accessible to machines that talk to etcd cluster. etcd client libraries parse these URLs to connect to the cluster.</p>
 </div>
 </div>
 <div id="footer">
