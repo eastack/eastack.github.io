@@ -480,6 +480,12 @@ export https_proxy="http://192.168.50.54:1080"</code></pre>
 <pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">split -b 10m server.log waynelog</code></pre>
 </div>
 </div>
+<div class="listingblock">
+<div class="title">list connection by pid</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">lsof -p $PID -nP</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -506,7 +512,7 @@ amixer set Capture 5%-</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-11-10 09:11:13 UTC
+Last updated 2020-11-30 08:09:04 UTC
 </div>
 </div>
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
