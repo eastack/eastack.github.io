@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>OpenSSL</title>
+<title>Untitled</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,26 +439,155 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>OpenSSL</h1>
 </div>
 <div id="content">
 <div class="listingblock">
-<div class="title">使用 openssl 生成 rsa 非对称加密的 pem 格式密钥对。</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">openssl genrsa -out rsa_private_key.pem 1024</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="nginx" class="language-nginx hljs">#user html;
+worker_processes  1; <i class="conum" data-value="1"></i><b>(1)</b>
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events { <i class="conum" data-value="2"></i><b>(2)</b>
+    worker_connections  1024; <i class="conum" data-value="3"></i><b>(3)</b>
+}
+
+
+http {
+    include       mime.types; <i class="conum" data-value="4"></i><b>(4)</b>
+    default_type  application/octet-stream; <i class="conum" data-value="5"></i><b>(5)</b>
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on; <i class="conum" data-value="6"></i><b>(6)</b>
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+
+        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+        #
+        #location ~ \.php$ {
+        #    proxy_pass   http://127.0.0.1;
+        #}
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #    root           html;
+        #    fastcgi_pass   127.0.0.1:9000;
+        #    fastcgi_index  index.php;
+        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    include        fastcgi_params;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #    deny  all;
+        #}
+    }
+
+
+    # another virtual host using mix of IP-, name-, and port-based configuration
+    #
+    #server {
+    #    listen       8000;
+    #    listen       somename:8080;
+    #    server_name  somename  alias  another.alias;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
+
+
+    # HTTPS server
+    #
+    #server {
+    #    listen       443 ssl;
+    #    server_name  localhost;
+
+    #    ssl_certificate      cert.pem;
+    #    ssl_certificate_key  cert.key;
+
+    #    ssl_session_cache    shared:SSL:1m;
+    #    ssl_session_timeout  5m;
+
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
+
+}</code></pre>
 </div>
 </div>
-<div class="listingblock">
-<div class="title">生成的密钥不是pcs8格式，我们需要转成pkcs8格式。</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">openssl pkcs8 -topk8 -inform PEM -in rsa_private_key.pem -outform PEM -nocrypt</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">生成 rsa 公钥</div>
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem</code></pre>
-</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>指定 worker processes 的数量 <a href="http://nginx.org/en/docs/ngx_core_module.html#worker_processes" class="bare">http://nginx.org/en/docs/ngx_core_module.html#worker_processes</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>为影响连接处理的指令提供配置上下文 <a href="http://nginx.org/en/docs/ngx_core_module.html#events" class="bare">http://nginx.org/en/docs/ngx_core_module.html#events</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>为 http server 指令提供上下文 <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#http" class="bare">http://nginx.org/en/docs/http/ngx_http_core_module.html#http</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>顾名思义，用来 include 其他配置文件支持通配符 <a href="http://nginx.org/en/docs/ngx_core_module.html#include" class="bare">http://nginx.org/en/docs/ngx_core_module.html#include</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>响应的默认 MIME 类型 <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#default_type" class="bare">http://nginx.org/en/docs/http/ngx_http_core_module.html#default_type</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>sendfile&#8230;&#8203; <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile" class="bare">http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile</a></td>
+</tr>
+</table>
 </div>
 </div>
 <div id="footer">
