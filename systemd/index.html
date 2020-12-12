@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Virtualbox</title>
+<title>SystemD</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,15 +439,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Virtualbox</h1>
+<h1>SystemD</h1>
 </div>
 <div id="content">
-<div class="paragraph">
-<p>解锁虚拟机</p>
-</div>
 <div class="listingblock">
+<div class="title">Debug</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">vboxmanage startvm &lt;vm-uuid&gt; --type emergencystop</code></pre>
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">SYSTEMD_LOG_LEVEL=debug /lib/systemd/systemd-resolved 2&gt;&amp;1 | tee -a /tmp/rs.log</code></pre>
 </div>
 </div>
 </div>

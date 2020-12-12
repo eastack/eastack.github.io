@@ -490,12 +490,28 @@ SELECT @@SESSION.transaction_isolation, @@SESSION.transaction_read_only;</code><
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_运行">运行</h3>
+<div class="listingblock">
+<div class="title">Server</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Client</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code data-lang="bash" class="language-bash hljs">docker run -it --network some-network --rm mysql mysql -hsome-mysql -uexample-user -p
+docker run -it --rm mysql mysql -hsome.mysql.host -usome-mysql-user -p</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-12-05 05:01:45 UTC
+Last updated 2020-12-12 16:06:28 UTC
 </div>
 </div>
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
