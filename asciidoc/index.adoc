@@ -1,3 +1,5 @@
 :title: Eastack
 
-https://www.eastack.me/mustache[Mustache Manual]
+link:mustache[Mustache Manual]
+
+link:taskwarrior[Taskwarrior]
