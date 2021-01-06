@@ -1,17 +1,17 @@
-= RADIX10.ME
+= EASTACK.ME
 
 Personal Notes.
 
 .Clone the repository
 [source, bash]
 ----
-git clone https://github.com/rwrr/rwrr.github.io
+git clone https://github.com/eastack/eastack.github.io
 ----
 
 .Generate static pages
 [source, bash]
 ----
-cd rwrr.github.io
+cd eastack.github.io
 ./asciidoctor
 ----
 
