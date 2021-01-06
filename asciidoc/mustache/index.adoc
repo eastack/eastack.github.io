@@ -171,14 +171,37 @@ Shown.
 
 === Lambdas
 
-When the value is a callable object, such as a function or lambda, the object will be invoked and passed the block of text.
 当其值是一个可调用对象时，比如一个函数或lambda表达式，此对象将被调用并传递给文本块。
-The text passed is the literal block, unrendered.
 传递的文本是字面文本块，其未经渲染。
-{{tags}} will not have been expanded - the lambda should do that on its own.
-`{{tags}}` 
-In this way you can implement filters or caching.
+`{{tags}}`  将不会被扩展 - 这应该由 lambda 自身完成。
+这样你可以实现过滤器或者缓存。
 
+.模板
+[source]
+----
+{{#wrapped}}
+  {{name}} is awesome.
+{{/wrapped}}
+----
+
+.散列值
+[source]
+----
+{
+  "name": "Willy",
+  "wrapped": function() {
+    return function(text, render) {
+      return "<b>" + render(text) + "</b>"
+    }
+  }
+}
+----
+
+.输出
+[source]
+----
+<b>Willy is awesome.</b>
+----
 
 === 非False值
 

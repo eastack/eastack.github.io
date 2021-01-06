@@ -16,7 +16,6 @@ docker run --rm \
     --attribute=highlightjsdir=/.highlightjs \
     --attribute=icons=font \
     --attribute=prewrap! \
-    --verbose \
     --require asciidoctor-diagram
 
 rm -rf \?
