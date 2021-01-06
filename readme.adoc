@@ -1,6 +1,4 @@
-= EASTACK.ME
-
-Personal Notes.
+= Personal Notes.
 
 .Clone the repository
 [source, bash]
