@@ -646,13 +646,37 @@ Well, 6000.0 dollars, after taxes.</code></pre>
 <div class="sect2">
 <h3 id="_lambdas">Lambdas</h3>
 <div class="paragraph">
-<p>When the value is a callable object, such as a function or lambda, the object will be invoked and passed the block of text.
-当其值是一个可调用对象时，比如一个函数或lambda表达式，此对象将被调用并传递给文本块。
-The text passed is the literal block, unrendered.
+<p>当其值是一个可调用对象时，比如一个函数或lambda表达式，此对象将被调用并传递给文本块。
 传递的文本是字面文本块，其未经渲染。
-{{tags}} will not have been expanded - the lambda should do that on its own.
-<code>{{tags}}</code>
-In this way you can implement filters or caching.</p>
+<code>{{tags}}</code>  将不会被扩展 - 这应该由 lambda 自身完成。
+这样你可以实现过滤器或者缓存。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs">{{#wrapped}}
+  {{name}} is awesome.
+{{/wrapped}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs">{
+  "name": "Willy",
+  "wrapped": function() {
+    return function(text, render) {
+      return "&lt;b&gt;" + render(text) + "&lt;/b&gt;"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-none hljs">&lt;b&gt;Willy is awesome.&lt;/b&gt;</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -843,7 +867,7 @@ In this way you can implement filters or caching.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-01-06 03:31:00 UTC
+Last updated 2021-01-06 03:55:43 UTC
 </div>
 </div>
 <script src="/.highlightjs/highlight.min.js"></script>
