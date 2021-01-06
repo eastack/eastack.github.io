@@ -1,0 +1,16 @@
+= PostgreSQL
+
+NOTE: 使用时会受用户拥有权限影响
+
+.取消或终结等待的事务
+[source, sql]
+----
+SELECT * FROM pg_stat_activity WHERE state = 'active'; // select actived
+SELECT pg_cancel_backend(14412); // cancel
+SELECT pg_terminate_backend(14459); /terminate
+----
+
+.docker env
+POSTGRES_USER=hello
+POSTGRES_PASSWORD=world
+POSTGRES_DB=gwp

@@ -1,0 +1,331 @@
+= Mustache
+
+轻逻辑模板。
+
+== 摘要
+
+.一个典型的 Mustache 模板
+[source, mustache]
+----
+Hello {{name}}
+You have just won {{value}} dollars!
+{{#in_ca}}
+Well, {{taxed_value}} dollars, after taxes.
+{{/in_ca}}
+----
+
+.给定以下散列值
+[source, json]
+----
+{
+  "name": "Chris",
+  "value": 10000,
+  "taxed_value": 10000 - (10000 * 0.4),
+  "in_ca": true
+}
+----
+
+.将会产生以下输出
+[source]
+----
+Hello Chris
+You have just won 10000 dollars!
+Well, 6000.0 dollars, after taxes.
+----
+
+== 简介
+
+Mustache 可以用于 HTML，配置文件，源码 - 等等。
+他的工作原理是使用提供的散列或对象在模板中展开标签。
+
+我们称其为 _“ 轻逻辑 ”_ 是因为它没有 `if` 语句，没有 `else` 子句，或 `for` 循环。
+取而代之只有标签。
+有些标签被替换为一个值，有些被替换为空，而另一些被替换为一系列值。
+此文档解释说明了 Mustache 标签的不同类型。
+
+== 标签类型
+
+标签使用双大括号表示。
+`{{person}}` 和 `{{#person}}` 都是标签。
+在这两个例子中，我们都将 **person** 称为键或标签键。
+让我们来谈谈标签的几种不同类型。
+
+=== 变量
+
+最基础的标签类型是变量类。
+一个 `{{name}}` 标签在模板中将会当前上下文中寻找名为 `name` 的 KEY。
+如果没有名为 `name` 的 KEY 将会递归查找父级上下文。
+如果已经查找到最顶级的上下问但还是没有发现名为 `name` 的 KEY，什么都不会被渲染。
+
+默认情况下所有变量都会被进行 HTML 转义。
+如果你想输出未转义的 HTML，使用三对大括号 `{{{name}}}` 。
+
+你还可以使用 `&` 来取消转义一个变量： `{{& name}}` 。
+这在你改变分割符时会非常有用（参考下面的 “设置分隔符”）。
+
+
+默认情况下变量 “缺失” 将会返回一个空字符串。
+其行为可在你使用的 Mustache 库中进行配置。
+比如在 Ruby 版本的 Mustache 库中在此情况下可以抛出一个异常。
+
+.模板
+[source]
+----
+* {{name}}
+* {{age}}
+* {{company}}
+* {{{company}}}
+----
+
+.散列值
+[source]
+----
+{
+  "name": "Chris",
+  "company": "<b>GitHub</b>"
+}
+----
+
+.输出
+[source]
+----
+* Chris
+*
+* &lt;b&gt;GitHub&lt;/b&gt;
+* <b>GitHub</b>
+----
+
+== 段
+
+段依赖当前上下问中 KEY 的值，将文本块渲染一次或多次。
+
+一个段以 `#` 开头以 `/` 结束。
+从这里 `{{#person}}` 开始一个 “person” 段直到 `{{/person}}` 结束。
+
+段的行为取决于 KEY 的值。
+
+=== False或空列表
+
+如果 **person** KEY 存在并且其值为 `false` 或空列表，井号和斜线之间的内容将不会被渲染。
+
+.模板
+[source]
+----
+Shown.
+{{#person}}
+  Never shown!
+{{/person}}
+----
+
+.散列值
+[source]
+----
+{
+  "person": false
+}
+----
+
+.输出
+[source]
+----
+Shown.
+----
+
+=== 非空列表
+
+如果 &person 键存在且其值不为 `false` ，井号和斜线之间的内容将会被渲染一次或多此。
+
+当值是一个非空列表时，段中的文本将会为列表中的每个值进行一次渲染。
+段中的上下文将会被设置为每次循环中
+每次迭代时，段中的上下文将被设置为当前项。
+这样我们就可以遍历集合了。
+
+.模板
+[source]
+----
+{{#repo}}
+  <b>{{name}}</b>
+{{/repo}}
+----
+
+.散列值
+[source]
+----
+{
+  "repo": [
+    { "name": "resque" },
+    { "name": "hub" },
+    { "name": "rip" }
+  ]
+}
+----
+
+.输出
+[source]
+----
+<b>resque</b>
+<b>hub</b>
+<b>rip</b>
+----
+
+
+=== Lambdas
+
+When the value is a callable object, such as a function or lambda, the object will be invoked and passed the block of text.
+当其值是一个可调用对象时，比如一个函数或lambda表达式，此对象将被调用并传递给文本块。
+The text passed is the literal block, unrendered.
+传递的文本是字面文本块，其未经渲染。
+{{tags}} will not have been expanded - the lambda should do that on its own.
+`{{tags}}` 
+In this way you can implement filters or caching.
+
+
+=== 非False值
+
+当值不是False也不是一个列表时，其将做为块单次渲染的上下文。
+
+.模板
+[source]
+----
+{{#person?}}
+  Hi {{name}}!
+{{/person?}}
+----
+
+.散列值
+[source]
+----
+
+{
+  "person?": { "name": "Jon" }
+}
+
+----
+.输出
+[source]
+----
+Hi Jon!
+----
+
+
+=== 反选段
+
+一个反选段以 `^` 开始以 `/` 结束。
+从这里 `{{^person}}` 开始一个 "person" 反选段直到 `{{/person}}` 结束。
+
+段根据键对应的值可以用来渲染文本一次或多次，而反选段会根据键的反意值渲染文本一次
+因此，如果键不存在或是一个空列表，反选段将被渲染。
+
+.模板
+[source]
+----
+{{#repo}}
+  <b>{{name}}</b>
+{{/repo}}
+{{^repo}}
+  No repos :(
+{{/repo}}
+----
+
+.散列值
+[source]
+----
+{
+  "repo": []
+}
+----
+
+.输出
+[source]
+----
+No repos :(
+----
+
+=== 注释
+
+注释以 `!` 开头且其被忽略。
+
+.下面的模板：
+[source]
+----
+<h1>Today{{! ignore me }}.</h1>
+----
+
+.将会如下渲染
+[source]
+----
+<h1>Today.</h1>
+----
+注释可以包含换行。
+
+=== 片段
+
+片段以 `>` 开始，象这样 `{{> box}}` 。
+
+片段在运行时渲染（而不是编译时），因此递归片段是可行的。
+只是要避免死循环。
+
+其还继承了调用上下文。
+在 http://en.wikipedia.org/wiki/ERuby[ERB] 中你可能需要这样：
+[source]
+----
+<%= partial :next_more, :start => start, :size => size %>
+----
+
+在 Mustache 只需要这样：
+[source]
+----
+{{> next_more}}
+----
+
+为什么？ 
+因为 `next_more.mustache` 文件将会从调用上下文中继承 `size` 和 `start` 。
+
+通过这种方式，你可能会想将片段视为引用，导入，模板扩展，嵌套模板或子模板，即使从字面上看并非如此。
+
+例如下面的模板和片段：
+
+.base.mustache:
+[source]
+----
+<h2>Names</h2>
+{{#names}}
+  {{> user}}
+{{/names}}
+----
+
+.user.mustache:
+[source]
+----
+<strong>{{name}}</strong>
+----
+
+可以被当作扩展后的单个模板：
+[source]
+----
+<h2>Names</h2>
+{{#names}}
+  <strong>{{name}}</strong>
+{{/names}}
+----
+
+=== 设置分隔符
+
+设置分割符的标签以 `=` 开头并修改分隔符从 `{{` 和 `}}` 为自定义字符串。
+
+参考以下下示例：
+
+[source]
+----
+{{这里使用默认标签}}
+{{!下面一条修改分隔符为<% %>}}
+{{=<% %>=}}
+<% 这里使用ERB风格标签 %>
+{{!下面一条修改分隔符为之前的默认值}}
+<%={{ }}=%>
+{{这里又使用回了默认标签}}
+----
+
+根据 ctemplates 说这对TeX之类的语言很有用，因为TeX可能在文本中出现双括号，并且很难用于标记。
+
+NOTE: 自定义分隔符不可以包含空格或者等号。

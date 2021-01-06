@@ -1,0 +1,54 @@
+linux list port and pid
+
+[source, bash]
+----
+sudo ss -lptn 'sport = :80'
+----
+
+[source, bash]
+----
+sudo netstat -nlp | grep :80
+----
+
+[source, bash]
+----
+sudo lsof -n -i :80 | grep LISTEN
+----
+
+set proxy
+
+注意https_proxy后边连接哪里就是 `http`
+
+[source, bash]
+----
+export http_proxy="http://192.168.50.54:1080"
+export https_proxy="http://192.168.50.54:1080"
+----
+
+== 文件分割
+
+.指定分割后文件大小
+[source, bash]
+----
+split -b 10m server.log waynelog
+----
+
+.list connection by pid
+[source, bash]
+----
+lsof -p $PID -nP
+----
+
+== KVM虚拟机与宿主及共享粘贴板
+
+[source, bash]
+----
+sudo apt install spice-vdagent
+----
+
+== 调节Mic音量
+[source, bash]
+----
+amixer set Capture 5%+
+amixer set Capture 5%-
+----

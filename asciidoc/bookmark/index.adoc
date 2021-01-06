@@ -1,0 +1,118 @@
+= AWESOME
+
+== OAuth2
+
+https://oauth.net/code/[Code — OAuth]
+
+== OpenAPI
+https://swagger.io/tools/open-source/[Open Source Tools]
+
+https://gitlab.com/tijsg/swagger-template[Swagger Template - GitLab]
+
+== Software
+
+* https://zerotier.com[Zerotier]
+
+== Web Site
+
+http://www.simplecloud.info/[SCIM]
+
+* https://12factor.net/zh_cn/[12 Factor]
+
+* https://semver.org/lang/zh-CN/[Semantic Versioning]
+
+* http://httpbin.org/[一个简单的HTTP请求响应服务器]
+
+* http://httpbin.org/forms/post[将HTML表单提交到/post]
+
+* https://ietf.org/[IETF]
+
+* https://tools.ietf.org/html/rfc6570[URL Template]
+
+* https://shields.io/[shields.io]
+
+* https://tls.ulfheim.net/[The Illustrated TLS Connection: Every Byte Explained]
+
+* https://refspecs.linuxfoundation.org/[Linux Foundation Referenced Specifications]
+
+* https://refspecs.linuxfoundation.org/fhs.shtml[FHS Referenced Specifications]
+
+* http://tinyhttpd.sourceforge.net/[Tiny HTTPd]
+
+* https://docs.ansible.com/ansible/2.3/playbooks_best_practices.html[Playbooks Best Practices]
+
+== Blog
+
+* https://draveness.me/[draveness]
+
+* http://einverne.github.io/[Verne in GitHub | Verne in GitHub]
+
+* https://www.ssldragon.com/blog/[ssldragon]
+
+* https://sealyun.com/[sealyun]
+
+* https://ezlippi.com/[EZlippi]
+
+* http://bartaz.github.io/ieee754-visualization/[Bartaz]
+
+* http://www.ruanyifeng.com/[阮一峰的个人网站]
+
+* https://coolshell.cn/[CoolShell]
+
+* http://blog.yanick.site/[Yanick]
+
+* https://pinout.xyz/[Pinout]
+
+* https://www.servicemesher.com/[Service Measher]
+
+* https://gpiozero.readthedocs.io[GPIO Zero]
+
+* https://im.dingtalk.com/[DingDing]
+
+* https://github.com/aisuhua/restful-api-design-references[RESTful API Design References]
+
+* https://tech.meituan.com/[美团技术团队]
+
+* https://xz.aliyun.com/[先知社区]
+
+* https://mustache.github.io/[Mustache]
+
+* https://handlebarsjs.com/[Handlebarsjs]
+
+* https://osdn.net/[Handlebarsjs]
+
+* https://www.baeldung.com/jdbc-database-metadata[JDBC Database Metadata]
+
+* https://www.bookstack.cn/read/sdn-handbook/linux-config.md[Linux SDN]
+
+* https://www.baeldung.com/java-spi[Java SPI]
+
+* https://www.tinc-vpn.org/[Tinc]
+
+* https://fastzhong.com/posts/k8s-install-thw/#%e5%ae%89%e8%a3%85%e5%92%8c%e9%85%8d%e7%bd%ae-kubectl[k8s install]
+
+* https://ssl-config.mozilla.org/[ssl-config.mozilla.org]
+
+* https://blog.gmem.cc/[green memory]
+
+* https://restfulapi.net/[restfulapi.net]
+
+* https://yourbasic.org/[Algorithms to Go]
+
+* https://biot.com/capstats/bpf.html[Berkeley Packet Filter (BPF) syntax]
+
+* https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status[Http Status Code]
+
+* https://www.dzssj.com/[电子书世界]
+
+* https://itbox.cc/[itbox]
+
+* https://learnxinyminutes.com/[Learn X in Y minutes]
+
+* https://blog.lilydjwg.me/[依云]
+
+* https://www.zx2c4.com/[zx2c4]
+
+* https://web.archive.org/[Web Archive]
+
+* https://gowebexamples.com/[Go Web Examples]

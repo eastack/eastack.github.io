@@ -1,0 +1,3 @@
+= Clipboard
+
+graphviz::hello-graphviz.dot[format="svg"]

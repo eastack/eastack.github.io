@@ -1,0 +1,43 @@
+= Spring Data JPA
+
+== 实体映射
+
+== 概念
+
+=== Cascade
+
+[source, java]
+----
+CascadeType[] cascade() default {};
+----
+
+=== JoinColumn
+
+与其他关联关系主键配合使用，用来表示外键字段。
+
+如果把当前实体类看作一张表的DDL的话，那么以下代码等同于声明一个外键字段。
+
+[source, java]
+----
+public class Child {
+  @ManyToOne
+  @JoinColumn(name="xxx_id")
+  Parent parent;
+}
+----
+
+与此同时另一个实体（表DDL）中需要声明（@OneToMany(mappedBy="parent")）
+
+[source, java]
+----
+public class Parent {
+  @ManyToOne(mappedBy="parent")
+  Child child;
+}
+----
+
+=== 多对多
+
+=== 一对多
+
+=== 一对一

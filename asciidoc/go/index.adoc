@@ -1,0 +1,7 @@
+= Golang
+
+.install gopls
+[source, bash]
+----
+go get golang.org/x/tools/gopls@latest
+----

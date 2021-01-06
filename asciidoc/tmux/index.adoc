@@ -1,0 +1,15 @@
+= tmux
+
+prefix + s // session列表
+prefix + d // 脱离当前session
+
+== ohmyzsh插件
+
+https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux[ohmyzsh插件]
+
+ta	tmux attach -t		Attach new tmux session to already running named session
+tad	tmux attach -d -t	Detach named tmux session
+ts	tmux new-session -s	Create a new named tmux session
+tl	tmux list-sessions	Displays a list of running tmux sessions
+tksv	tmux kill-server	Terminate all running tmux sessions
+tkss	tmux kill-session -t	Terminate named running tmux session

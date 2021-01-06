@@ -1,0 +1,22 @@
+= Spring
+
+Spring主要通过DI实现的IOC和AOP配合以下四个原则来助力Java开发。
+
+* 基于POJO的轻量级和最小侵入性编程;
+* 通过依赖注入和面向接口实现松耦合;
+* 基于切面和惯例进行声明式编程;
+* 通过切面和模板减少样板式代码;
+
+控制反转（IOC:Inversion Of Control）
+依赖注入（DI:Dependency Injection）
+面向切面编程（AOP:Aspect-Oriented Programming）
+
+== Bean的注册和装配（wiring）
+
+1. 通过 `@Component` 注解及包含 `@Component` 注解的注解对要注册的 `bean` 进行标记。
+2. 通过 `@Bean` 注解对要生成注册 `bean` 的方法进行标记。
+
+默认情况下通过扫描发现的 `bean` 默以类名首字母小写作为其 `bean` 名称，而使用 `@Bean` 注解标记的方法注册的bean则以对应方法名作为其 `bean` 名称，但其名称均可通过注解的参数进行配置。
+
+Spring会拦截 `@Bean` 注解标记的方法，并返回相应的单例 `bean` （默认情况下）。
+使用 `@Bean` 注解声明 `bean` 只受 `Java` 语言的限制，因此你可以使用任何必要的Java功能来产生 `bean` 。

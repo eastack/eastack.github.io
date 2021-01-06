@@ -1,0 +1,29 @@
+= RADIX10.ME
+
+Personal Notes.
+
+.Clone the repository
+[source, bash]
+----
+git clone https://github.com/rwrr/rwrr.github.io
+----
+
+.Generate static pages
+[source, bash]
+----
+cd rwrr.github.io
+./asciidoctor
+----
+
+.Start a server
+[source, bash]
+----
+cd public
+python -m http.server
+----
+
+.Open in browser
+[source, bash]
+----
+xdg-open http://localhost:8000
+----

@@ -1,0 +1,39 @@
+* Gradle下载源码与文档
+
+.use eclipse plugin
+[source, groovy]
+----
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+----
+
+[source, bash]
+----
+gradle cleanEclipse eclipse
+----
+
+.use idea plugin
+[source, groovy]
+----
+apply plugin: 'java'
+apply plugin: 'idea'
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+----
+
+[source, bash]
+----
+gradle cleanIdea idea
+----

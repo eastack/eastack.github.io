@@ -1,0 +1,10 @@
+= 事务（Transaction）
+
+* 原子性（Atomicity）：事务作为一个整体被执行，包含在其中的对数据库的操作要么全部被执行，要么都不执行。
+* 一致性（Consistency）：事务应确保数据库的状态从一个一致状态转变为另一个一致状态。一致状态的含义是数据库中的数据应满足完整性约束。
+* 隔离性（Isolation）：多个事务并发执行时，一个事务的执行不应影响其他事务的执行。
+* 持久性（Durability）：已被提交的事务对数据库的修改应该永久保存在数据库中。
+
+SQL国际标准使用START TRANSACTION开始一个事务（也可以用方言命令BEGIN）。COMMIT语句使事务成功完成。ROLLBACK语句结束事务，放弃从BEGIN TRANSACTION开始的一切变更。若autocommit被START TRANSACTION的使用禁止，在事务结束时autocommit会重新激活。
+
+

@@ -1,0 +1,7 @@
+= Libvirt
+
+.Used to query operation system infomation
+[source, bash]
+----
+osinfo-query
+----

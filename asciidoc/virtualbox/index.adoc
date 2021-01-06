@@ -1,0 +1,7 @@
+= Virtualbox
+
+解锁虚拟机
+[source, bash]
+----
+vboxmanage startvm <vm-uuid> --type emergencystop
+----

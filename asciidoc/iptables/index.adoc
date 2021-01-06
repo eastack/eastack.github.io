@@ -1,0 +1,3 @@
+= iptables
+
+image::netfilter-packet-flow.svg[Netfilter packet flow, opts=inline]

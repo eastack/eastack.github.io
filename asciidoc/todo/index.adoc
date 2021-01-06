@@ -1,0 +1,13 @@
+= To Do
+
+* [ ] auth-server
+* [ ] openapi
+* [ ] gitlab
+* [ ] nginx
+* [ ] algorithm
+* [ ] asciidoc写PPT
+* [ ] 录点视频教程
+* [ ] 搞定openapi generate
+* [ ] vault实现pki管理
+* [ ] tinc
+* [ ] SDN

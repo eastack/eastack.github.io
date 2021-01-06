@@ -1,0 +1,13 @@
+= Pacman
+
+.删除无用包
+[source, bash]
+----
+sudo pacman -R $(sudo pacman -Qdt | cut -d ' ' -f 1)
+----
+
+.列出所已安装有包
+[source, bash]
+----
+pacman -Q | cut -d ' ' -f 1
+----

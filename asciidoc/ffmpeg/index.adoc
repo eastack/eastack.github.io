@@ -1,0 +1,7 @@
+= FFMPEG
+
+.视频格式转换
+[source, bash]
+----
+ffmpeg -y -i out.ogv out.mp4
+----

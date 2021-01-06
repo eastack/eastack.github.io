@@ -1,0 +1,30 @@
+= virt-manager
+
+.set root password
+[source, bash]
+----
+sudo virt-customize -a CentOS2.qcow2 --root-password password:12345
+----
+
+.backing
+[source, bash]
+----
+qemu-img create -f qcow2 -F qcow2 -b ./CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2 CentOS2.qcow2
+----
+
+.provision new virtual machine
+[source, bash]
+----
+sudo virt-install \
+	--virt-type kvm 
+	--name centos-test2 \
+	-ram- 1024 \
+	--disk CentOS2.qcow2 \
+	--network type=direct,source=enp0s25,source_mode=bridge,model=virtio \
+	--os-type=linux \
+	--os-variant=centos8 \
+	--import \
+	--noautoconsole
+
+sudo virt-install --virt-type kvm --name centos-test2 --ram 1024 --disk CentOS2.qcow2 --network type=direct,source=enp0s25,source_mode=bridge,model=virtio --os-type=linux --os-variant=centos8 --import --noautoconsole
+----

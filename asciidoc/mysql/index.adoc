@@ -1,0 +1,40 @@
+= MySQL
+
+== 事务
+
+=== ACID
+
+* Atomicity(原子性)
+* Consistency(一致性)
+* Isolation(隔离性)
+* Durability(持久性)
+
+.查询当前事务隔离级别
+[source, sql]
+----
+SELECT @@GLOBAL.transaction_isolation, @@GLOBAL.transaction_read_only;
+SELECT @@SESSION.transaction_isolation, @@SESSION.transaction_read_only;
+----
+
+=== 隔离级别
+
+* REPEATABLE READ(可重复读)
+* READ COMMITTED(读已提交)
+* READ UNCOMMITTED(读未提交)
+* SERIALIZABLE(串行化)
+
+=== 运行
+
+.Server
+[source, bash]
+----
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
+----
+
+.Client
+[source, bash]
+----
+docker run -it --network some-network --rm mysql mysql -hsome-mysql -uexample-user -p
+docker run -it --rm mysql mysql -hsome.mysql.host -usome-mysql-user -p
+----
+

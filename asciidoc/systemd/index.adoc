@@ -1,0 +1,7 @@
+= SystemD
+
+.Debug
+[source, bash]
+----
+SYSTEMD_LOG_LEVEL=debug /lib/systemd/systemd-resolved 2>&1 | tee -a /tmp/rs.log
+----

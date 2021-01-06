@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+rm -rf public
+cp -r resources public
+
+docker run --rm \
+  --user $(id -u):$(id -g) \
+  --volume $PWD:/documents \
+  asciidoctor/docker-asciidoctor \
+  asciidoctor 'asciidoc/**/*.adoc' \
+    --source-dir=asciidoc \
+    --destination-dir=public \
+    --attribute=source-highlighter=highlightjs \
+    --attribute=highlightjsdir=/.highlightjs \
+    --attribute=icons=font \
+    --attribute=prewrap! \
+    --verbose \
+    --require asciidoctor-diagram
+
+rm -rf \?
