@@ -116,3 +116,5 @@ http://www.simplecloud.info/[SCIM]
 * https://web.archive.org/[Web Archive]
 
 * https://gowebexamples.com/[Go Web Examples]
+
+* https://www.reactivemanifesto.org/[响应式宣言]

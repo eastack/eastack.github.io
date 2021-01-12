@@ -37,3 +37,23 @@ idea {
 ----
 gradle cleanIdea idea
 ----
+
+== 显示gradle使用的仓库
+
+.添加以下task到build.gradle
+[source, gradle]
+----
+task showRepos {
+    doLast {
+        repositories.each {
+            println "repository: ${it.name} ('${it.url}')"
+        }
+    }
+}
+----
+
+.执行下列命令显示使用的仓库
+[source, bash]
+----
+gradle -q showRepos
+----

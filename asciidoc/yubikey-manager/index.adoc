@@ -1,0 +1,7 @@
+= YubiKey Manager
+
+.重启 scdaemon 解决 kyman 无法正常连接 yubikey 的问题
+[source, bash]
+----
+gpgconf --reload scdaemon
+----

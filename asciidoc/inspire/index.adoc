@@ -15,3 +15,18 @@
 * 每一层有每一层的优雅
 * 度还是度，是从所有数据源到所有模板还是，从openapi.yaml到api.mustache，是从自由命名，还是到规范命名。
 * email is good. rss is good.
+* have structed data, select and operation it
+* try focus data flow, focus data
+* 我想要灵活性，还想要类型
+
+== 编程范式
+
+函数
+过程
+对象
+响应
+
+== 语言特性
+
+范型
+反射
