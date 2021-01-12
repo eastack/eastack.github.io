@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.12">
-<title>Untitled</title>
+<title>显示gradle使用的仓库</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -489,10 +489,33 @@ idea {
 <pre class="highlightjs highlight nowrap"><code class="language-bash hljs" data-lang="bash">gradle cleanIdea idea</code></pre>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_显示gradle使用的仓库">显示gradle使用的仓库</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">添加以下task到build.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-gradle hljs" data-lang="gradle">task showRepos {
+    doLast {
+        repositories.each {
+            println "repository: ${it.name} ('${it.url}')"
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">执行下列命令显示使用的仓库</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-bash hljs" data-lang="bash">gradle -q showRepos</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-01-06 04:49:55 UTC
+Last updated 2021-01-12 09:16:26 UTC
 </div>
 </div>
 <script src="/.highlightjs/highlight.min.js"></script>
