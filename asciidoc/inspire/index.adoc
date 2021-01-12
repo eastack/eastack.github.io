@@ -17,7 +17,7 @@
 * email is good. rss is good.
 * have structed data, select and operation it
 * try focus data flow, focus data
-* 我想要灵活性，还想要类型
+* 在解决问题时避免出现模糊不清的点，二分查找如果不能确保数组有序，那...
 
 == 编程范式
 
