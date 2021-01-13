@@ -1,10 +1,5 @@
 :title: Eastack
 
-[source, bash]
-----
-echo 'Hello, world!'
-----
-
 link:mustache[Mustache Manual]
 
 link:taskwarrior[Taskwarrior]
