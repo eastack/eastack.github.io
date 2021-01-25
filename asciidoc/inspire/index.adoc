@@ -18,6 +18,9 @@
 * have structed data, select and operation it
 * try focus data flow, focus data
 * 在解决问题时避免出现模糊不清的点，二分查找如果不能确保数组有序，那...
+* 掌握生活节奏
+* selector + actuator + variable
+* 有趣，思考一件事站在不同的位置，对人的影响很大
 
 == 编程范式
 
@@ -30,3 +33,5 @@
 
 范型
 反射
+协程
+线程

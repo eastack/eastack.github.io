@@ -11,3 +11,6 @@
 * [ ] vault实现pki管理
 * [ ] tinc
 * [ ] SDN
+* [ ] Lua
+* [ ] Kotlin
+* [ ] 用Kotlin写个简单的 spring bean container 和 spring mvc ？

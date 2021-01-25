@@ -1,0 +1,9 @@
+= ZSH
+
+For zsh, echo
+
+setopt VERBOSE
+
+And for debugging,
+
+setopt XTRACE
