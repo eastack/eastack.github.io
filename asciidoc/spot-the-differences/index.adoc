@@ -1,0 +1,5 @@
+= Spot The Differences
+
+== cmake and make
+
+source file and cmakelist ---(cmake)---> makefile ---(make)---> target file

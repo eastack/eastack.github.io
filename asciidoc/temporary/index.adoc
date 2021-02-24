@@ -1,0 +1,16 @@
+= Temporary
+
+* async and await
+
+* yield and resume
+
+* Promise
+
+* Coroutine
+
+* LHS and RHS
+
+* Iterators and generators
+
+.执行下列代码时yield将会返回a的值，作为resume的返回值，待下次resume时将resume的值赋值给b，yield就像精神分裂一样
+local b = coroutine.yield(a)

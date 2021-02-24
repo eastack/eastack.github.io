@@ -1,0 +1,7 @@
+= Make
+
+.to see the full list of default rules and variables available, run `make -p` in a directory with no makefile.
+[source, bash]
+----
+make -p
+----

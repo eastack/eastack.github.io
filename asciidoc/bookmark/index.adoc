@@ -120,3 +120,9 @@ http://www.simplecloud.info/[SCIM]
 * https://www.reactivemanifesto.org/[响应式宣言]
 
 * https://www.cnkirito.moe/[响应式宣言]
+
+* https://clericpy.github.io/blog/[响应式宣言]
+
+* http://headsalon.org/[海德沙龙]
+
+* https://www.2n.pl/[海德沙龙]
