@@ -125,4 +125,12 @@ http://www.simplecloud.info/[SCIM]
 
 * http://headsalon.org/[海德沙龙]
 
-* https://www.2n.pl/[海德沙龙]
+* https://www.2n.pl/[2n.pl]
+
+* https://microsoft.github.io/debug-adapter-protocol/[DAP]
+
+* https://microsoft.github.io/language-server-protocol/[LSP]
+
+* https://www.lvaohui.top/[lvaohui]
+
+* https://martinfowler.com/[Martin Fowler]
