@@ -518,12 +518,42 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>Configuration Best Practices
+配置最佳实践
+This document highlights and consolidates configuration best practices that are introduced throughout the user guide, Getting Started documentation, and examples.</p>
+</div>
+<div class="paragraph">
+<p>This is a living document. If you think of something that is not on this list but might be useful to others, please don&#8217;t hesitate to file an issue or submit a PR.</p>
+</div>
+<div class="paragraph">
+<p>General Configuration Tips
+When defining configurations, specify the latest stable API version.</p>
+</div>
+<div class="paragraph">
+<p>Configuration files should be stored in version control before being pushed to the cluster. This allows you to quickly roll back a configuration change if necessary. It also aids cluster re-creation and restoration.</p>
+</div>
+<div class="paragraph">
+<p>Write your configuration files using YAML rather than JSON. Though these formats can be used interchangeably in almost all scenarios, YAML tends to be more user-friendly.</p>
+</div>
+<div class="paragraph">
+<p>Group related objects into a single file whenever it makes sense. One file is often easier to manage than several. See the guestbook-all-in-one.yaml file as an example of this syntax.</p>
+</div>
+<div class="paragraph">
+<p>Note also that many kubectl commands can be called on a directory. For example, you can call kubectl apply on a directory of config files.</p>
+</div>
+<div class="paragraph">
+<p>Don&#8217;t specify default values unnecessarily: simple, minimal configuration will make errors less likely.</p>
+</div>
+<div class="paragraph">
+<p>Put object descriptions in annotations, to allow better introspection.</p>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-03-23 12:10:30 UTC
+Last updated 2021-03-30 10:04:09 UTC
 </div>
 </div>
 <script src="/.highlightjs/highlight.min.js"></script>
