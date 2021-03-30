@@ -14,3 +14,7 @@
 * [ ] Lua
 * [ ] Kotlin
 * [ ] 用Kotlin写个简单的 spring bean container 和 spring mvc ？
+* [ ] stream
+* [ ] netty
+* [ ] mmap
+* [ ] sicp
