@@ -18,3 +18,21 @@ openssl pkcs8 -topk8 -inform PEM -in rsa_private_key.pem -outform PEM -nocrypt
 ----
 openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
 ----
+
+.查看KEY信息
+[source, bash]
+----
+openssl rsa -noout -text -in tls.key
+----
+
+.查看CSR信息
+[source, bash]
+----
+openssl req -noout -text -in tls.csr
+----
+
+.查看KEY信息
+[source, bash]
+----
+openssl x509 -noout -text -in tls.crt
+----

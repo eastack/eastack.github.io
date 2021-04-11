@@ -1,0 +1,9 @@
+= Flask
+
+[source, bash]
+----
+python _m venv flask_env_dir_name
+cd flask_env_dir_name
+source bin/activate
+----
+

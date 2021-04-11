@@ -134,3 +134,7 @@ http://www.simplecloud.info/[SCIM]
 * https://www.lvaohui.top/[lvaohui]
 
 * https://martinfowler.com/[Martin Fowler]
+
+* https://www.ipify.org/[ipify]
+
+* https://blog.desgran.ge/post/emoji-on-linux/[一篇文章治好了我的ohmyarch emoji显示问题]
