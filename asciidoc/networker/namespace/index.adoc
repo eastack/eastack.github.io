@@ -1,0 +1,46 @@
+= Network Namespace
+
+.新建命名空间
+[source, bash]
+----
+sudo ip netns add helloworld
+----
+
+.创建Veth设备对
+[source, bash]
+----
+sudo ip link add hello type veth peer name world
+----
+
+.移动Veth设备对一端到另一命名空间
+[source, bash]
+----
+sudo ip link set hello netns helloworld
+----
+
+.分别为Veth设备对分配IP
+[source, bash]
+----
+sudo ip netns exec helloworld ip addr add 10.1.1.1/24 dev hello
+sudo ip addr add 10.1.1.2/24 dev world
+----
+
+.启动Veth设备对
+[source, bash]
+----
+sudo ip netns exec helloworld ip link set dev hello up
+sudo ip link set dev world up
+----
+
+.测试通信情况
+[source, bash]
+----
+ping 10.1.1.1
+----
+
+.删除网络命名空间和Veth设备
+[source, bash]
+----
+sudo ip link delete world
+sudo ip netns delete helloworld
+----
