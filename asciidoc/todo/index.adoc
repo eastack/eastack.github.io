@@ -23,3 +23,8 @@
 * [ ] 多路复用？
 * [ ] 异步函数？
 * [ ] NIO？
+* [ ] Minikube minikube start --driver=docker --registry-mirror=https://bv3349qk.mirror.aliyuncs.com 也太香了
+* [ ] git webhook 自己写个简单的
+* [ ] todo list 类工具有能打的吗？
+* [ ] 存储过程
+* [ ] MySQL游标

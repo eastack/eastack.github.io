@@ -11,6 +11,7 @@ all:
 	    --attribute=highlightjsdir=/.highlightjs \
 	    --attribute=icons=font \
 	    --attribute=prewrap! \
+	    --attribute=nofooter \
 	    --require asciidoctor-diagram
 	@rm -rf \?
 

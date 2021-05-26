@@ -1,0 +1,8 @@
+= Redis
+
+[source, bash]
+----
+ssh -L 80:r-uf6uh5cvei3zjuixen.redis.rds.aliyuncs.com:8080 root@47.116.65.46
+----
+访问本地 80 端口将会通过 47.116.65.46 这台机器访问 r-uf6uh5cvei3zjuixen.redis.rds.aliyuncs.com:8080
+

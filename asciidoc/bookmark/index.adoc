@@ -138,3 +138,5 @@ http://www.simplecloud.info/[SCIM]
 * https://www.ipify.org/[ipify]
 
 * https://blog.desgran.ge/post/emoji-on-linux/[一篇文章治好了我的ohmyarch emoji显示问题]
+
+* https://blog.desgran.ge/post/emoji-on-linux/[openssl 证书链校验]

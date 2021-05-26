@@ -1,4 +1,11 @@
-:title: Eastack
+:title: EaStack
+
+= EaStack
+:author: WANG H.
+:email: admin@eastack.me
+
+[quote, Stewart Brand, Whole Earth Catalog]
+Stay Hungry. Stay Foolish.
 
 link:mustache[Mustache Manual]
 
