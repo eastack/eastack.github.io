@@ -443,114 +443,68 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_kube_apiserver">kube-apiserver</h2>
+<h2 id="_常用操作">常用操作</h2>
 <div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>配置镜像中心 Secret</p>
+</li>
+</ol>
+</div>
 <div class="listingblock">
+<div class="title">生成 Secret</div>
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-bash hljs" data-lang="bash">kube-apiserver
---advertise-address=192.168.123.101
---allow-privileged=true
---authorization-mode=Node,RBAC
---client-ca-file=/etc/kubernetes/pki/ca.crt
---enable-admission-plugins=NodeRestriction
---enable-bootstrap-token-auth=true
-
---etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
---etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
---etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
---etcd-servers=https://127.0.0.1:2379
-
---insecure-port=0
-
---kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
---kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
---kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-
---proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt
---proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key
-
---requestheader-allowed-names=front-proxy-client
---requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt
---requestheader-extra-headers-prefix=X-Remote-Extra-
---requestheader-group-headers=X-Remote-Group
---requestheader-username-headers=X-Remote-User
-
---secure-port=6443
-
---service-account-key-file=/etc/kubernetes/pki/sa.pub
---service-cluster-ip-range=10.96.0.0/12
---tls-cert-file=/etc/kubernetes/pki/apiserver.crt
---tls-private-key-file=/etc/kubernetes/pki/apiserver.key</code></pre>
+<pre class="highlightjs highlight nowrap"><code class="language-bash hljs" data-lang="bash">kubectl create secret docker-registry \<i class="conum" data-value="1"></i><b>(1)</b>
+	aliyun-docker-registry \<i class="conum" data-value="2"></i><b>(2)</b>
+	--docker-server=registry.aliyuncs.com \<i class="conum" data-value="3"></i><b>(3)</b>
+	--docker-username=username \<i class="conum" data-value="4"></i><b>(4)</b>
+	--docker-password=password \<i class="conum" data-value="5"></i><b>(5)</b>
+	--docker-email='admin@eastack.me' <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
 </div>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>--advertise-address ip    The IP address on which to advertise the apiserver to members of the cluster. This address must be reachable by the rest of the cluster. If blank, the --bind-address will be used. If --bind-address is unspecified, the host&#8217;s default interface will be used.
-广播地址：此IP地址被广播给集群中的其他成员。
-此地址必须为其他节点可达的地址。
-如果空着， <code>--bind-address</code> 选项的值将被使用。
-如果 <code>--bind-address</code> 也空着，主机默认接口将被使用。</p>
-</li>
-<li>
-<p>--allow-privileged boolean   If true, allow privileged containers. [default=false]
-如果为 <code>true</code> 则允许运行特权（privileged）容器。</p>
-</li>
-<li>
-<p>--authorization-mode string    Ordered list of plug-ins to do authorization on secure port. Comma-delimited list of: AlwaysAllow,AlwaysDeny,ABAC,Webhook,RBAC,Node. (default [AlwaysAllow])
-授权模式：安全端口上授权插件的有序列表。逗号分割的列表，例：AlwaysAllow,AlwaysDeny,ABAC,Webhook,RBAC,Node. (default [AlwaysAllow])</p>
-</li>
-<li>
-<p>--client-ca-file string                                                              If set, any request presenting a client certificate signed by one of the authorities in the client-ca-file is authenticated with an identity corresponding to the CommonName of the client certificate.
-库户端CA文件：如果设置了，则使用此ca证书对请求中的客户端证书使用此ca证书进行校验。</p>
-</li>
-<li>
-<p>--enable-admission-plugins strings       admission plugins that should be enabled in addition to default enabled ones (NamespaceLifecycle, LimitRanger, ServiceAccount&#8230;&#8203;. The order of plugins in this flag does not matter.
-开启的准入插件：除了默认启动的插件外还应启动的准入插件。插件顺序无关。</p>
-</li>
-<li>
-<p>--enable-bootstrap-token-auth                                                        Enable to allow secrets of type 'bootstrap.kubernetes.io/token' in the 'kube-system' namespace to be used for TLS bootstrapping authentication.
-开启Token自举认证：开启已允许 <code>kube-system</code> 命名空间中 <code>bootstrap.kubernetes.io/token</code> 类型的secrets用来进行TLS自举认证。
-*</p>
-</li>
-</ul>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>指定 Secret 类型</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>设置 Secret 名称</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>指定镜像中心地址</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>用户名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>密码</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>邮箱</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">在 Deployment 中配置 Secret</div>
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-yaml hljs" data-lang="yaml">spec.template.spec.imagePullSecrets[0].name = aliyun-docker-registry</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Configuration Best Practices
-配置最佳实践
-This document highlights and consolidates configuration best practices that are introduced throughout the user guide, Getting Started documentation, and examples.</p>
+<div class="title">参考链接</div>
+<p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account">Add ImagePullSecrets To a ServiceAccount</a></p>
 </div>
 <div class="paragraph">
-<p>This is a living document. If you think of something that is not on this list but might be useful to others, please don&#8217;t hesitate to file an issue or submit a PR.</p>
-</div>
-<div class="paragraph">
-<p>General Configuration Tips
-When defining configurations, specify the latest stable API version.</p>
-</div>
-<div class="paragraph">
-<p>Configuration files should be stored in version control before being pushed to the cluster. This allows you to quickly roll back a configuration change if necessary. It also aids cluster re-creation and restoration.</p>
-</div>
-<div class="paragraph">
-<p>Write your configuration files using YAML rather than JSON. Though these formats can be used interchangeably in almost all scenarios, YAML tends to be more user-friendly.</p>
-</div>
-<div class="paragraph">
-<p>Group related objects into a single file whenever it makes sense. One file is often easier to manage than several. See the guestbook-all-in-one.yaml file as an example of this syntax.</p>
-</div>
-<div class="paragraph">
-<p>Note also that many kubectl commands can be called on a directory. For example, you can call kubectl apply on a directory of config files.</p>
-</div>
-<div class="paragraph">
-<p>Don&#8217;t specify default values unnecessarily: simple, minimal configuration will make errors less likely.</p>
-</div>
-<div class="paragraph">
-<p>Put object descriptions in annotations, to allow better introspection.</p>
+<p><a href="https://help.aliyun.com/document_detail/86562.html">在Kubernetes集群如何支持私有镜像</a></p>
 </div>
 </div>
-</div>
-</div>
-<div id="footer">
-<div id="footer-text">
-Last updated 2021-05-06 14:34:59 UTC
 </div>
 </div>
 <script src="/.highlightjs/highlight.min.js"></script>
