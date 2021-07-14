@@ -2,6 +2,8 @@
 
 == 常用操作
 
+=== 配置镜像拉取 secret
+
 1. 配置镜像中心 Secret
 
 .生成 Secret
@@ -32,3 +34,7 @@ spec.template.spec.imagePullSecrets[0].name = aliyun-docker-registry
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account[Add ImagePullSecrets To a ServiceAccount]
 
 https://help.aliyun.com/document_detail/86562.html[在Kubernetes集群如何支持私有镜像]
+
+=== Kubeadm 生成 join 命令
+
+kubeadm token create --print-join-command

@@ -1,0 +1,31 @@
+= Netty
+
+== io.netty.channel.Channel
+
+A nexus to a network socket or a component which is capable of I/O operations such as read, write, connect, and bind.
+
+和一个网络套接字或能够进行I/O操作（读、写、连接、绑定）的组件关联。
+
+1. 所有I/O操作都是异步的
+返回ChannelFuture，当I/O操作结束时（成功，失败，取消）关联的ChannelFuture实例将收到通知
+2. Channel是分层的
+3. 可以访问底层特定于传输的操作
+4. 资源释放
+
+==  io.netty.channel.ChannelHandler
+
+处理一个I/O事件，或中断一个I/O操作，并将其转发给其ChannelPipeline中的下一个Handler
+
+void handlerAdded(ChannelHandlerContext ctx) throws Exception;
+void handlerAdded(ChannelHandlerContext ctx) throws Exception;
+
+== io.netty.channel.ChannelPipeline
+
+一个ChanneHandler列表用来处理或者截获一个Channel的入站事件和出站操作
+ChannelHandler实现了一个高级拦截过滤器模式，从而让用户全权控制一个事件如何处理及ChannelHandler如何与一个流水线中的其他实例交互
+
+== io.netty.channel.ChannelHandlerContext
+
+让ChannelHandler和ChannelPipeline及其他Handler进行交互
+处理程序处了其他事情之外还还可以通知ChannelHandler中的下一个ChannelHandler，以及动态修改其所属的ChannelPipeline
+
