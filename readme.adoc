@@ -10,7 +10,7 @@ git clone https://github.com/eastack/eastack.github.io
 [source, bash]
 ----
 cd eastack.github.io
-./asciidoctor
+make
 ----
 
 .Start a server

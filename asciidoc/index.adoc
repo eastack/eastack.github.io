@@ -1,7 +1,7 @@
 :title: EaStack
 
 = EaStack
-:author: WANG H.
+:author: WANG HENG.
 :email: admin@eastack.me
 
 [quote, Stewart Brand, Whole Earth Catalog]
