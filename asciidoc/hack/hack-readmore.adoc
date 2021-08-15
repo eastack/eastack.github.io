@@ -1,0 +1,11 @@
+= Readmore
+
+1. 中间人代理修改返回结果
+2. 浏览器断点分析及修改返回值
+3. 因为是一次永久解锁,所以有使用本地存储,直接写入本地存储对应信息
+
+https://blog.didispace.com/spring-statemachine/[目标站点: 使用Spring StateMachine框架实现状态机]
+https://mitmproxy.org/[代理工具: Mitmproxy]
+https://gist.github.com/franciscocpg/a4f52afcc00d472a9d7c407db16a92ee[Mitmproxy如何添加证书]
+http://mitm.it[Mitmproxy证书下载地址]
+https://wiki.archlinux.org/title/User:Grawity/Adding_a_trusted_CA_certificate[ArchLinux添加信任证书]

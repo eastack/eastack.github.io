@@ -1,0 +1,29 @@
+= Docker Compose
+
+== 操作
+
+== 语法
+
+=== 端口映射
+[soruce, yaml]
+----
+services:
+  user-service:
+    ports:
+      - "8080:5050" # <1>
+----
+<1> 8080为本地端口，5050为容器内端口
+
+=== 镜像来源
+[source, yaml]
+----
+services:
+  user-service:
+    build: .
+  redis:
+    image: redis:latest
+----
+
+=== 磁盘挂载卷
+
+

@@ -1,18 +1,3 @@
-= AWESOME
-
-== OAuth2
-
-https://oauth.net/code/[Code — OAuth]
-
-== OpenAPI
-https://swagger.io/tools/open-source/[Open Source Tools]
-
-https://gitlab.com/tijsg/swagger-template[Swagger Template - GitLab]
-
-== Software
-
-* https://zerotier.com[Zerotier]
-
 == Web Site
 
 * http://www.simplecloud.info/[SCIM]
@@ -139,12 +124,10 @@ https://gitlab.com/tijsg/swagger-template[Swagger Template - GitLab]
 
 * https://blog.desgran.ge/post/emoji-on-linux/[一篇文章治好了我的ohmyarch emoji显示问题]
 
-* https://blog.desgran.ge/post/emoji-on-linux/[openssl 证书链校验]
+* https://blog.desgran.ge/post/emoji-on-linux/[Openssl 证书链校验]
 
 * https://iambowen.gitbooks.io/cloud-design-pattern/content/[Cloud Design Pattern]
 
 * https://jimmysong.io/[Jimmy Song]
 
 * https://www.chungkwong.cc/[Chung Kwong]
-
-include::rust.adoc[]
