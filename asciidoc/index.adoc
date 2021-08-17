@@ -1,14 +1,19 @@
-:title: EaStack
-
 = EaStack
-:author: WANG HENG.
+:title: EaStack
+:author: Heng Wang
 :email: admin@eastack.me
 
 [quote, Stewart Brand, Whole Earth Catalog]
 Stay Hungry. Stay Foolish.
+
+== 2021
+
+'''
 
 link:mustache[Mustache Manual]
 
 link:taskwarrior[Taskwarrior]
 
 link:bookmark[Bookmark]
+
+* 2021/08/17 link:data-structure-alignment.html[数据结构对齐/内存对齐]

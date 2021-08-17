@@ -10,7 +10,7 @@ all:
 	    --attribute=source-highlighter=highlightjs \
 	    --attribute=highlightjsdir=/.highlightjs \
 	    --attribute=icons=font \
-	    --attribute=prewrap! \
+	    --attribute=toc-title=目录 \
 	    --attribute=nofooter \
 	    --require asciidoctor-diagram
 	@rm -rf \?
