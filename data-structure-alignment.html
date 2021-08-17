@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
-<title>YubiKey Manager</title>
+<title>数据结构对齐/内存对齐</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,15 +439,198 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>YubiKey Manager</h1>
+<h1>数据结构对齐/内存对齐</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_定义">定义</a></li>
+<li><a href="#_问题">问题</a></li>
+<li><a href="#_参考">参考</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="listingblock">
-<div class="title">重启 scdaemon 解决 kyman 无法正常连接 yubikey 的问题</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">gpgconf --reload scdaemon</code></pre>
+<pre>Data structure alignment is the way data is arranged and accessed in computer memory.
+It consists of three separate but related issues: data alignment, data structure padding, and packing.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>数据结构对齐是数据在计算机内存中排布和访问的方式。
+其由三个独立但相关的问题组成：<strong>数据对齐</strong>、<strong>数据结构填补</strong>和<strong>压紧</strong>。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>The CPU in modern computer hardware performs reads and writes to memory most efficiently when the data is naturally aligned, which generally means that the data's memory address is a multiple of the data size.
+For instance, in a 32-bit architecture, the data may be aligned if the data is stored in four consecutive bytes and the first byte lies on a 4-byte boundary.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>当内存自然对齐时，现代计算机硬件中的CPU对内存执行读写操作时效率最高，这通常意味着数据的内存地址是数据大小的倍数。
+例如，在32位架构中，如果数据存储于4个连续的字节中，而且第一个字节位于4字节边界上，则数据应该是对齐的。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Data alignment is the aligning of elements according to their natural alignment.
+To ensure natural alignment, it may be necessary to insert some padding between structure elements or after the last element of a structure.
+For example, on a 32-bit machine, a data structure containing a 16-bit value followed by a 32-bit value could have 16 bits of padding between the 16-bit value and the 32-bit value to align the 32-bit value on a 32-bit boundary.
+Alternatively, one can pack the structure, omitting the padding, which may lead to slower access, but uses three quarters as much memory.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>数据对齐是根据元素的自然对齐来对齐元素。
+为了确保自然对齐，可能需要在结构体中元素间或最后一个元素后插入填充。
+例如，在32位机器上，一个数据结构包含一个16位值跟一个32位值则可以在16位值和32位值之间填充16位从而对齐32位值到32位边界上。
+或者，压紧结构，省略填充，这可能导致访问速度变慢，但使用4分之3的内存。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Although data structure alignment is a fundamental issue for all modern computers, many computer languages and computer language implementations handle data alignment automatically.
+Fortran, Ada,[1][2] PL/I,[3] Pascal,[4] certain C and C++ implementations, D,[5] Rust,[6] C#,[7] and assembly language allow at least partial control of data structure padding, which may be useful in certain special circumstances.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>尽管数据结构对齐是所有现代计算机的基础问题，许多计算机语言和计算机语言实现会自动处理数据对齐。
+Fortran、Ada、PL/I、Pascal、某些 C 和 C++ 实现，D、Rust、C#、及汇编语言允许对数据结构填充的部分控制，这在一些特殊情况下可能非常有用。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_定义">定义</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>A memory address a is said to be n-byte aligned when a is a multiple of n bytes (where n is a power of 2).
+In this context, a byte is the smallest unit of memory access, i.e. each memory address specifies a different byte.
+An n-byte aligned address would have a minimum of log2(n) least-significant zeros when expressed in binary.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>当 <strong>A</strong> 是 <strong>N</strong> 字节的倍数（其中 <strong>N</strong> 是2的幂）时，内存地址 <strong>A</strong> 被称为 <strong>N</strong> 字节对齐。
+在这种情况下，字节是内存访问的最小单元，即：每个内存地址指定一个不同的字节。
+当以二进制表示时，一个 <strong>N</strong>字节对齐的地址最少有 log2(N) 个最低有效零。
+例如32位时，最少有4个最低有效零（10进制:32 &#8594; 2进制:10000，32前边有0-31共32位）</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>The alternate wording b-bit aligned designates a b/8 byte aligned address (ex. 64-bit aligned is 8 bytes aligned).</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>或者换个说法 <strong>B</strong> 位对齐表示一个 <strong>B</strong>/8 字节对齐地址（例如：64位对齐是8字节对齐）。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>A memory access is said to be aligned when the data being accessed is n bytes long and the datum address is n-byte aligned.
+When a memory access is not aligned, it is said to be misaligned.
+Note that by definition byte memory accesses are always aligned.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>当被访问的数据藏独是 <strong>N</strong> 字节且其数据地址为n字节对齐时，内存访问被称为是对齐的。
+当一个内存访问不是对齐的，则称其位未对齐。
+请注意，根据定义字节内存访问始终是对齐的。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>A memory pointer that refers to primitive data that is n bytes long is said to be aligned if it is only allowed to contain addresses that are n-byte aligned, otherwise it is said to be unaligned.
+A memory pointer that refers to a data aggregate (a data structure or array) is aligned if (and only if) each primitive datum in the aggregate is aligned.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>指向 <strong>N</strong> 字节长原始数据的内存指针，如果只允许包含 <strong>N</strong> 字节对齐的地址则称其为对齐的，否则称其为未对齐。
+当且仅当聚合中的每个原始数据对齐时，指向数据聚合（数据结构或数组）的内存指针才对齐。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Note that the definitions above assume that each primitive datum is a power of two bytes long.
+When this is not the case (as with 80-bit floating-point on x86) the context influences the conditions where the datum is considered aligned or not.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>注意上面的定义假设每个原始数据都是两字节长的幂。
+如果不是这种情况（如80位浮点型在x86平台上）上下文会影响数据是否对齐的条件。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Data structures can be stored in memory on the stack with a static size known as bounded or on the heap with a dynamic size known as unbounded.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>数据结构可以以静态的大小存储在内存中的栈上称之为 <em>有界</em> 或以动态大小存储在堆中称之为 <em>无界</em> 。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_问题">问题</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>The CPU accesses memory by a single memory word at a time.
+As long as the memory word size is at least as large as the largest primitive data type supported by the computer, aligned accesses will always access a single memory word.
+This may not be true for misaligned data accesses.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CPU一次访问一个字的内存。
+只要内存字大小至少与最大原始数据类型一样大，对齐访问将始终访问单个字节。
+对于未对齐的数据访问，情况可能并非如此。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>If the highest and lowest bytes in a datum are not within the same memory word the computer must split the datum access into multiple memory accesses.
+This requires a lot of complex circuitry to generate the memory accesses and coordinate them.
+To handle the case where the memory words are in different memory pages the processor must either verify that both pages are present before executing the instruction or be able to handle a TLB miss or a page fault on any memory access during the instruction execution.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果数据中的最高和最低位字节不再同一个内存字中，计算机必须将数据访问拆分多个内存访问。
+这需要大量复杂的电路来生成内存访问并协调它们。
+为了处理内存字位于不同内存页的情况，处理器必须要么在执行指令前验证两个页面都存在，要么能够在指令执行期间处理任何TLB未命中或页错误。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Some processor designs deliberately avoid introducing such complexity, and instead yield alternative behavior in the event of a misaligned memory access.
+For example, implementations of the ARM architecture prior to the ARMv6 ISA require mandatory aligned memory access for all multi-byte load and store instructions.
+Depending on which specific instruction was issued, the result of attempted misaligned access might be to round down the least significant bits of the offending address turning it into an aligned access (sometimes with additional caveats), or to throw an MMU exception (if MMU hardware is present), or to silently yield other potentially unpredictable results.
+The ARMv6 and later architectures support unaligned access in many circumstances, but not necessarily all.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>一些处理器设计有意避免引入这种复杂性，而是在内存访问未对齐的情况下产生替代行为。
+例如，在 ARMv6 ISA 之前的 ARM 体系结构的实现要求对所有的多字节加载和存储指令进行强制的内存访问。
+根据发出的特定指令，尝试未对齐访问的结果可能是向下舍入违规地址的最低有效位，将其转化为对齐访问（有时还有额外的警告），或者抛出一个 MMU 异常（如果 MMU 硬件存在），或者默默的产生其他潜在的不可预测的结果。
+ARMv6和更高版本的体系结构在许多情况下支持未对齐访问，但不一定在所有情况下都支持。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>When a single memory word is accessed the operation is atomic, i.e. the whole memory word is read or written at once and other devices must wait until the read or write operation completes before they can access it.
+This may not be true for unaligned accesses to multiple memory words, e.g. the first word might be read by one device, both words written by another device and then the second word read by the first device so that the value read is neither the original value nor the updated value.
+Although such failures are rare, they can be very difficult to identify.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>当访问单个内存字时操作是原子的，比如：一次读取或写入整个内存字，其他设备必须等到读取或写入操作完成才能访问它。
+对于多个内存字的未对齐访问，这就不一定了，比如：第一个字可能由一个设备读取，第二个字由另一个设备写入，然后第二个字再由第一个设备读取，因此第一个设备读取的值既不是原始值也不是更新值（一半一半）。
+尽管此类故障很少见，但很难鉴别。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参考">参考</h2>
+<div class="sectionbody">
+<div class="ulist bibliography">
+<ul class="bibliography">
+<li>
+<p><a id="原文"></a>[原文] <a href="https://en.wikipedia.org/wiki/Data_structure_alignment">Data structure alignment</a></p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
