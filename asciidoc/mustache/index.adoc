@@ -1,4 +1,5 @@
 = Mustache
+:toc: right
 
 轻逻辑模板。
 

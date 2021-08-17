@@ -1,0 +1,18 @@
+= Spring Security
+
+== 配置流程
+
+Spring Security 入口是一个 Filter
+
+WebFilterChainProxy 是 WebFilter 的一个实现类，此为 Spring Security 入口，其中包含与 Spring Security 有关的过滤器(SecurityWebFilterChain)列表，在请求到来调用 `filter` 方法时逐个调用。
+
+
+.WebFluxSecurityConfigutration
+[source, java]
+----
+@Bean(SPRING_SECURITY_WEBFILTERCHAINFILTER_BEAN_NAME)
+@Order(WEB_FILTER_CHAIN_FILTER_ORDER)
+WebFilterChainProxy springSecurityWebFilterChainFilter() {
+	return new WebFilterChainProxy(getSecurityWebFilterChains());
+}
+----

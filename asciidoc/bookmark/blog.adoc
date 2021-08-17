@@ -103,3 +103,11 @@
 * https://jimmysong.io/[Jimmy Song]
 
 * https://www.chungkwong.cc/[Chung Kwong]
+
+
+* https://dev.to/lydiahallie/javascript-visualized-promises-async-await-5gke[JavaScript Visualized Pormises & Async/Await]
+
+* https://liujiacai.net/blog/2021/04/27/trait-usage/[刘家财]
+
+
+
