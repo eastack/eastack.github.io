@@ -119,6 +119,37 @@ Although such failures are rare, they can be very difficult to identify.
 对于多个内存字的未对齐访问，这就不一定了，比如：第一个字可能由一个设备读取，第二个字由另一个设备写入，然后第二个字再由第一个设备读取，因此第一个设备读取的值既不是原始值也不是更新值（一半一半）。
 尽管此类故障很少见，但很难鉴别。
 
+== 数据结构填充
+
+----
+Although the compiler (or interpreter) normally allocates individual data items on aligned boundaries, data structures often have members with different alignment requirements.
+To maintain proper alignment the translator normally inserts additional unnamed data members so that each member is properly aligned.
+In addition, the data structure as a whole may be padded with a final unnamed member.
+This allows each member of an array of structures to be properly aligned.
+----
+尽管编译器（或解释器）通常在对齐边界上分配单个数据项，但数据结构通常包含具有不同对齐要求的成员。
+为了保持恰当的对齐，翻译器通常会插入额外的未命名数据成员以便每个成员正确对齐。
+此外，整个数据结构最终可能会只添加一个未命名成员。
+这允许正确对齐结果数组的每个成员。
+
+----
+Padding is only inserted when a structure member is followed by a member with a larger alignment requirement or at the end of the structure.
+By changing the ordering of members in a structure, it is possible to change the amount of padding required to maintain alignment.
+For example, if members are sorted by descending alignment requirements a minimal amount of padding is required.
+The minimal amount of padding required is always less than the largest alignment in the structure.
+Computing the maximum amount of padding required is more complicated, but is always less than the sum of the alignment requirements for all members minus twice the sum of the alignment requirements for the least aligned half of the structure members.
+----
+填充仅在一个结构体成员后跟一个具有较大对齐要求的成员或在结构体末尾时才插入填充。
+通过改变结构体内成员顺序，可以改变保持对齐所需的填充量。
+例如，如果成员按降序排序对齐需求则需要最少的填充量。
+
+Although C and C++ do not allow the compiler to reorder structure members to save space, other languages might. It is also possible to tell most C and C++ compilers to "pack" the members of a structure to a certain level of alignment, e.g. "pack(2)" means align data members larger than a byte to a two-byte boundary so that any padding members are at most one byte long.
+
+One use for such "packed" structures is to conserve memory. For example, a structure containing a single byte and a four-byte integer would require three additional bytes of padding. A large array of such structures would use 37.5% less memory if they are packed, although accessing each structure might take longer. This compromise may be considered a form of space–time tradeoff.
+
+Although use of "packed" structures is most frequently used to conserve memory space, it may also be used to format a data structure for transmission using a standard protocol. However, in this usage, care must also be taken to ensure that the values of the struct members are stored with the endianness required by the protocol (often network byte order), which may be different from the endianness used natively by the host machine.
+
+
 [bibliography]
 == 参考
 
