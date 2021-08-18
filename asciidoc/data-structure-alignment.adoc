@@ -6,7 +6,7 @@ Data structure alignment is the way data is arranged and accessed in computer me
 It consists of three separate but related issues: data alignment, data structure padding, and packing.
 ----
 数据结构对齐是数据在计算机内存中排布和访问的方式。
-其由三个独立但相关的问题组成：**数据对齐**、**数据结构填充**和**压紧**。
+其由三个独立但相关的问题组成：**数据对齐**、**数据结构填充**和**打包**。
 
 ----
 The CPU in modern computer hardware performs reads and writes to memory most efficiently when the data is naturally aligned, which generally means that the data's memory address is a multiple of the data size.
@@ -24,7 +24,7 @@ Alternatively, one can pack the structure, omitting the padding, which may lead 
 数据对齐是根据元素的自然对齐来对齐元素。
 为了确保自然对齐，可能需要在结构体中元素间或最后一个元素后插入填充。
 例如，在32位机器上，一个数据结构包含一个16位值跟一个32位值则可以在16位值和32位值之间填充16位从而对齐32位值到32位边界上。
-或者，压紧结构，省略填充，这可能导致访问速度变慢，但使用4分之3的内存。
+或者，打包结构，省略填充，这可能导致访问速度变慢，但使用4分之3的内存。
 
 ----
 Although data structure alignment is a fundamental issue for all modern computers, many computer languages and computer language implementations handle data alignment automatically.
