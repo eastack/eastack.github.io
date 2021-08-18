@@ -447,7 +447,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#_定义">定义</a></li>
 <li><a href="#_问题">问题</a></li>
-<li><a href="#_数据结构填充">数据结构填充</a></li>
+<li><a href="#_数据结构填充">数据结构填充</a>
+<ul class="sectlevel2">
+<li><a href="#_计算填充量">计算填充量</a></li>
+</ul>
+</li>
 <li><a href="#_参考">参考</a></li>
 </ul>
 </div>
@@ -463,7 +467,7 @@ It consists of three separate but related issues: data alignment, data structure
 </div>
 <div class="paragraph">
 <p>数据结构对齐是数据在计算机内存中排布和访问的方式。
-其由三个独立但相关的问题组成：<strong>数据对齐</strong>、<strong>数据结构填补</strong>和<strong>压紧</strong>。</p>
+其由三个独立但相关的问题组成：<strong>数据对齐</strong>、<strong>数据结构填充</strong>和<strong>压紧</strong>。</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -649,18 +653,172 @@ Computing the maximum amount of padding required is more complicated, but is alw
 </div>
 </div>
 <div class="paragraph">
-<p>填充仅在一个结构体成员后跟一个具有较大对齐要求的成员或在结构体末尾时才插入填充。
-通过改变结构体内成员顺序，可以改变保持对齐所需的填充量。
+<p>填充仅在一个结构体成员后跟一个具有较大对齐要求的成员或在结构体末尾时才插入填充。</p>
+</div>
+<div class="listingblock">
+<div class="title">一个结构体成员后跟一个具有较大对齐要求的成员</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">struct User {
+	age int8
+	// padding 8bit
+	id  int16
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">在结构体末尾时</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">struct User {
+	id  int16
+	age int8
+	// padding 8bit
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>通过改变结构体内成员顺序，可以改变保持对齐所需的填充量。
 例如，如果成员按降序排序对齐需求则需要最少的填充量。</p>
 </div>
-<div class="paragraph">
-<p>Although C and C do not allow the compiler to reorder structure members to save space, other languages might. It is also possible to tell most C and C compilers to "pack" the members of a structure to a certain level of alignment, e.g. "pack(2)" means align data members larger than a byte to a two-byte boundary so that any padding members are at most one byte long.</p>
+<div class="listingblock">
+<div class="title">进行填充，对齐边界</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">type User struct {
+	age   int16       //&lt;----|
+	// padding 16 bit        | 64 bit boundary
+	id    int32       //&lt;----|
+
+	point int16       //&lt;----|
+	// padding 16 bit        | 64 bit boundary
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">调整结构后甚至不需要进行填充（如果成员按降序排序对齐需求则需要最少的填充量）</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">type User struct {
+	age   int16
+	point int16
+	id    int32
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Although C and C++ do not allow the compiler to reorder structure members to save space, other languages might.
+It is also possible to tell most C and C++ compilers to "pack" the members of a structure to a certain level of alignment, e.g. "pack(2)" means align data members larger than a byte to a two-byte boundary so that any padding members are at most one byte long.</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>One use for such "packed" structures is to conserve memory. For example, a structure containing a single byte and a four-byte integer would require three additional bytes of padding. A large array of such structures would use 37.5% less memory if they are packed, although accessing each structure might take longer. This compromise may be considered a form of space–time tradeoff.</p>
+<p>尽管 <strong>C</strong> 和 <strong>C* 不允许编译器重排序结构体成员来节省内存，其他语言可能会这样做。
+但可以告诉大多数 *C* 和 *C</strong> 将结构体成员 “打包” 到一定对齐级别。
+例如：“pack(2)” 表示将大于1字节的数据成员对齐到2字节边界，以便任何填充成员最多只有一字节长。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">type User struct {
+	age   int24
+	// padding 8 bit
+	point int16
+	id    int32
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>One use for such "packed" structures is to conserve memory.
+For example, a structure containing a single byte and a four-byte integer would require three additional bytes of padding.
+A large array of such structures would use 37.5% less memory if they are packed, although accessing each structure might take longer.
+This compromise may be considered a form of space–time tradeoff.</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Although use of "packed" structures is most frequently used to conserve memory space, it may also be used to format a data structure for transmission using a standard protocol. However, in this usage, care must also be taken to ensure that the values of the struct members are stored with the endianness required by the protocol (often network byte order), which may be different from the endianness used natively by the host machine.</p>
+<p>这种打包结构的一种用途是节约内存。
+例如：一个包含1字节和4字节整数的机构体将需要3个额外的填充字节。
+如果这些结构被打包，一个包含此结构的大数组所用内存将减少37.5%，尽管访问每个结构体可能需要更长时间。
+这种折中，可以被认为是一种时间和空间权衡的形式。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Although use of "packed" structures is most frequently used to conserve memory space, it may also be used to format a data structure for transmission using a standard protocol.
+However, in this usage, care must also be taken to ensure that the values of the struct members are stored with the endianness required by the protocol (often network byte order), which may be different from the endianness used natively by the host machine.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>尽管使用“packed”结构体最长用于节省内存空间，但它也可以用于格式化数据结构用来使用标准协议进行传输。
+但是在这种用法中，还必须注意确保结构成员的值以协议要求的字节序（通常是网络字节顺序）存储，这可能与主机本地使用的字节序不同。</p>
+</div>
+<div class="sect2">
+<h3 id="_计算填充量">计算填充量</h3>
+<div class="listingblock">
+<div class="content">
+<pre>The following formulas provide the number of padding bytes required to align the start of a data structure (where mod is the modulo operator):</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>以下公式提供对齐数据结构开头所需的填充字节数（其中 mod 是模运算符）：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">padding = (align - (offset mod align)) mod align
+aligned = offset + padding
+        = offset + ((align - (offset mod align)) mod align)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>For example, the padding to add to offset 0x59d for a 4-byte aligned structure is 3.
+The structure will then start at 0x5a0, which is a multiple of 4.
+However, when the alignment of offset is already equal to that of align, the second modulo in (align - (offset mod align)) mod align will return zero, therefore the original value is left unchanged.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>例如：对于4字节对齐结构，要添加到偏移量 <code>0x59d</code> 的填充是3。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">1437 % 32    # -&gt; 29
+             # or
+0x59d % 0x20 # -&gt; 29</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>当结构从 <code>0x5a0</code> 开始时，它是4的倍数。
+但是，当 <code>offset</code> 的对齐已经等于 <code>align</code> 的时候， <code>(align - (offset mod align)) mod align</code> 中的第二个模将返回零，因此原始值保持不变。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Since the alignment is by definition a power of two,[a] the modulo operation can be reduced to a bitwise boolean AND operation.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>由于对齐定义为2的幂，模运算可以简化为按位布尔与运算。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>The following formulas produce the aligned offset (where &amp; is a bitwise AND and ~ a bitwise NOT):</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>以下公式产生对齐的偏移量（其中 <code>&amp;</code> 是按位与和 <code>~</code> 按位非）：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">padding = (align - (offset &amp; (align - 1))) &amp; (align - 1)
+        = (-offset &amp; (align - 1))
+aligned = (offset + (align - 1)) &amp; ~(align - 1)
+        = (offset + (align - 1)) &amp; -align</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">表示32的二进制位之前的位都是32的倍数，所以取模运算终究会除的一干二净，所以直接和32位二进制位后的位做与运算</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">0101 1001 1101 # 0x59d or 1437
+&amp;
+0000 0001 1111 # 0x20 - 1 or 32 - 1
+=
+0000 0001 1101 # 0x1d or 29</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
