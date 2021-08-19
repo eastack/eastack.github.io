@@ -2,6 +2,8 @@
 :title: EaStack
 :author: Heng Wang
 :email: admin@eastack.me
+:description: EaStack 的博客使用 Asciidoctor 和 Make 构建。
+:keywords: eastack, blog, asciidoctor, make
 
 [quote, Stewart Brand, Whole Earth Catalog]
 Stay Hungry. Stay Foolish.
