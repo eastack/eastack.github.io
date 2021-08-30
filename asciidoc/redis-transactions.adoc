@@ -1,4 +1,11 @@
 = Redis 事务
+:toc: right
+:description: Redis 事务。 \ 
+:keywords: redis, transaction, 事务
+
+NOTE: 事务早已存在。
+我们不太可能在短期内取消对事务的支持，因为从语义上看，即使不求助于 Redis 脚本，仍然可以避免竞争条件，特别是因为 Redis 事务的实现复杂性最小。
+然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除事务。
 
 ====
 MULTI, EXEC, DISCARD and WATCH are the foundation of transactions in Redis.
@@ -176,7 +183,7 @@ This time due to the syntax error the bad INCR command is not queued at all.
 ====
 这次由于语法错误，错误的 INCR 命令根本没有排队。
 
-== 为什么 Redis 不支持会滚操作？
+== 为什么 Redis 不支持回滚操作？
 
 ====
 If you have a relational databases background, the fact that Redis commands can fail during a transaction, but still Redis will execute the rest of the transaction instead of rolling back, may look odd to you.
@@ -379,4 +386,9 @@ However we are unlikely to remove the support for transactions in the short-term
 ====
 However it is not impossible that in a non immediate future we'll see that the whole user base is just using scripts. If this happens we may deprecate and finally remove transactions.
 ====
-然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除交易。
+然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除事务。
+
+[bibliography]
+== 参考
+
+* [[[原文]]] https://redis.io/topics/transactions[Data structure alignment]
