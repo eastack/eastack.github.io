@@ -5,6 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="description" content="Redis 事务。 :keywords: redis, transaction, 事务">
 <title>Redis 事务</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -439,13 +440,39 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
 <h1>Redis 事务</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_使用">使用</a></li>
+<li><a href="#_事务中的错误">事务中的错误</a></li>
+<li><a href="#_为什么_redis_不支持回滚操作">为什么 Redis 不支持回滚操作？</a></li>
+<li><a href="#_丢弃命令队列">丢弃命令队列</a></li>
+<li><a href="#_使用cas乐观锁">使用CAS乐观锁</a></li>
+<li><a href="#_解释_watch">解释 WATCH</a></li>
+<li><a href="#_参考">参考</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+事务早已存在。
+我们不太可能在短期内取消对事务的支持，因为从语义上看，即使不求助于 Redis 脚本，仍然可以避免竞争条件，特别是因为 Redis 事务的实现复杂性最小。
+然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除事务。
+</td>
+</tr>
+</table>
+</div>
 <div class="exampleblock">
 <div class="content">
 <div class="paragraph">
@@ -734,7 +761,7 @@ INCR a b c
 </div>
 </div>
 <div class="sect1">
-<h2 id="_为什么_redis_不支持会滚操作">为什么 Redis 不支持会滚操作？</h2>
+<h2 id="_为什么_redis_不支持回滚操作">为什么 Redis 不支持回滚操作？</h2>
 <div class="sectionbody">
 <div class="exampleblock">
 <div class="content">
@@ -1057,7 +1084,19 @@ However we are unlikely to remove the support for transactions in the short-term
 </div>
 </div>
 <div class="paragraph">
-<p>然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除交易。</p>
+<p>然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除事务。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参考">参考</h2>
+<div class="sectionbody">
+<div class="ulist bibliography">
+<ul class="bibliography">
+<li>
+<p><a id="原文"></a>[原文] <a href="https://redis.io/topics/transactions">Data structure alignment</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>
