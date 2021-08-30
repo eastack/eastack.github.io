@@ -1,0 +1,382 @@
+= Redis 事务
+
+====
+MULTI, EXEC, DISCARD and WATCH are the foundation of transactions in Redis.
+They allow the execution of a group of commands in a single step, with two important guarantees:
+
+* All the commands in a transaction are serialized and executed sequentially.
+It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction.
+This guarantees that the commands are executed as a single isolated operation.
+
+* Either all of the commands or none are processed, so a Redis transaction is also atomic.
+The EXEC command triggers the execution of all the commands in the transaction, so if a client loses the connection to the server in the context of a transaction before calling the EXEC command none of the operations are performed, instead if the EXEC command is called, all the operations are performed.
+When using the append-only file Redis makes sure to use a single write(2) syscall to write the transaction on disk.
+However if the Redis server crashes or is killed by the system administrator in some hard way it is possible that only a partial number of operations are registered.
+Redis will detect this condition at restart, and will exit with an error.
+Using the redis-check-aof tool it is possible to fix the append only file that will remove the partial transaction so that the server can start again.
+====
+
+MULTI, EXEC, DISCARD 和 WATCH 是 Redis 事务的基石。
+其允许在一个步骤中执行一组命令，并提供了两个重要保证：
+
+* 一个事务中的所有命令都是序列化的并顺序执行。
+在一个Redis 事务执行过程中，永远不会发生另一个客户端发出的请求被执行的情况。
+
+* 要么处理所有命令，要么不处理任何命令，所有 Redis 事务是原子性的。
+EXEC 命令触发事务中所有命令的执行，因此如果客户端在调用 EXEC 命令之前在事务上下文中失去与服务器的连接，则不会执行任何操作，而是如果调用 EXEC 命令， 执行所有操作。
+在使用 append-only 文件时 Redis 确保单个 write 系统调用将事务写入磁盘。
+但是，如果 Redis 服务器崩溃或被系统管理员以某种方式杀死，则可能只注册了部分操作。
+Redis 将在重新启动时检测到这种情况，并会出现错误退出。 使用 redis-check-aof 工具可以修复将删除部分事务的仅附加文件，以便服务器可以重新启动。
+
+====
+Starting with version 2.2, Redis allows for an extra guarantee to the above two, in the form of optimistic locking in a way very similar to a check-and-set (CAS) operation.
+This is documented later on this page.
+====
+自 Redis 2.2 开始，使用一种非常类似（CAS）操作的乐观锁的形式对上述两点提供额外的保证。
+这将在本页稍后记录。
+
+== 使用
+
+====
+A Redis transaction is entered using the MULTI command.
+The command always replies with OK.
+At this point the user can issue multiple commands.
+Instead of executing these commands, Redis will queue them.
+All the commands are executed once EXEC is called.
+====
+使用 MULTI 命令进入 Redis 事务。
+此命令始终回复 OK 。
+此时用户可以发送多个命令。
+Redis 不会执行这些命令，而是将它们排入队列。
+调用 exec 命令后所有命令都会被执行。
+
+====
+Calling DISCARD instead will flush the transaction queue and will exit the transaction.
+The following example increments keys foo and bar atomically.
+====
+调用 DISCARD 将刷新事务队列并退出事务。
+以下示例以原子方式递增键 foo 和 bar。
+
+[soruce]
+----
+> MULTI
+OK
+> INCR foo
+QUEUED
+> INCR bar
+QUEUED
+> EXEC
+1) (integer) 1
+2) (integer) 1
+----
+
+====
+As it is possible to see from the session above, EXEC returns an array of replies, where every element is the reply of a single command in the transaction, in the same order the commands were issued.
+====
+从上面的会话中可以看出，EXEC 返回一个回复数组，其中每个元素都是事务中单个命令的回复，与命令发出的顺序相同。
+
+====
+When a Redis connection is in the context of a MULTI request, all commands will reply with the string QUEUED (sent as a Status Reply from the point of view of the Redis protocol).
+A queued command is simply scheduled for execution when EXEC is called.
+====
+当 Redis 连接处于 MULTI 请求的上下文中时，所有命令都将回复字符串 QUEUED（从 Redis 协议的角度来看，作为状态回复发送）。
+排队的命令只在调用 EXEC 命令时被调度执行。
+
+== 事务中的错误
+
+====
+During a transaction it is possible to encounter two kind of command errors:
+
+* A command may fail to be queued, so there may be an error before EXEC is called.
+For instance the command may be syntactically wrong (wrong number of arguments, wrong command name, ...), or there may be some critical condition like an out of memory condition (if the server is configured to have a memory limit using the maxmemory directive).
+
+* A command may fail after EXEC is called, for instance since we performed an operation against a key with the wrong value (like calling a list operation against a string value).
+====
+在事务期间可能会遇到两种命令错误：
+
+* 命令在插入队列时可能会出错，因此在调用 EXEC 之前可能会出现错误。 
+例如，命令可能在语法上是错误的（参数数量错误，命令名称错误，等等），或者存在一些紧急情况，例如内存不足的情况（如果服务器配置了 maxmemory 指令来限制内存）。
+
+* 在调用 EXEC 命令时也可能会失败，例如，因为我们对具有错误值的键执行了操作（例如对字符串值调用列表操作）。
+
+====
+Clients used to sense the first kind of errors, happening before the EXEC call, by checking the return value of the queued command: if the command replies with QUEUED it was queued correctly, otherwise Redis returns an error.
+If there is an error while queueing a command, most clients will abort the transaction discarding it.
+====
+客户端过去常常通过检查插入队列命令的返回值来感知第一种错误，发生在 EXEC 调用之前：如果命令回复 QUEUED，则它已正确插入队列，否则 Redis 返回错误。
+
+====
+However starting with Redis 2.6.5, the server will remember that there was an error during the accumulation of commands, and will refuse to execute the transaction returning also an error during EXEC, and discarding the transaction automatically.
+====
+但是从Redis 2.6.5开始，服务器会记住命令提交过程中出现的错误，并拒绝执行事务，在 EXEC 过程中也返回错误，并自动丢弃事务。
+
+====
+Before Redis 2.6.5 the behavior was to execute the transaction with just the subset of commands queued successfully in case the client called EXEC regardless of previous errors.
+The new behavior makes it much more simple to mix transactions with pipelining, so that the whole transaction can be sent at once, reading all the replies later at once.
+====
+在 Redis 2.6.5 之前，行为是仅使用成功排队的命令子集执行事务，在客户端调用 EXEC 命令时无视之前的错误。
+新行为让事务和流水线混合使用变得更加简单，以便可以一次发送整个事务，稍后立即读取所有回复。
+
+====
+Errors happening after EXEC instead are not handled in a special way: all the other commands will be executed even if some command fails during the transaction.
+====
+EXEC 之后发生的错误不会以特殊方式处理：即使某些命令在事务期间失败，所有其他命令也将执行。
+
+====
+This is more clear on the protocol level.
+In the following example one command will fail when executed even if the syntax is right:
+====
+这在协议层面更清晰。
+在下面的例子中，即使语法正确，一个命令在执行时也会失败：
+
+[source]
+----
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+MULTI
++OK
+SET a abc
++QUEUED
+LPOP a
++QUEUED
+EXEC
+*2
++OK
+-ERR Operation against a key holding the wrong kind of value
+----
+
+====
+EXEC returned two-element Bulk string reply where one is an OK code and the other an -ERR reply.
+It's up to the client library to find a sensible way to provide the error to the user.
+====
+EXEC 返回包含两个元素的批量字符串回复，其中一个是 OK 代码，另一个是 -ERR 回复。
+客户端库需要找到一种合理的方式来向用户提供错误。
+
+====
+It's important to note that even when a command fails, all the other commands in the queue are processed – Redis will not stop the processing of commands.
+====
+需要注意的是，即使一个命令失败，队列中的所有其他命令也会被处理——Redis 不会停止命令的处理。
+
+====
+Another example, again using the wire protocol with telnet, shows how syntax errors are reported ASAP instead:
+====
+另一个例子，再次使用带有 telnet 的有线协议，显示了如何尽快报告语法错误：
+
+[source]
+----
+MULTI
++OK
+INCR a b c
+-ERR wrong number of arguments for 'incr' command
+----
+
+====
+This time due to the syntax error the bad INCR command is not queued at all.
+====
+这次由于语法错误，错误的 INCR 命令根本没有排队。
+
+== 为什么 Redis 不支持会滚操作？
+
+====
+If you have a relational databases background, the fact that Redis commands can fail during a transaction, but still Redis will execute the rest of the transaction instead of rolling back, may look odd to you.
+====
+如果您有关系数据库背景，Redis 命令可能会在事务期间失败，但 Redis 仍会执行事务的其余部分而不是回滚，这一事实对您来说可能看起来很奇怪。
+
+====
+However there are good opinions for this behavior:
+
+Redis commands can fail only if called with a wrong syntax (and the problem is not detectable during the command queueing), or against keys holding the wrong data type: this means that in practical terms a failing command is the result of a programming errors, and a kind of error that is very likely to be detected during development, and not in production.
+Redis is internally simplified and faster because it does not need the ability to roll back.
+====
+但是，对这种行为有很好的一面：
+
+* Redis 命令只有在使用错误的语法调用时才会失败（并且在命令排队期间无法检测到问题），或者针对持有错误数据类型的键：这意味着实际上失败的命令是编程错误的结果， 一种很可能在开发过程中检测到的错误，而不是在生产中。
+
+* 因为 Redis 不需要回滚的能力，所以其内部得以简化并提高性能。
+
+====
+An argument against Redis point of view is that bugs happen, however it should be noted that in general the roll back does not save you from programming errors.
+For instance if a query increments a key by 2 instead of 1, or increments the wrong key, there is no way for a rollback mechanism to help.
+Given that no one can save the programmer from his or her errors, and that the kind of errors required for a Redis command to fail are unlikely to enter in production, we selected the simpler and faster approach of not supporting roll backs on errors.
+====
+反对 Redis 观点的一个论点是BUG总会有的，但是应该注意的是，回滚通常无法帮助你避免编程错误。
+例如，如果查询将键增加 2 而不是 1，或者增加错误的键，则回滚机制无法提供帮助。
+鉴于没有人可以将程序员从他或她的错误中拯救出来，而且 Redis 命令失败所需的那种错误不太可能进入生产环境，我们选择了不支持错误回滚的更简单、更快的方法。
+
+== 丢弃命令队列
+
+====
+DISCARD can be used in order to abort a transaction.
+In this case, no commands are executed and the state of the connection is restored to normal.
+====
+DISCARD 可用于中止事务。
+在这种情况下，不执行任何命令，连接状态恢复正常。
+
+[source]
+----
+> SET foo 1
+OK
+> MULTI
+OK
+> INCR foo
+QUEUED
+> DISCARD
+OK
+> GET foo
+"1"
+----
+
+== 使用CAS乐观锁
+
+====
+WATCH is used to provide a check-and-set (CAS) behavior to Redis transactions.
+====
+WATCH 用于为 Redis 事务提供（CAS） 行为。
+
+====
+WATCHed keys are monitored in order to detect changes against them.
+If at least one watched key is modified before the EXEC command, the whole transaction aborts, and EXEC returns a Null reply to notify that the transaction failed.
+====
+监视键被监视以检测对它们的更改。
+如果在 EXEC 命令之前至少修改了一个被监视的 key，则整个事务中止，EXEC 返回 Null 回复以通知事务失败。
+
+====
+For example, imagine we have the need to atomically increment the value of a key by 1 (let's suppose Redis doesn't have INCR).
+====
+例如，假设我们需要以原子方式将键的值增加 1（假设 Redis 没有 INCR）。
+
+The first try may be the following:
+第一次尝试可能像下面这样：
+
+[source]
+----
+val = GET mykey
+val = val + 1
+SET mykey $val
+----
+
+====
+This will work reliably only if we have a single client performing the operation in a given time.
+If multiple clients try to increment the key at about the same time there will be a race condition.
+For instance, client A and B will read the old value, for instance, 10.
+The value will be incremented to 11 by both the clients, and finally SET as the value of the key.
+So the final value will be 11 instead of 12.
+====
+这只有在给定时间内仅有单个用户执行操作时能可靠工作。
+如果多个客户端几乎同时尝试增加密钥时则会出现竞态条件。
+例如，客户端 A 和 B 将读取旧值，例如 10。
+两个客户端都会将该值增加到 11，最后将其设置为key的值。
+所以最终值将是 11 而不是 12。
+
+Thanks to WATCH we are able to model the problem very well:
+感谢 WATCH 我们能够使用它对问题很好地建模：
+
+[source]
+----
+WATCH mykey
+val = GET mykey
+val = val + 1
+MULTI
+SET mykey $val
+EXEC
+----
+
+====
+Using the above code, if there are race conditions and another client modifies the result of val in the time between our call to WATCH and our call to EXEC, the transaction will fail.
+====
+使用上面的代码，如果存在竞争条件并且另一个客户端在我们调用 WATCH 和调用 EXEC 之间的时间内修改了 val 的结果，则事务将失败。
+
+====
+We just have to repeat the operation hoping this time we'll not get a new race.
+This form of locking is called optimistic locking and is a very powerful form of locking.
+In many use cases, multiple clients will be accessing different keys, so collisions are unlikely – usually there's no need to repeat the operation.
+====
+我们只需要重复操作，希望这次我们不会有新的比赛。
+这种锁定形式称为乐观锁定，是一种非常强大的锁定形式。
+在许多用例中，多个客户端将访问不同的密钥，因此不太可能发生冲突——通常不需要重复操作。
+
+== 解释 WATCH
+
+====
+So what is WATCH really about? It is a command that will make the EXEC conditional: we are asking Redis to perform the transaction only if none of the WATCHed keys were modified.
+This includes modifications made by the client, like write commands, and by Redis itself, like expiration or eviction.
+If keys were modified between when they were WATCHed and when the EXEC was received, the entire transaction will be aborted instead.
+====
+那么 WATCH 到底是关于什么的呢？ 这是一个使 EXEC 成为条件的命令：我们要求 Redis 只有在没有修改任何 WATCHed 键时才执行事务。
+如果键在被 WATCH 和收到 EXEC 之间被修改，整个事务将被中止。
+
+====
+NOTE: 
+* In Redis versions before 6.0.9, an expired key would not cause a transaction to be aborted. More on this 
+* Commands within a transaction wont trigger the WATCH condition since they are only queued until the EXEC is sent.
+====
+NOTE: 
+* 在 6.0.9 之前的 Redis 版本中，过期的密钥不会导致事务中止。
+* 事务中的命令不会触发 WATCH 条件，因为它们只会在 EXEC 发送之前排队。
+
+====
+WATCH can be called multiple times.
+Simply all the WATCH calls will have the effects to watch for changes starting from the call, up to the moment EXEC is called.
+You can also send any number of keys to a single WATCH call.
+====
+WATCH 可以被多次调用。
+简单地说，所有的 WATCH 调用都会有效果来观察从调用开始到调用 EXEC 的变化。
+您还可以向单个 WATCH 呼叫发送任意数量的键。
+
+====
+When EXEC is called, all keys are UNWATCHed, regardless of whether the transaction was aborted or not.
+Also when a client connection is closed, everything gets UNWATCHed.
+====
+当 EXEC 被调用时，所有的键都是 UNWATCHed，不管事务是否中止。
+此外，当客户端连接关闭时，一切都会被忽视。
+
+====
+It is also possible to use the UNWATCH command (without arguments) in order to flush all the watched keys.
+Sometimes this is useful as we optimistically lock a few keys, since possibly we need to perform a transaction to alter those keys, but after reading the current content of the keys we don't want to proceed.
+When this happens we just call UNWATCH so that the connection can already be used freely for new transactions.
+====
+也可以使用 UNWATCH 命令（不带参数）来刷新所有被监视的键。
+有时 UNWATCH 命令很有用，应为当我们乐观锁定几个键，因为我们一会要执行事务来更改他们，但在读取到键值后我们就不想再进行修改了。
+
+====
+Using WATCH to implement ZPOP
+A good example to illustrate how WATCH can be used to create new atomic operations otherwise not supported by Redis is to implement ZPOP (ZPOPMIN, ZPOPMAX and their blocking variants have only been added in version 5.0), that is a command that pops the element with the lower score from a sorted set in an atomic way.
+This is the simplest implementation:
+====
+使用 WATCH 来实现 ZPOP
+有一个很好的例子来说明如何使用 WATCH 创建新的原子操作，否则 Redis 无法实现 ZPOP命令（ZPOPMIN、ZPOPMAX 和它们的阻塞变体仅在 5.0 版中添加），这是一个弹出元素的命令 以原子方式排序的集合中的较低分数。
+
+这是最简单的实现：
+[source]
+----
+WATCH zset
+element = ZRANGE zset 0 0
+MULTI
+ZREM zset element
+EXEC
+----
+
+====
+If EXEC fails (i.e. returns a Null reply) we just repeat the operation.
+====
+如果 EXEC 失败（也就是返回Null回复）我们只要重新执行此操作就可以。
+
+====
+Redis scripting and transactions
+A Redis script is transactional by definition, so everything you can do with a Redis transaction, you can also do with a script, and usually the script will be both simpler and faster.
+====
+Redis 脚本和事务
+Redis 脚本根据定义是事务性的，所以你可以用 Redis 事务做的一切，你也可以用脚本来做，通常脚本会更简单和更快。
+
+====
+This duplication is due to the fact that scripting was introduced in Redis 2.6 while transactions already existed long before.
+However we are unlikely to remove the support for transactions in the short-term because it seems semantically opportune that even without resorting to Redis scripting it is still possible to avoid race conditions, especially since the implementation complexity of Redis transactions is minimal.
+====
+这种重复是由于脚本是在 Redis 2.6 中引入的，而事务早已存在。
+然而，我们不太可能在短期内取消对事务的支持，因为从语义上看，即使不求助于 Redis 脚本，仍然可以避免竞争条件，特别是因为 Redis 事务的实现复杂性最小。
+
+====
+However it is not impossible that in a non immediate future we'll see that the whole user base is just using scripts. If this happens we may deprecate and finally remove transactions.
+====
+然而，在不久的将来，我们将看到整个用户群只是在使用脚本，这并非不可能。 如果发生这种情况，我们可能会弃用并最终删除交易。
