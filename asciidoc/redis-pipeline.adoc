@@ -1,4 +1,4 @@
-= Redsi 流水线
+= Redis 流水线
 :toc: right
 :description: Redis 流水线。 \ 
 :keywords: redis, pipeline, 流水线, 系统调用, 上下文切换
@@ -146,7 +146,7 @@ The speed will be nearly the same, but the additional memory used will be at max
 所以，如果你要用流水线发送大量命令，最好是分批发送，每一批包含一个合理的数字，比如1万条命令，然后读取回复，然后再发送1万条命令，依次类推。
 速递几乎不变，但是额外使用的内存量将达到存储1万个命令响应所需要的最大内存用量。
 
-== It's not just a matter of RTT
+== 这一切不知是RTT的问题
 
 ====
 Pipelining is not just a way to reduce the latency cost associated with the round trip time, it actually greatly improves the number of operations you can perform per second in a given Redis server.
