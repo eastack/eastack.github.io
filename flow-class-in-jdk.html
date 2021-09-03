@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
-<title>Inspire</title>
+<title>JDK 中的 Flow 类</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,181 +441,378 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Inspire</h1>
+<h1>JDK 中的 Flow 类</h1>
 </div>
 <div id="content">
-<div id="preamble">
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>简单的普适规则演化出繁杂的表象，抓住根本才能游刃有余</p>
-</li>
-<li>
-<p>掌握知识和概念，为你所用，而不是被束缚</p>
-</li>
-<li>
-<p>环境很重要，要主动改变，创造环境</p>
-</li>
-<li>
-<p>沉淀</p>
-</li>
-<li>
-<p>度-艺术</p>
-</li>
-<li>
-<p>区分功能和业务，共能框架/规范提供，业务自己实现</p>
-</li>
-<li>
-<p>什么？要扩展性？那提高一个抽象的 level 试试</p>
-</li>
-<li>
-<p>信息差，价值</p>
-</li>
-<li>
-<p>幸福的家庭都是相似的，不幸的家庭各有各的不幸，就像200，和其他状态码一样</p>
-</li>
-<li>
-<p>人们的时间流向了何处</p>
-</li>
-<li>
-<p>尽量不偷懒，该怎么做就怎么做</p>
-</li>
-<li>
-<p>貌似很多东西都讲究要易读</p>
-</li>
-<li>
-<p>每一层有每一层的优雅</p>
-</li>
-<li>
-<p>度还是度，是从所有数据源到所有模板还是，从openapi.yaml到api.mustache，是从自由命名，还是到规范命名。</p>
-</li>
-<li>
-<p>email is good. rss is good.</p>
-</li>
-<li>
-<p>have structed data, select and operation it</p>
-</li>
-<li>
-<p>try focus data flow, focus data</p>
-</li>
-<li>
-<p>在解决问题时避免出现模糊不清的点，二分查找如果不能确保数组有序，那&#8230;&#8203;</p>
-</li>
-<li>
-<p>掌握生活节奏</p>
-</li>
-<li>
-<p>selector + actuator + variable</p>
-</li>
-<li>
-<p>有趣，思考一件事站在不同的位置，对人的影响很大</p>
-</li>
-<li>
-<p>谦逊一些，碰见新事物时不要想得太简单了，否则你会事半工倍而不是事倍工半</p>
-</li>
-<li>
-<p>软件主动查找插件，提供扩展目录，或其他接口</p>
-</li>
-<li>
-<p>一切自动化的检查都值得</p>
-</li>
-<li>
-<p>懒是一种美德</p>
-</li>
-<li>
-<p>业务架构、技术架构、组织架构</p>
-</li>
-<li>
-<p>模式演变而来，大型网站也是</p>
-</li>
-<li>
-<p>词典管理</p>
-</li>
-<li>
-<p>文档管理</p>
-</li>
-<li>
-<p>同步的本质&#8212;&#8203;实现临界区的互斥性</p>
-</li>
-<li>
-<p>把思维的惯性停下来，思考问题的本质</p>
-</li>
-<li>
-<p>同名类不同包最TMD坑</p>
-</li>
-<li>
-<p>思考本来应该如何，而不是可以如何</p>
-</li>
-<li>
-<p>系统设计不可，空想，结合实际需求，和未来规划，确定数据量，并发量，等。</p>
-</li>
-</ul>
+<div class="exampleblock text-center">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<img src="flow-uml.svg" alt="Diagram" width="642" height="266">
 </div>
 </div>
 </div>
-<div class="sect1">
-<h2 id="_编程范式paradigm">编程范式(Paradigm)</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>函数式
-过程式
-面向对象
-响应式
-面向切面</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_概念concept">概念（concept）</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>范型
-反射
-协程
-线程
-迭代（iteration）
-闭包
-匿名函数</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_cicd">CI/CD</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>做了什么？</p>
-</div>
-<div class="paragraph">
-<p>Operation repeatable ?</p>
-</div>
-<div class="paragraph">
-<p>一个事件&#8594;触发随后的一系列操作</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_常见思路">常见思路</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>池化 &#8594; 复用
-分片</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_同步异步和阻塞与非阻塞">同步/异步和阻塞与非阻塞</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<div class="title">同步阻塞</div>
-<p>API: read, write
-在调用后当前进程等待(同步)，当内核准备好数据后将数据复制到进程中时，进程阻塞</p>
-</div>
-<div class="paragraph">
-<div class="title">同步非阻塞</div>
-<p>API: write, read + poll / select
-在调用后直接返回</p>
-</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-java hljs" data-lang="java">/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+
+/*
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file:
+ *
+ * Written by Doug Lea with assistance from members of JCP JSR-166
+ * Expert Group and released to the public domain, as explained at
+ * http://creativecommons.org/publicdomain/zero/1.0/
+ */
+
+package java.util.concurrent;
+
+/**
+ * Interrelated interfaces and static methods for establishing
+ * flow-controlled components in which {@link Publisher Publishers}
+ * produce items consumed by one or more {@link Subscriber
+ * Subscribers}, each managed by a {@link Subscription
+ * Subscription}.
+ *
+ * 用于建立流控制组件的接口和静态方法，其中 {@link Publisher Publisher}
+ * 发布由一个或多个 {@link Subscriber Subscribers} 消费的项目，
+ * 每一个 {@link Subscriber Subscribers} 都由一个 {@link Subscription Subscription} 管理。
+ *
+ * &lt;p&gt;These interfaces correspond to the &lt;a
+ * href="http://www.reactive-streams.org/"&gt; reactive-streams&lt;/a&gt;
+ * specification.  They apply in both concurrent and distributed
+ * asynchronous settings: All (seven) methods are defined in {@code
+ * void} "one-way" message style. Communication relies on a simple form
+ * of flow control (method {@link Subscription#request}) that can be
+ * used to avoid resource management problems that may otherwise occur
+ * in "push" based systems.
+ *
+ * &lt;p&gt;这些接口对应&lt;a href="http://www.reactive-streams.org/"&gt; reactive-streams&lt;/a&gt;
+ * 规范。其适用于并发和分布式异步环境：所有（7个）方法均定义为无返回值的“单向”消息风格。
+ * 通信依赖于一种简式流量控制（方法{@link Subscription#request}）
+ * 这可以用来避免在基于“推”的系统中可能出现的资源管理问题。
+ *
+ * &lt;p&gt;&lt;b&gt;Examples.&lt;/b&gt; A {@link Publisher} usually defines its own
+ * {@link Subscription} implementation; constructing one in method
+ * {@code subscribe} and issuing it to the calling {@link
+ * Subscriber}. It publishes items to the subscriber asynchronously,
+ * normally using an {@link Executor}.  For example, here is a very
+ * simple publisher that only issues (when requested) a single {@code
+ * TRUE} item to a single subscriber.  Because the subscriber receives
+ * only a single item, this class does not use buffering and ordering
+ * control required in most implementations (for example {@link
+ * SubmissionPublisher}).
+ *
+ * &lt;p&gt;&lt;b&gt;例如。&lt;/b&gt; 一个 {@link Publisher} 通常定义自己的 {@link Subscription} 实现;
+ * constructing one in method
+ * {@code subscribe} and issuing it to the calling {@link
+ * Subscriber}. It publishes items to the subscriber asynchronously,
+ * normally using an {@link Executor}.  For example, here is a very
+ * simple publisher that only issues (when requested) a single {@code
+ * TRUE} item to a single subscriber.  Because the subscriber receives
+ * only a single item, this class does not use buffering and ordering
+ * control required in most implementations (for example {@link
+ * SubmissionPublisher}).
+ * &lt;pre&gt; {@code
+ *
+ * class OneShotPublisher implements Publisher&lt;Boolean&gt; {
+ *   private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
+ *   private boolean subscribed; // true after first subscribe
+ *   public synchronized void subscribe(Subscriber&lt;? super Boolean&gt; subscriber) {
+ *     if (subscribed)
+ *       subscriber.onError(new IllegalStateException()); // only one allowed
+ *     else {
+ *       subscribed = true;
+ *       subscriber.onSubscribe(new OneShotSubscription(subscriber, executor));
+ *     }
+ *   }
+ *   static class OneShotSubscription implements Subscription {
+ *     private final Subscriber&lt;? super Boolean&gt; subscriber;
+ *     private final ExecutorService executor;
+ *     private Future&lt;?&gt; future; // to allow cancellation
+ *     private boolean completed;
+ *     OneShotSubscription(Subscriber&lt;? super Boolean&gt; subscriber,
+ *                         ExecutorService executor) {
+ *       this.subscriber = subscriber;
+ *       this.executor = executor;
+ *     }
+ *     public synchronized void request(long n) {
+ *       if (!completed) {
+ *         completed = true;
+ *         if (n &lt;= 0) {
+ *           IllegalArgumentException ex = new IllegalArgumentException();
+ *           executor.execute(() -&gt; subscriber.onError(ex));
+ *         } else {
+ *           future = executor.submit(() -&gt; {
+ *             subscriber.onNext(Boolean.TRUE);
+ *             subscriber.onComplete();
+ *           });
+ *         }
+ *       }
+ *     }
+ *     public synchronized void cancel() {
+ *       completed = true;
+ *       if (future != null) future.cancel(false);
+ *     }
+ *   }
+ * }}&lt;/pre&gt;
+ *
+ * &lt;p&gt;A {@link Subscriber} arranges that items be requested and
+ * processed.  Items (invocations of {@link Subscriber#onNext}) are
+ * not issued unless requested, but multiple items may be requested.
+ * Many Subscriber implementations can arrange this in the style of
+ * the following example, where a buffer size of 1 single-steps, and
+ * larger sizes usually allow for more efficient overlapped processing
+ * with less communication; for example with a value of 64, this keeps
+ * total outstanding requests between 32 and 64.
+ * Because Subscriber method invocations for a given {@link
+ * Subscription} are strictly ordered, there is no need for these
+ * methods to use locks or volatiles unless a Subscriber maintains
+ * multiple Subscriptions (in which case it is better to instead
+ * define multiple Subscribers, each with its own Subscription).
+ *
+ * &lt;pre&gt; {@code
+ * class SampleSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
+ *   final Consumer&lt;? super T&gt; consumer;
+ *   Subscription subscription;
+ *   final long bufferSize;
+ *   long count;
+ *   SampleSubscriber(long bufferSize, Consumer&lt;? super T&gt; consumer) {
+ *     this.bufferSize = bufferSize;
+ *     this.consumer = consumer;
+ *   }
+ *   public void onSubscribe(Subscription subscription) {
+ *     long initialRequestSize = bufferSize;
+ *     count = bufferSize - bufferSize / 2; // re-request when half consumed
+ *     (this.subscription = subscription).request(initialRequestSize);
+ *   }
+ *   public void onNext(T item) {
+ *     if (--count &lt;= 0)
+ *       subscription.request(count = bufferSize - bufferSize / 2);
+ *     consumer.accept(item);
+ *   }
+ *   public void onError(Throwable ex) { ex.printStackTrace(); }
+ *   public void onComplete() {}
+ * }}&lt;/pre&gt;
+ *
+ * &lt;p&gt;The default value of {@link #defaultBufferSize} may provide a
+ * useful starting point for choosing request sizes and capacities in
+ * Flow components based on expected rates, resources, and usages.
+ * Or, when flow control is never needed, a subscriber may initially
+ * request an effectively unbounded number of items, as in:
+ *
+ * &lt;pre&gt; {@code
+ * class UnboundedSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
+ *   public void onSubscribe(Subscription subscription) {
+ *     subscription.request(Long.MAX_VALUE); // effectively unbounded
+ *   }
+ *   public void onNext(T item) { use(item); }
+ *   public void onError(Throwable ex) { ex.printStackTrace(); }
+ *   public void onComplete() {}
+ *   void use(T item) { ... }
+ * }}&lt;/pre&gt;
+ *
+ * @author Doug Lea
+ * @since 9
+ */
+public final class Flow {
+
+    private Flow() {} // uninstantiable
+
+    /**
+     * A producer of items (and related control messages) received by
+     * Subscribers.  Each current {@link Subscriber} receives the same
+     * items (via method {@code onNext}) in the same order, unless
+     * drops or errors are encountered. If a Publisher encounters an
+     * error that does not allow items to be issued to a Subscriber,
+     * that Subscriber receives {@code onError}, and then receives no
+     * further messages.  Otherwise, when it is known that no further
+     * messages will be issued to it, a subscriber receives {@code
+     * onComplete}.  Publishers ensure that Subscriber method
+     * invocations for each subscription are strictly ordered in &lt;a
+     * href="package-summary.html#MemoryVisibility"&gt;&lt;i&gt;happens-before&lt;/i&gt;&lt;/a&gt;
+     * order.
+     * 订阅者接收的项目（和相关控制信息）的生产者。当前的每个 {@link Subscriber}
+     * 都以相同的顺序接收相同的项（通过{@code onNext}方法），除非遇到丢弃或错误。
+     * 如果一个生产者发生错误那么则不允许任何项被发送到订阅者，订阅者被调用
+     * {@code onError}方法，且从此不会再收到消息。否则，当订阅者的{@code onComplete}
+     * 方法被调用时，其知道不会再有更多消息发送给它了。
+     * 发布者确保每个订阅的订阅者方法严格按照
+     * &lt;a href="package-summary.html#MemoryVisibility"&gt;&lt;i&gt;happens-before&gt;顺序进行。
+     *
+     * &lt;p&gt;Publishers may vary in policy about whether drops (failures
+     * to issue an item because of resource limitations) are treated
+     * as unrecoverable errors.  Publishers may also vary about
+     * whether Subscribers receive items that were produced or
+     * available before they subscribed.
+     * &lt;p&gt;
+     * &lt;p&gt;发布者可能会在关于丢弃（由于资源限制而未能发布项目）是否视为不可恢复错误
+     * 的政策上有所不同。
+     * 订阅者也会在订阅者是否可以收到订阅前已生产或可用的项而不同。
+     * &lt;p&gt;
+     *
+     * @param &lt;T&gt; 发布项的类型
+     */
+    @FunctionalInterface
+    public static interface Publisher&lt;T&gt; {
+        /**
+         * Adds the given Subscriber if possible.  If already
+         * subscribed, or the attempt to subscribe fails due to policy
+         * violations or errors, the Subscriber's {@code onError}
+         * method is invoked with an {@link IllegalStateException}.
+         * Otherwise, the Subscriber's {@code onSubscribe} method is
+         * invoked with a new {@link Subscription}.  Subscribers may
+         * enable receiving items by invoking the {@code request}
+         * method of this Subscription, and may unsubscribe by
+         * invoking its {@code cancel} method.
+         * 如果可能添加给定的订阅者。如果已经订阅，或订阅尝试因违反
+	 * 政策或错误而失败，则使用 {@link IllegalStateException}
+	 * 调用订阅者的 {@code onError} 方法。
+	 * 否则，则将 {@link Subscription} 作为参数调用订阅者的
+	 * {@code onSubscribe} 方法。订阅者可以通过调用此订阅的
+	 * {@code request} 方法启用接收项目，也可以通过调用其 {@code cancel}
+	 * 方法取消订阅。
+         *
+         * @param subscriber 订阅者
+         * @throws NullPointerException 如果订阅者为 null
+         */
+        public void subscribe(Subscriber&lt;? super T&gt; subscriber);
+    }
+
+    /**
+     * A receiver of messages.  The methods in this interface are
+     * invoked in strict sequential order for each {@link
+     * Subscription}.
+     *
+     * @param &lt;T&gt; the subscribed item type
+     */
+    public static interface Subscriber&lt;T&gt; {
+        /**
+         * Method invoked prior to invoking any other Subscriber
+         * methods for the given Subscription. If this method throws
+         * an exception, resulting behavior is not guaranteed, but may
+         * cause the Subscription not to be established or to be cancelled.
+         *
+         * &lt;p&gt;Typically, implementations of this method invoke {@code
+         * subscription.request} to enable receiving items.
+         *
+         * @param subscription a new subscription
+         */
+        public void onSubscribe(Subscription subscription);
+
+        /**
+         * Method invoked with a Subscription's next item.  If this
+         * method throws an exception, resulting behavior is not
+         * guaranteed, but may cause the Subscription to be cancelled.
+         *
+         * @param item the item
+         */
+        public void onNext(T item);
+
+        /**
+         * Method invoked upon an unrecoverable error encountered by a
+         * Publisher or Subscription, after which no other Subscriber
+         * methods are invoked by the Subscription.  If this method
+         * itself throws an exception, resulting behavior is
+         * undefined.
+         *
+         * @param throwable the exception
+         */
+        public void onError(Throwable throwable);
+
+        /**
+         * Method invoked when it is known that no additional
+         * Subscriber method invocations will occur for a Subscription
+         * that is not already terminated by error, after which no
+         * other Subscriber methods are invoked by the Subscription.
+         * If this method throws an exception, resulting behavior is
+         * undefined.
+         */
+        public void onComplete();
+    }
+
+    /**
+     * Message control linking a {@link Publisher} and {@link
+     * Subscriber}.  Subscribers receive items only when requested,
+     * and may cancel at any time. The methods in this interface are
+     * intended to be invoked only by their Subscribers; usages in
+     * other contexts have undefined effects.
+     */
+    public static interface Subscription {
+        /**
+         * Adds the given number {@code n} of items to the current
+         * unfulfilled demand for this subscription.  If {@code n} is
+         * less than or equal to zero, the Subscriber will receive an
+         * {@code onError} signal with an {@link
+         * IllegalArgumentException} argument.  Otherwise, the
+         * Subscriber will receive up to {@code n} additional {@code
+         * onNext} invocations (or fewer if terminated).
+         *
+         * @param n the increment of demand; a value of {@code
+         * Long.MAX_VALUE} may be considered as effectively unbounded
+         */
+        public void request(long n);
+
+        /**
+         * Causes the Subscriber to (eventually) stop receiving
+         * messages.  Implementation is best-effort -- additional
+         * messages may be received after invoking this method.
+         * A cancelled subscription need not ever receive an
+         * {@code onComplete} or {@code onError} signal.
+         */
+        public void cancel();
+    }
+
+    /**
+     * A component that acts as both a Subscriber and Publisher.
+     *
+     * @param &lt;T&gt; the subscribed item type
+     * @param &lt;R&gt; the published item type
+     */
+    public static interface Processor&lt;T,R&gt; extends Subscriber&lt;T&gt;, Publisher&lt;R&gt; {
+    }
+
+    static final int DEFAULT_BUFFER_SIZE = 256;
+
+    /**
+     * Returns a default value for Publisher or Subscriber buffering,
+     * that may be used in the absence of other constraints.
+     *
+     * @implNote
+     * The current value returned is 256.
+     *
+     * @return the buffer size value
+     */
+    public static int defaultBufferSize() {
+        return DEFAULT_BUFFER_SIZE;
+    }
+
+}</code></pre>
 </div>
 </div>
 </div>
