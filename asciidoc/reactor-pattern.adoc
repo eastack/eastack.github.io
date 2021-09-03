@@ -1,0 +1,5 @@
+= 反应器模式（Reactor pattern）
+
+== 结构
+
+资源:: Any resource that can provide input to or consume output from the system.

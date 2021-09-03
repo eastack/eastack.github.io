@@ -1,0 +1,30 @@
+@startuml
+interface Flow {
+    ~DEFAULT_BUFFER_SIZE
+    -Flow()
+    +defaultBufferSize()
+}
+
+interface Flow.Publisher {
+    +subscribe()
+}
+
+interface Flow.Subscriber {
+    +onSubscribe()
+    +onNext()
+    +onError()
+    +onComplete()
+}
+
+interface Flow.Subscription {
+    +request()
+    +cancel()
+}
+
+interface Flow.Processor {}
+
+Flow +-- Flow.Publisher
+Flow +-- Flow.Subscriber
+Flow +-- Flow.Subscription
+Flow +-- Flow.Processor
+@enduml

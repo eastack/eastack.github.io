@@ -44,10 +44,12 @@
 * [ ] 手写Lua虚拟机和运行库
 * [ ] Spring 5.0 后代码变得好简洁
 * [ ] Reactor是怎么实现的，还有 Stream 到底怎么回事
-* [ ] Netty是个好东西
+* [ ] **好好学Netty**
 * [ ] DFA 算法
 * [ ] 布隆过滤器
 * [ ] HTTP内容协商
 * [ ] https://www.baeldung.com/java-classloaders[Java Classloaders]
 * [ ] https://zhuanlan.zhihu.com/p/356444542[Java Classloaders]
 * [ ] https://docs.spring.io/spring-boot/docs/2.0.0.M3/reference/html/boot-features-developing-auto-configuration.html[Spring boot auth configuration]
+* [ ] D3.js + asciidoctor = mindmap
+* [ ] 协程

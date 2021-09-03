@@ -1,0 +1,5 @@
+= 观察者模式
+
+The observer pattern is a software design pattern in which an object, named the subject, maintains a list of its dependents, called observers, and notifies them automatically of any state changes, usually by calling one of their methods.
+
+观察者模式是一种软件设计模式，其中一个名为"Subject"的对象维护其依赖项列表（"Observers")）。

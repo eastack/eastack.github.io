@@ -63,5 +63,17 @@ Operation repeatable ?
 
 == 常见思路
 
-池化
+池化 -> 复用
 分片
+
+== 同步/异步和阻塞与非阻塞
+
+.同步阻塞
+API: read, write
+在调用后当前进程等待(同步)，当内核准备好数据后将数据复制到进程中时，进程阻塞
+
+
+.同步非阻塞
+API: write, read + poll / select
+在调用后直接返回
+// todo

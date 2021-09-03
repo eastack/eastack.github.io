@@ -1,0 +1,18 @@
+= Redsi 流水线
+
+Request/Response protocols and RTT
+
+====
+Redis is a TCP server using the client-server model and what is called a Request/Response protocol.
+
+This means that usually a request is accomplished with the following steps:
+
+* The client sends a query to the server, and reads from the socket, usually in a blocking way, for the server response.
+* The server processes the command and sends the response back to the client.
+====
+
+Redis 是一个使用 CS 模型和请求/响应协议的 TCP 服务器。
+
+也就是说一般通过以下步骤完成一次请求：
+
+* 客户端向服务器发送请求，
