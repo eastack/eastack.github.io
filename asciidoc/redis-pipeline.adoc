@@ -163,7 +163,7 @@ The context switch is a huge speed penalty.
 When pipelining is used, many commands are usually read with a single read() system call, and multiple replies are delivered with a single write() system call.
 Because of this, the number of total queries performed per second initially increases almost linearly with longer pipelines, and eventually reaches 10 times the baseline obtained without pipelining, as you can see from the following graph:
 ====
-当使用流水线时，通常会使用单个 `read()` 系统调用一次性读取大量命令，并通过单个 `write()` 系统调用传送多个系统调用。
+当使用流水线时，通常会使用单个 `read()` 系统调用一次性读取大量命令，通过单个 `write()` 系统调用分发多个回复。
 正应如此，每秒执行的总查询数最开始随着管道内容纳元素数量的几乎成线性增长，最终达到不使用流水线的大约10倍左右，如下图所示：
 
 image::https://redis.io/images/redisdoc/pipeline_iops.png[pipeline_iops]
