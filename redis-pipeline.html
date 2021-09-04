@@ -751,7 +751,7 @@ Because of this, the number of total queries performed per second initially incr
 </div>
 </div>
 <div class="paragraph">
-<p>当使用流水线时，通常会使用单个 <code>read()</code> 系统调用一次性读取大量命令，并通过单个 <code>write()</code> 系统调用传送多个系统调用。
+<p>当使用流水线时，通常会使用单个 <code>read()</code> 系统调用一次性读取大量命令，通过单个 <code>write()</code> 系统调用分发多个回复。
 正应如此，每秒执行的总查询数最开始随着管道内容纳元素数量的几乎成线性增长，最终达到不使用流水线的大约10倍左右，如下图所示：</p>
 </div>
 <div class="imageblock">
