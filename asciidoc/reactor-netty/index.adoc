@@ -15,32 +15,44 @@ ConnectionObserver 接口观察状态变化
 
 HttpServerConfig 保存 HttpServer 的配置
 
-== Netty Domain
+== Netty
 
-Channel类
+=== ChannelHandler
 
+====
 Handles an I/O event or intercepts an I/O operation, and forwards it to its next handler in its ChannelPipeline.
 Sub-types
+====
 处理 I/O 事件或拦截 I/O 操作，并将其转发到其 ChinnelPipeline 中的下一个处理程序。
 
+====
 ChannelHandler itself does not provide many methods, but you usually have to implement one of its subtypes:
-ChannelHandler 本身并没有提供很多方法，但是您通常必须实现其子类型之一：
-
 ChannelInboundHandler to handle inbound I/O events, and
-ChannelInboundHandler 处理入站 I/O 事件， 和
 ChannelOutboundHandler to handle outbound I/O operations.
+====
+ChannelHandler 本身并没有提供很多方法，但是您通常必须实现其子类型之一：
+ChannelInboundHandler 处理入站 I/O 事件， 和
 ChannelOutboundHandler 处理出站 I/O 事件。
 
+====
 Alternatively, the following adapter classes are provided for your convenience:
-或者，为了你使用方便提供了以下适配器类：
-
 ChannelInboundHandlerAdapter to handle inbound I/O events,
-ChannelInboundHandlerAdapter 处理入站 I/O 事件,
 ChannelOutboundHandlerAdapter to handle outbound I/O operations, and
-ChannelOutboundHandlerAdapter 处理出站 I/O 事件
 ChannelDuplexHandler to handle both inbound and outbound events
+====
+或者，为了你使用方便提供了以下适配器类：
+ChannelInboundHandlerAdapter 处理入站 I/O 事件,
+ChannelOutboundHandlerAdapter 处理出站 I/O 事件
 ChannelDuplexHandler 处理出站和出站 I/O 事件
 
+====
+For more information, please refer to the documentation of each subtype.
+====
+更多信息，请参阅每个子类的文档。
 
+====
+The context object
 
-
+A ChannelHandler is provided with a ChannelHandlerContext object. A ChannelHandler is supposed to interact with the ChannelPipeline it belongs to via a context object. Using the context object, the ChannelHandler can pass events upstream or downstream, modify the pipeline dynamically, or store the information (using AttributeKeys) which is specific to the handler.
+====
+上下文对象
