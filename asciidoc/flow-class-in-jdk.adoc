@@ -81,15 +81,10 @@ package java.util.concurrent;
  * SubmissionPublisher}).
  *
  * <p><b>例如。</b> 一个 {@link Publisher} 通常定义自己的 {@link Subscription} 实现; 
- * constructing one in method
- * {@code subscribe} and issuing it to the calling {@link
- * Subscriber}. It publishes items to the subscriber asynchronously,
- * normally using an {@link Executor}.  For example, here is a very
- * simple publisher that only issues (when requested) a single {@code
- * TRUE} item to a single subscriber.  Because the subscriber receives
- * only a single item, this class does not use buffering and ordering
- * control required in most implementations (for example {@link
- * SubmissionPublisher}).
+ * 在{@code subscribe}方法中构造{@link Subscription}并将其发送给{@link Subscriber}。
+ * 其通常使用{@link Executor}异步的向订阅者发布项目。 
+ * 例如，下面是一个非常简单二发布者，它只向单个订阅者发布（当订阅者请求时）一个{@code TRUE}元素。
+ * 因为订阅者只接受一个项目，这个类不使用大多数实现中所需要的缓冲和排序控制（例如{@link SubmissionPublisher}）
  * <pre> {@code
  *
  * class OneShotPublisher implements Publisher<Boolean> {
@@ -147,6 +142,15 @@ package java.util.concurrent;
  * methods to use locks or volatiles unless a Subscriber maintains
  * multiple Subscriptions (in which case it is better to instead
  * define multiple Subscribers, each with its own Subscription).
+ *
+ * <p>{@link Subscriber}会负责对元素的请求和处理
+ * 除非订阅者请求元素元素否则不会发出项目（调用{@link Subscriber#onNext}）
+ * ,但可以一次请求多个元素。许多订阅者实现会按照以下示例的风格进行协商，
+ * 其中缓冲区大小为1个single-step,并且更大的大小通常允许更有效的overlapped处理，
+ * 和更少的通信, 比如，值为64,这会将未完成的请求总数保持在 32 到 64 之间。
+ * 因为给定 Flow.Subscription 的订阅者方法调用是严格排序的，
+ * 除非订阅者维护多个订阅，否则这些方法不需要使用锁或易失性 
+ * （在这种情况下，最好定义多个订阅者，每个订阅者都有自己的订阅）。
  *
  * <pre> {@code
  * class SampleSubscriber<T> implements Subscriber<T> {
