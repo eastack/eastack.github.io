@@ -12,7 +12,8 @@ all:
 	    --attribute=icons=font \
 	    --attribute=toc-title=目录 \
 	    --attribute=nofooter \
-	    --require asciidoctor-diagram
+	    --require asciidoctor-diagram \
+	    --require asciidoctor-mathematical
 	@rm -rf \?
 
 clean:
