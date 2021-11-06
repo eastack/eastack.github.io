@@ -1,0 +1,30 @@
+= 通配符与子类型
+
+如范型，继承，子类型中所述，范型类或接口之间的关系不仅仅因为他们的类型之间存在关系。
+但是您可以使用通配符来创建范型类或接口之间的关系。
+
+给出以下两个常规（非范型）类：
+
+----
+class A { /* ... */ }
+class B extends A { /* ... */ }
+----
+
+编写一下代码是合理的
+
+----
+B b = new B();
+A a = b;
+----
+
+示例表明，常规类的继承对子类遵循如下规则：
+类B类A的子类型，如果B继承自A。
+此规则无法应用于范型类型：
+
+----
+List<B> lb = new ArrayList<>();
+List<A> la = lb; // compile-time error
+
+鉴于 Integer 是 Number 的子类型，List<Integer> 和 List<Number> 之间的关系是什么？ 
+虽然 Integer 是 Number 的子类型，但 List<Integer> 不是 List<Number> 的子类型，实际上这两种类型没有关系。 List<Number> 和 List<Integer> 的共同父项是 List<?>。
+

@@ -1,0 +1,172 @@
+= 范型类型
+
+一个范型类型是一个通过类型参数化的范型类或接口。
+
+== 一个简单的包装类型
+
+我们先来看一个对任何类型进行操作的非范型类 `Box` 。
+他只需要两个方法，一个 `set` 它将一个对象添加到box中，一个 `get` 它将之前设置的对象取回。
+
+[source, java]
+----
+public class Box {
+    private Object object;
+
+    public void set(Object object) { this.object = object; }
+    public Object get() { return object; }
+}
+----
+
+因为 `Box` 类的方法接收或返回一个 `Object` 所以你可以自由的传入任何你想要的东西，只要它不是原始类型之一。
+我们在编译时无法验证类的使用方式。
+一部分代码可能会在 `Box` 中存放一个 `Integer` 并期望从中取回一个 `Integer` ，但另一部分代码可能错误的传入了一个 `String` 从而导致运行时错误。
+
+== 范型版 `Box` 类
+
+范型类使用以下格式定义：
+
+[source, java]
+----
+class name<T1, T2, ..., Tn> { /* ... */ }
+----
+
+类型参数部分由尖括号（<>）分隔，跟在类名之后。
+其指定类型信息（又称类型变量）T1, T2,...,Tn。
+
+要更新 `Box` 类来使用范型，你可以通过将代码 `public class Box` 改为 `public class Box<T>` 来创建一个范型类型声明。
+这里引入了类型变量 `T` ，它可以在类中的任何地方使用。
+
+`Box` 随着改变， `Box` 将变为如下所示：
+
+[source, java]
+----
+/**
+ * Generic version of the Box class.
+ * @param <T> the type of the value being boxed
+ */
+public class Box<T> {
+    // T stands for "Type"
+    private T t;
+
+    public void set(T t) { this.t = t; }
+    public T get() { return t; }
+}
+----
+
+如你所见，所有的Object出现的地方都被T代替。
+类型变量可以是你指定的任何非原始类型：任何接口类型，数组类型，甚至另一个类型变量。
+
+同样的技术可以用来创建通用接口。
+
+== 类型参数命名规范
+
+按照惯例，类型参素名称是单个大写字母。
+这和你已经知道的命名规范形成鲜明对比，并且这有充分的理由：
+如果没有这个规范，将很难将类型变量和普通的类或接口名进行区分。
+
+最常用的类型参数名称是：
+
+* E - Element(元素，被Java集合框架广泛使用)
+* K - Key
+* N - Number
+* T - Type
+* V - Value
+* S,U,V etc. - 2nd, 3rd, 4th types
+
+你将会在Java SE API和本课程的其余部分中看到这些名称。
+
+== 调用和实例化范型类型
+
+要从您的代码中使用范型 `Box` 类你必须执行范型类型调用，其将 `T` 替换为一些具体的值，比如 `Integer` ：
+
+[source, java]
+----
+Box<Integer> integerBox;
+----
+
+你可以将范型类型调用视为普通方法调用，但不是将参数传递给方法，而是将类型参数（在本里中为 Integer）传递给 Box 类本身。
+
+NOTE::
+术语 “Type Parameter" 和 “Type Argument”：许多开发人员交替使用术语 "type parameter" 和 "type argument" ，但这这两个术语并不相同。
+当编码时，我们提供一个类型参数(type augument)，来创建一个参数化类型(parameterized type)。
+因此， `Foo<T>` 中的 `T` 是一个类型参数（type parameter）而在 `Foo<String> f` 中 `String` 是一个类型参数（type arguamen）。本课程在使用这些术语时遵守此定义。
+
+和其他任何变量声明一样，这段代码并没有创建新的 Box 对象。
+它只是简单的声明了 integerBox 将会保存对 “Box of Integer” 的引用，这是 `Box<Integer>的阅读方式。
+
+范型类型调用通常称为参数化类型。
+
+To instantiate this class, use the new keyword, as usual, but place <Integer> between the class name and the parenthesis:
+要实例化这个类，可以使用 `new` 关键字，但将 `<Integer>` 放在类名和括号之间。
+
+[source, java]
+----
+Box<Integer> integerBox = new Box<Integer>();
+----
+
+== 钻石符
+
+在Java SE 7及之后的版本中，只要编译器可以在上下文中确定或推断出类型参数，你就可以将调用范型类的构造函数所需的类型参数替换为空的类型参数集（<>）。
+这对尖括号被非正式的称为钻石符。
+比如，你可以使用下列语句创建 `Box<Integer>` 的实例：
+[source, java]
+----
+Box<Integer> integerBox = new Box<>();
+----
+
+关于钻石符和类型推断的更多信息，请参阅 https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html[类型推断]。
+
+== 多个类型参数
+
+如之前所述，一个范型类型可以拥有多个类型参数。
+比如，范型类 `OrderPair` ，他实现了范型 `Pair` 接口：
+
+[source, java]
+----
+public interface Pair<K, V> {
+	public K getKey();
+	public V getValue();
+}
+
+public class OrderedPair<K, V> implements Pair<K,V> {
+	private K key;
+	private V value;
+
+	public OrderedPair(K key, V value) {
+		this.key = key;
+		this.value = value;
+	}
+
+	public K getKey() {return key;}
+	public K getValue() {return value;}
+}
+----
+
+下面的语句创建了两个 `OrderedPair` 类的实例：
+
+[source, java]
+----
+Pair<String, Integer> p1 = new OrderedPair<String, Integer>("Even", 8);
+Pair<String, String> p1 = new OrderedPair<String, String>("hello", "world");
+----
+
+代码 `new OrderedPair<String, Integer>` 实例化 `K` 为 `String` 、 `V` 为 `Integer` 。
+因此， `OrderPair` 的构造函数的参数类型分别是 `String` 和 `Integer` 。
+由于自动装箱，将 `String` 和 `int` 传给此类是有效的。
+
+正如前面钻石符中提到的，因为Java编译器可以从OrderedPair<String, Integer> 声明中推断出 K 和 V 类型，所以可以使用钻石表示法缩短这些语句。
+
+OrderedPair<String, Integer> p1 = new OrderedPair<>("Even", 8);
+OrderedPair<String, String>  p2 = new OrderedPair<>("hello", "world");
+
+创建范型接口，遵循与创建范型类同样的约定。
+
+== 参数化类型
+
+你还可以使用参数化类型（如 List<String>这种类型) 替换类型参数（即 K 或者 V）。
+比如使用OrderedPair<K, V>举例：
+
+[source, java]
+----
+OrderedPair<String, Box<Integer>> p = new OrderedPair<>("primes", new Box<Integer>(...);
+----

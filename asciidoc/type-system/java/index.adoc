@@ -1,0 +1,29 @@
+= 范型
+
+----
+In any nontrivial software project, bugs are simply a fact of life.
+Careful planning, programming, and testing can help reduce their pervasiveness, but somehow, somewhere, they'll always find a way to creep into your code.
+This becomes especially apparent as new features are introduced and your code base grows in size and complexity.
+----
+
+在常见的软件项目中，错误难以避免。
+细心规划、编程和测试可以帮助我们减少 BUG 的存在，但无论如何，他们总有办法潜入你的代码中。
+特别是伴随着新功能的引入以及代码库大小和复杂性的增长，这一点变得越发明显。
+
+----
+Fortunately, some bugs are easier to detect than others.
+Compile-time bugs, for example, can be detected early on; you can use the compiler's error messages to figure out what the problem is and fix it, right then and there.
+Runtime bugs, however, can be much more problematic; they don't always surface immediately, and when they do, it may be at a point in the program that is far removed from the actual cause of the problem.
+----
+
+幸运的是，有些错误还是比较容易检测。
+比如编译器可以在早期发现编译错误;你可以通过编译器报错信息找出问题所在并立即修复它。
+但运行时错误回来更多问题;他们并不是立即显现出来，当他们出现时，可能已经与程序中问题实际原因想去甚远。
+
+----
+Generics add stability to your code by making more of your bugs detectable at compile time.
+After completing this lesson, you may want to follow up with the Generics tutorial by Gilad Bracha.
+----
+
+范型通过在编译时检测更多问题来增加代码的稳定性。
+完成本课程后，你可能希望继续学习 Gilad Bracha 的范型教程。

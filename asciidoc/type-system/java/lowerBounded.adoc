@@ -1,0 +1,28 @@
+= 下界通配符
+
+上界通配符那一节展示了上界通配符限制未知类型为特定类型或该类型的子类，并通过 `extends` 关键字表示。
+通过类似的方式，一个下界通配符限制未知类型到一个特定类型或该类型的超类。
+
+下界通配符使用通配符（'?'）表示，之后跟 super 关键字，再之后是下限。
+
+NOTE::
+你可以为通配符指定一个上界，或指定一个下界，但两者不能共存。
+
+假设你要编写一个将Integer对象放入列表的方法。
+为了最大化灵活度，你希望此方法可以操作， `List<Integer>` `List<Number>` `List<Object>` 任何可以存储 `Integer` 值的东西。
+
+要编写适用于 `Integer` 以及 `Integer` 超类(如Integer,Number,Object)列表的方法，你需要指定 `List<? super Integer>` 。
+
+术语 `List<Integer>` 比 `List<? super Integer>` 更加受限因为前者只匹配一个Integer列表，而后面的则匹配一个任何是Integer超类的列表。
+
+下列代码添加数字1-10到列表末尾：
+[source, java]
+----
+public static void addNumbers(List<? super Integer> list) {
+    for (int i = 1; i <= 10; i++) {
+        list.add(i);
+    }
+}
+----
+
+通配符使用指南部分提供了有关何时使用上限通配符以及何时使用下限通配符的指南。

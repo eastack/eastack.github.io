@@ -1,0 +1,49 @@
+= 通配符
+
+无界通配类型使用通配符（?）表示，比如 `List<?>` 这称为 *未知类型* 列表。
+
+在下面两种场景中无界通配符是一种有用的方法：
+
+* 如果你写了一个方法，而这个方法使用了 `Objects` 类的功能。
+* 当使用的范型类方法不依赖类型参数时。例如， `List.size` 或 `List.clear` 。
+事实上， `Class<?>` 如此常用就是因为 `Class<T>` 中的大多数方法都不依赖于 `T` 。
+
+考虑如下方法， *printList* ：
+
+[source, java]
+----
+public static void printList(List<Object> list) {
+    for (Object elem : list)
+        System.out.println(elem + " ");
+    System.out.println();
+}
+----
+
+*printList* 方法的目的是用来输出任意类型的列表，但它未能实现这一目标--
+它只能输出 `Object` 实例的列表;
+它没法输出 `List<Integer>` , `List<String>` , `List<Double>` 等等，因为他们都不是 `List<Object>` 的子类型。
+要编写范型 `printList` 方法，请使用 `List<?>` 。
+
+[source, java]
+----
+public static void printList(List<?> list) {
+    for (Object elem: list)
+        System.out.print(elem + " ");
+    System.out.println();
+}
+----
+
+因为对于任何具体类型 *A* ， `List<A>` 是 `List<?>` 的子类型，你可以使用 `printList` 输出任意类型的列表：
+
+[source, java]
+----
+List<Integer> li = Arrays.asList(1, 2, 3);
+List<String>  ls = Arrays.asList("one", "two", "three");
+printList(li);
+printList(ls);
+----
+
+有一点很重要需要注意， `List<Object>` 和 `List<?>` 是不一样的。
+你可以插入一个 `Object` 或任何 `Object` 的子类型到 `List<Object>` 。
+但你只能插入 `null` 到一个 `List<?>` 中。
+通配符使用指南部分为在什么情况下使用什么通配符提供了更多信息。
