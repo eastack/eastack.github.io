@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
-<title>Web Site</title>
+<title>范型类型</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,224 +441,249 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
+<h1>范型类型</h1>
 </div>
 <div id="content">
-<div class="sect1">
-<h2 id="_web_site">Web Site</h2>
+<div id="preamble">
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p><a href="http://www.simplecloud.info/">SCIM</a></p>
-</li>
-<li>
-<p><a href="https://12factor.net/zh_cn/">12 Factor</a></p>
-</li>
-<li>
-<p><a href="https://semver.org/lang/zh-CN/">Semantic Versioning</a></p>
-</li>
-<li>
-<p><a href="http://httpbin.org/">一个简单的HTTP请求响应服务器</a></p>
-</li>
-<li>
-<p><a href="http://httpbin.org/forms/post">将HTML表单提交到/post</a></p>
-</li>
-<li>
-<p><a href="https://ietf.org/">IETF</a></p>
-</li>
-<li>
-<p><a href="https://tools.ietf.org/html/rfc6570">URL Template</a></p>
-</li>
-<li>
-<p><a href="https://shields.io/">shields.io</a></p>
-</li>
-<li>
-<p><a href="https://tls.ulfheim.net/">The Illustrated TLS Connection: Every Byte Explained</a></p>
-</li>
-<li>
-<p><a href="https://refspecs.linuxfoundation.org/">Linux Foundation Referenced Specifications</a></p>
-</li>
-<li>
-<p><a href="https://refspecs.linuxfoundation.org/fhs.shtml">FHS Referenced Specifications</a></p>
-</li>
-<li>
-<p><a href="http://tinyhttpd.sourceforge.net/">Tiny HTTPd</a></p>
-</li>
-<li>
-<p><a href="https://docs.ansible.com/ansible/2.3/playbooks_best_practices.html">Playbooks Best Practices</a></p>
-</li>
-</ul>
+<div class="paragraph">
+<p>一个范型类型是一个通过类型参数化的范型类或接口。</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_blog">Blog</h2>
+<h2 id="_一个简单的包装类型">一个简单的包装类型</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>我们先来看一个对任何类型进行操作的非范型类 <code>Box</code> 。
+他只需要两个方法，一个 <code>set</code> 它将一个对象添加到box中，一个 <code>get</code> 它将之前设置的对象取回。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Box {
+    private Object object;
+
+    public void set(Object object) { this.object = object; }
+    public Object get() { return object; }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>因为 <code>Box</code> 类的方法接收或返回一个 <code>Object</code> 所以你可以自由的传入任何你想要的东西，只要它不是原始类型之一。
+我们在编译时无法验证类的使用方式。
+一部分代码可能会在 <code>Box</code> 中存放一个 <code>Integer</code> 并期望从中取回一个 <code>Integer</code> ，但另一部分代码可能错误的传入了一个 <code>String</code> 从而导致运行时错误。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_范型版_box_类">范型版 <code>Box</code> 类</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>范型类使用以下格式定义：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">class name&lt;T1, T2, ..., Tn&gt; { /* ... */ }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>类型参数部分由尖括号（&lt;&gt;）分隔，跟在类名之后。
+其指定类型信息（又称类型变量）T1, T2,&#8230;&#8203;,Tn。</p>
+</div>
+<div class="paragraph">
+<p>要更新 <code>Box</code> 类来使用范型，你可以通过将代码 <code>public class Box</code> 改为 <code>public class Box&lt;T&gt;</code> 来创建一个范型类型声明。
+这里引入了类型变量 <code>T</code> ，它可以在类中的任何地方使用。</p>
+</div>
+<div class="paragraph">
+<p><code>Box</code> 随着改变， <code>Box</code> 将变为如下所示：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/**
+ * Generic version of the Box class.
+ * @param &lt;T&gt; the type of the value being boxed
+ */
+public class Box&lt;T&gt; {
+    // T stands for "Type"
+    private T t;
+
+    public void set(T t) { this.t = t; }
+    public T get() { return t; }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如你所见，所有的Object出现的地方都被T代替。
+类型变量可以是你指定的任何非原始类型：任何接口类型，数组类型，甚至另一个类型变量。</p>
+</div>
+<div class="paragraph">
+<p>同样的技术可以用来创建通用接口。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_类型参数命名规范">类型参数命名规范</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>按照惯例，类型参素名称是单个大写字母。
+这和你已经知道的命名规范形成鲜明对比，并且这有充分的理由：
+如果没有这个规范，将很难将类型变量和普通的类或接口名进行区分。</p>
+</div>
+<div class="paragraph">
+<p>最常用的类型参数名称是：</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://draveness.me/">draveness</a></p>
+<p>E - Element(元素，被Java集合框架广泛使用)</p>
 </li>
 <li>
-<p><a href="http://einverne.github.io/">Verne in GitHub | Verne in GitHub</a></p>
+<p>K - Key</p>
 </li>
 <li>
-<p><a href="https://www.ssldragon.com/blog/">ssldragon</a></p>
+<p>N - Number</p>
 </li>
 <li>
-<p><a href="https://sealyun.com/">sealyun</a></p>
+<p>T - Type</p>
 </li>
 <li>
-<p><a href="https://ezlippi.com/">EZlippi</a></p>
+<p>V - Value</p>
 </li>
 <li>
-<p><a href="http://bartaz.github.io/ieee754-visualization/">Bartaz</a></p>
-</li>
-<li>
-<p><a href="http://www.ruanyifeng.com/">阮一峰的个人网站</a></p>
-</li>
-<li>
-<p><a href="https://coolshell.cn/">CoolShell</a></p>
-</li>
-<li>
-<p><a href="http://blog.yanick.site/">Yanick</a></p>
-</li>
-<li>
-<p><a href="https://pinout.xyz/">Pinout</a></p>
-</li>
-<li>
-<p><a href="https://www.servicemesher.com/">Service Measher</a></p>
-</li>
-<li>
-<p><a href="https://gpiozero.readthedocs.io">GPIO Zero</a></p>
-</li>
-<li>
-<p><a href="https://im.dingtalk.com/">DingDing</a></p>
-</li>
-<li>
-<p><a href="https://github.com/aisuhua/restful-api-design-references">RESTful API Design References</a></p>
-</li>
-<li>
-<p><a href="https://tech.meituan.com/">美团技术团队</a></p>
-</li>
-<li>
-<p><a href="https://xz.aliyun.com/">先知社区</a></p>
-</li>
-<li>
-<p><a href="https://mustache.github.io/">Mustache</a></p>
-</li>
-<li>
-<p><a href="https://handlebarsjs.com/">Handlebarsjs</a></p>
-</li>
-<li>
-<p><a href="https://osdn.net/">Handlebarsjs</a></p>
-</li>
-<li>
-<p><a href="https://www.baeldung.com/jdbc-database-metadata">JDBC Database Metadata</a></p>
-</li>
-<li>
-<p><a href="https://www.bookstack.cn/read/sdn-handbook/linux-config.md">Linux SDN</a></p>
-</li>
-<li>
-<p><a href="https://www.baeldung.com/java-spi">Java SPI</a></p>
-</li>
-<li>
-<p><a href="https://www.tinc-vpn.org/">Tinc</a></p>
-</li>
-<li>
-<p><a href="https://fastzhong.com/posts/k8s-install-thw/#%e5%ae%89%e8%a3%85%e5%92%8c%e9%85%8d%e7%bd%ae-kubectl">k8s install</a></p>
-</li>
-<li>
-<p><a href="https://ssl-config.mozilla.org/">ssl-config.mozilla.org</a></p>
-</li>
-<li>
-<p><a href="https://blog.gmem.cc/">green memory</a></p>
-</li>
-<li>
-<p><a href="https://restfulapi.net/">restfulapi.net</a></p>
-</li>
-<li>
-<p><a href="https://yourbasic.org/">Algorithms to Go</a></p>
-</li>
-<li>
-<p><a href="https://biot.com/capstats/bpf.html">Berkeley Packet Filter (BPF) syntax</a></p>
-</li>
-<li>
-<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status">Http Status Code</a></p>
-</li>
-<li>
-<p><a href="https://www.dzssj.com/">电子书世界</a></p>
-</li>
-<li>
-<p><a href="https://itbox.cc/">itbox</a></p>
-</li>
-<li>
-<p><a href="https://learnxinyminutes.com/">Learn X in Y minutes</a></p>
-</li>
-<li>
-<p><a href="https://blog.lilydjwg.me/">依云</a></p>
-</li>
-<li>
-<p><a href="https://www.zx2c4.com/">zx2c4</a></p>
-</li>
-<li>
-<p><a href="https://web.archive.org/">Web Archive</a></p>
-</li>
-<li>
-<p><a href="https://gowebexamples.com/">Go Web Examples</a></p>
-</li>
-<li>
-<p><a href="https://www.reactivemanifesto.org/">响应式宣言</a></p>
-</li>
-<li>
-<p><a href="https://www.cnkirito.moe/">响应式宣言</a></p>
-</li>
-<li>
-<p><a href="https://clericpy.github.io/blog/">响应式宣言</a></p>
-</li>
-<li>
-<p><a href="http://headsalon.org/">海德沙龙</a></p>
-</li>
-<li>
-<p><a href="https://www.2n.pl/">2n.pl</a></p>
-</li>
-<li>
-<p><a href="https://microsoft.github.io/debug-adapter-protocol/">DAP</a></p>
-</li>
-<li>
-<p><a href="https://microsoft.github.io/language-server-protocol/">LSP</a></p>
-</li>
-<li>
-<p><a href="https://www.lvaohui.top/">lvaohui</a></p>
-</li>
-<li>
-<p><a href="https://martinfowler.com/">Martin Fowler</a></p>
-</li>
-<li>
-<p><a href="https://www.ipify.org/">ipify</a></p>
-</li>
-<li>
-<p><a href="https://blog.desgran.ge/post/emoji-on-linux/">一篇文章治好了我的ohmyarch emoji显示问题</a></p>
-</li>
-<li>
-<p><a href="https://blog.desgran.ge/post/emoji-on-linux/">Openssl 证书链校验</a></p>
-</li>
-<li>
-<p><a href="https://iambowen.gitbooks.io/cloud-design-pattern/content/">Cloud Design Pattern</a></p>
-</li>
-<li>
-<p><a href="https://jimmysong.io/">Jimmy Song</a></p>
-</li>
-<li>
-<p><a href="https://www.chungkwong.cc/">Chung Kwong</a></p>
-</li>
-<li>
-<p><a href="https://www.cnblogs.com/whaozl/p/5462865.html">正则表达式分组</a></p>
-</li>
-<li>
-<p><a href="https://www.cnblogs.com/symbol441/articles/957950.html">正则表达式分组</a></p>
+<p>S,U,V etc. - 2nd, 3rd, 4th types</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>你将会在Java SE API和本课程的其余部分中看到这些名称。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_调用和实例化范型类型">调用和实例化范型类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>要从您的代码中使用范型 <code>Box</code> 类你必须执行范型类型调用，其将 <code>T</code> 替换为一些具体的值，比如 <code>Integer</code> ：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Box&lt;Integer&gt; integerBox;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>你可以将范型类型调用视为普通方法调用，但不是将参数传递给方法，而是将类型参数（在本里中为 Integer）传递给 Box 类本身。</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>术语 “Type Parameter" 和 “Type Argument”：许多开发人员交替使用术语 "type parameter" 和 "type argument" ，但这这两个术语并不相同。
+当编码时，我们提供一个类型参数(type augument)，来创建一个参数化类型(parameterized type)。
+因此， <code>Foo&lt;T&gt;</code> 中的 <code>T</code> 是一个类型参数（type parameter）而在 <code>Foo&lt;String&gt; f</code> 中 <code>String</code> 是一个类型参数（type arguamen）。本课程在使用这些术语时遵守此定义。</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>和其他任何变量声明一样，这段代码并没有创建新的 Box 对象。
+它只是简单的声明了 integerBox 将会保存对 “Box of Integer” 的引用，这是 `Box&lt;Integer&gt;的阅读方式。</p>
+</div>
+<div class="paragraph">
+<p>范型类型调用通常称为参数化类型。</p>
+</div>
+<div class="paragraph">
+<p>To instantiate this class, use the new keyword, as usual, but place &lt;Integer&gt; between the class name and the parenthesis:
+要实例化这个类，可以使用 <code>new</code> 关键字，但将 <code>&lt;Integer&gt;</code> 放在类名和括号之间。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Box&lt;Integer&gt; integerBox = new Box&lt;Integer&gt;();</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_钻石符">钻石符</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>在Java SE 7及之后的版本中，只要编译器可以在上下文中确定或推断出类型参数，你就可以将调用范型类的构造函数所需的类型参数替换为空的类型参数集（&lt;&gt;）。
+这对尖括号被非正式的称为钻石符。
+比如，你可以使用下列语句创建 <code>Box&lt;Integer&gt;</code> 的实例：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Box&lt;Integer&gt; integerBox = new Box&lt;&gt;();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>关于钻石符和类型推断的更多信息，请参阅 <a href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html">类型推断</a>。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_多个类型参数">多个类型参数</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>如之前所述，一个范型类型可以拥有多个类型参数。
+比如，范型类 <code>OrderPair</code> ，他实现了范型 <code>Pair</code> 接口：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface Pair&lt;K, V&gt; {
+	public K getKey();
+	public V getValue();
+}
+
+public class OrderedPair&lt;K, V&gt; implements Pair&lt;K,V&gt; {
+	private K key;
+	private V value;
+
+	public OrderedPair(K key, V value) {
+		this.key = key;
+		this.value = value;
+	}
+
+	public K getKey() {return key;}
+	public K getValue() {return value;}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>下面的语句创建了两个 <code>OrderedPair</code> 类的实例：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Pair&lt;String, Integer&gt; p1 = new OrderedPair&lt;String, Integer&gt;("Even", 8);
+Pair&lt;String, String&gt; p1 = new OrderedPair&lt;String, String&gt;("hello", "world");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>代码 <code>new OrderedPair&lt;String, Integer&gt;</code> 实例化 <code>K</code> 为 <code>String</code> 、 <code>V</code> 为 <code>Integer</code> 。
+因此， <code>OrderPair</code> 的构造函数的参数类型分别是 <code>String</code> 和 <code>Integer</code> 。
+由于自动装箱，将 <code>String</code> 和 <code>int</code> 传给此类是有效的。</p>
+</div>
+<div class="paragraph">
+<p>正如前面钻石符中提到的，因为Java编译器可以从OrderedPair&lt;String, Integer&gt; 声明中推断出 K 和 V 类型，所以可以使用钻石表示法缩短这些语句。</p>
+</div>
+<div class="paragraph">
+<p>OrderedPair&lt;String, Integer&gt; p1 = new OrderedPair&lt;&gt;("Even", 8);
+OrderedPair&lt;String, String&gt;  p2 = new OrderedPair&lt;&gt;("hello", "world");</p>
+</div>
+<div class="paragraph">
+<p>创建范型接口，遵循与创建范型类同样的约定。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参数化类型">参数化类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>你还可以使用参数化类型（如 List&lt;String&gt;这种类型) 替换类型参数（即 K 或者 V）。
+比如使用OrderedPair&lt;K, V&gt;举例：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">OrderedPair&lt;String, Box&lt;Integer&gt;&gt; p = new OrderedPair&lt;&gt;("primes", new Box&lt;Integer&gt;(...);</code></pre>
+</div>
 </div>
 </div>
 </div>
