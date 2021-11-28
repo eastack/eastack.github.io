@@ -1,0 +1,5 @@
+= 下载镜像
+
+可以在 https://www.raspberrypi.com/software/[这里] 获得镜像的下载方式。
+然后我这里选择 https://www.raspberrypi.com/software/operating-systems/[手动下载]。
+

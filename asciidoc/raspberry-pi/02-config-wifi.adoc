@@ -1,14 +1,33 @@
 = 配置树梅派WIFI
 
-1. 使用 `wpa_passphrase` 生成 `wpa_supplicant` 配置
+== 生成配置所需的PSK
+
+首先我们要
+
+1. 使用 `wpa_passphrase` 命令生成 `wpa_supplicant` 配置
 +
 [source, bash]
 ----
-# wpa_passphrase <ssid> [passphrase]
+# wpa_passphrase 你的WIFI 你的WIFI密码
 wpa_passphrase ipool wodemima
 ----
 +
 2. 将生成结果添加到 `/boot/wpa_supplicant.conf` 文件中
+[source, plantext]
++
+.format
+----
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=CN
+
+network={
+	ssid="<你的WIFI名称>"
+	psk="<生成的PSK>"
+}
+----
++
+.example
 [source, plantext]
 +
 ----
@@ -17,13 +36,7 @@ update_config=1
 country=CN
 
 network={
-	ssid="iPool_2G"
-	psk="074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0"
-}
-
-network={
 	ssid="iPool"
 	psk="074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0"
 }
 ----
-
