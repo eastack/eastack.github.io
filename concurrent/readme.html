@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
-<title>Inspire</title>
+<title>并发</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,194 +441,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Inspire</h1>
+<h1>并发</h1>
 </div>
 <div id="content">
-<div id="preamble">
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>简单的普适规则演化出繁杂的表象，抓住根本才能游刃有余</p>
-</li>
-<li>
-<p>掌握知识和概念，为你所用，而不是被束缚</p>
-</li>
-<li>
-<p>环境很重要，要主动改变，创造环境</p>
-</li>
-<li>
-<p>沉淀</p>
-</li>
-<li>
-<p>度-艺术</p>
-</li>
-<li>
-<p>区分功能和业务，共能框架/规范提供，业务自己实现</p>
-</li>
-<li>
-<p>什么？要扩展性？那提高一个抽象的 level 试试</p>
-</li>
-<li>
-<p>信息差，价值</p>
-</li>
-<li>
-<p>幸福的家庭都是相似的，不幸的家庭各有各的不幸，就像200，和其他状态码一样</p>
-</li>
-<li>
-<p>人们的时间流向了何处</p>
-</li>
-<li>
-<p>尽量不偷懒，该怎么做就怎么做</p>
-</li>
-<li>
-<p>貌似很多东西都讲究要易读</p>
-</li>
-<li>
-<p>每一层有每一层的优雅</p>
-</li>
-<li>
-<p>度还是度，是从所有数据源到所有模板还是，从openapi.yaml到api.mustache，是从自由命名，还是到规范命名。</p>
-</li>
-<li>
-<p>email is good. rss is good.</p>
-</li>
-<li>
-<p>have structed data, select and operation it</p>
-</li>
-<li>
-<p>try focus data flow, focus data</p>
-</li>
-<li>
-<p>在解决问题时避免出现模糊不清的点，二分查找如果不能确保数组有序，那&#8230;&#8203;</p>
-</li>
-<li>
-<p>掌握生活节奏</p>
-</li>
-<li>
-<p>selector + actuator + variable</p>
-</li>
-<li>
-<p>有趣，思考一件事站在不同的位置，对人的影响很大</p>
-</li>
-<li>
-<p>谦逊一些，碰见新事物时不要想得太简单了，否则你会事半工倍而不是事倍工半</p>
-</li>
-<li>
-<p>软件主动查找插件，提供扩展目录，或其他接口</p>
-</li>
-<li>
-<p>一切自动化的检查都值得</p>
-</li>
-<li>
-<p>懒是一种美德</p>
-</li>
-<li>
-<p>业务架构、技术架构、组织架构</p>
-</li>
-<li>
-<p>模式演变而来，大型网站也是</p>
-</li>
-<li>
-<p>词典管理</p>
-</li>
-<li>
-<p>文档管理</p>
-</li>
-<li>
-<p>同步的本质&#8212;&#8203;实现临界区的互斥性</p>
-</li>
-<li>
-<p>把思维的惯性停下来，思考问题的本质</p>
-</li>
-<li>
-<p>同名类不同包最TMD坑</p>
-</li>
-<li>
-<p>思考本来应该如何，而不是可以如何</p>
-</li>
-<li>
-<p>系统设计不可，空想，结合实际需求，和未来规划，确定数据量，并发量，等。</p>
-</li>
-<li>
-<p>复杂对象的状态/变化，初期需要仔细的探讨和设计</p>
-</li>
-<li>
-<p>10个只有单一功能的接口，要比1个有10种功能的接口好</p>
-</li>
-<li>
-<p>与其他端进行交互时某些字段的格式选择尤为重要，会对内部实现有一定影响(比如时间格式，类型格式)</p>
-</li>
-<li>
-<p>复杂状态如何表示，比如订单的状态同时与退货单，过期时间，支付状态的关联</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_编程范式paradigm">编程范式(Paradigm)</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>函数式
-过程式
-面向对象
-响应式
-面向切面</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_概念concept">概念（concept）</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>范型
-反射
-协程
-线程
-迭代（iteration）
-闭包
-匿名函数</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_cicd">CI/CD</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>做了什么？</p>
+<p>并发会导致，</p>
 </div>
 <div class="paragraph">
-<p>Operation repeatable ?</p>
-</div>
-<div class="paragraph">
-<p>一个事件&#8594;触发随后的一系列操作</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_常见思路">常见思路</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>池化 &#8594; 复用
-分片</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_同步异步和阻塞与非阻塞">同步/异步和阻塞与非阻塞</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<div class="title">同步阻塞</div>
-<p>API: read, write
-在调用后当前进程等待(同步)，当内核准备好数据后将数据复制到进程中时，进程阻塞</p>
-</div>
-<div class="paragraph">
-<div class="title">同步非阻塞</div>
-<p>API: write, read + poll / select
-在调用后直接返回</p>
-</div>
-</div>
+<p>共享数据
+被
+并发修改</p>
 </div>
 </div>
 <script src="/.highlightjs/highlight.min.js"></script>
