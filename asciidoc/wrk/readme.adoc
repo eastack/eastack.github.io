@@ -1,0 +1,27 @@
+= wrk2
+
+[source, bash]
+----
+git clone https://github.com/giltene/wrk2.git
+----
+
+[source, bash]
+----
+make
+----
+
+[source, bash]
+----
+./wrk -t 8   \#<1>
+      -c 100 \#<2>
+      -R 50  \#<3>
+      -d 30s \#<4>
+      -H 'X-UserId: 10086' \#<5>
+      http://localhost:8001/users/me #<6>
+----
+<1> 使用线程数
+<2> 每秒产生的连接数
+<3> 每秒重复操作数
+<4> 持续时间
+<5> 自定义HTTP头
+<6> 接口地址

@@ -1,0 +1,19 @@
+= JSR-133: Java内存模型与线程规范
+
+此文档是JSR-133规范，Java内存模型（JMM）和线程规范提议的最终拟定版本。
+此规范意图成为JSR-176（Java release 1.5 Tiger）的一部分，并打算替换掉Java语言规范第17章及Java虚拟机规范第8章。
+当前文档已被编写为实用于以上两者，最终版本将包含两个不同的版本，语义本质上是相同的，但会对每个版本使用恰当的术语。
+此规范的讨论与开发异常详尽且具技术性，涉及许多学术主题的见解和进展。
+This discussion is archived (and continues) at the JMM web site.
+此讨论已存档（并继续）在JMM网站上。
+此网站提供了额外信息，可以帮助理解该规范是如何得出的; 其托管在这里[http://www.cs.umd.edu/~pugh/java/memoryModel]
+核心术语（4-7小节）意在描述JVM允许的语义。
+JLS和JVMS现有部分章节指定了与许多现有JVM执行优化不一致的语义。
+此提案的核心语义不应该对现有JVM实现造成问题，尽管其可能会对未来的优化和实现带来限制。
+The major change since the public review period is the new formalism for expressing the semantics.
+This only codifies the previous behavior described in previous versions of the specifications.
+Readers are urged to examine closely the semantics on final fields (Sections 3.5 and 9).
+This is the one place most likely to require JVM implementors to change their implementation
+to be compliant with JSR-133. In particular, memory barriers or other techniques may be
+required to ensure that other threads see the correct values for final fields of immutable
+objects, even in the presence of data races.
