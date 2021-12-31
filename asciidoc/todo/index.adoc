@@ -8,7 +8,7 @@
 * [ ] asciidoc写PPT
 * [ ] 录点视频教程
 * [ ] 搞定openapi generate
-* [ ] vault实现pki管理
+* [x] vault实现pki管理
 * [ ] tinc
 * [ ] SDN
 * [ ] Lua
@@ -73,3 +73,5 @@
 * [ ] 函数式编程语言
 * [ ] wasm
 * [ ] javascrip es module
+* [ ] 前端（布局、动画、路由、网络、H5）
+* [ ] 订单和状态模式

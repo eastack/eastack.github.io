@@ -11,3 +11,8 @@
 == try_files
 
 顾名思义，逐个尝试多个文件，可以有变量，为nginx内部转发。
+
+== Links
+
+https://github.com/nginx/nginx[Github Source Code]
+http://tengine.taobao.org/book/[tengine book]

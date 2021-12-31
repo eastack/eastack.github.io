@@ -1,0 +1,6 @@
+= Scala
+
+https://glavo.gitbooks.io/dotty/content/
+https://dotty-china.com/
+https://dotty.epfl.ch/
+https://scastie.scala-lang.org
