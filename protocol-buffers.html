@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
-<title>Temporary</title>
+<title>Protocol Buffers</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -438,36 +438,208 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/.highlightjs/styles/github.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-right">
 <div id="header">
-<h1>Temporary</h1>
+<h1>Protocol Buffers</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_定义一个消息类型">定义一个消息类型</a></li>
+<li><a href="#_指定字段类型">指定字段类型</a></li>
+<li><a href="#_分配字段编号">分配字段编号</a></li>
+<li><a href="#_指定字段规则">指定字段规则</a></li>
+<li><a href="#_添加更多消息类型">添加更多消息类型</a></li>
+<li><a href="#_添加注释">添加注释</a></li>
+<li><a href="#_保留字段">保留字段</a></li>
+<li><a href="#_你的_proto_文件生成了什么">你的 <code>.proto</code> 文件生成了什么</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+Protocol buffers are a language-neutral, platform-neutral extensible mechanism for serializing structured data.
+</blockquote>
+<div class="attribution">
+&#8212; https://developers.google.com/protocol-buffers
+</div>
+</div>
+<div class="paragraph">
+<p>本指南讲解了如何使用 Protocol Buffer 语言来构造你的 Protocol Buffer 数据，包含 <code>.proto</code> 文件语法以及如何从你的 <code>.proto</code> 文件生成数据访问类。</p>
+</div>
+<div class="paragraph">
+<p>这是一个参考指南 —— 关于一个使用本文档中介绍的许多特性的引导示例，参见你所选语言的对应 <a href="https://developers.google.com/protocol-buffers/docs/tutorials">教程</a> 。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_定义一个消息类型">定义一个消息类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>首先我们看一个非常简单的示例。
+假如说你想定义一个搜索请求格式，每个搜索请求中包含一个 <em>查询字符串</em> ，搜索结果你感兴趣的 <em>页码</em> ，以及 <em>每页结果数</em> 。
+那么你可以使用下面这个 <code>.proto</code> 文件来定义你的消息类型。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-protobuf hljs" data-lang="protobuf">syntax = "proto3"
+
+message SearchRequest {
+	string query = 1;
+	int32 page_number = 2;
+	int32 result_per_page = 3;
+}</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>async and await</p>
+<p>文件中的第一行指定了你将使用 <code>proto3</code> 语法：如果你不添加这一行那么 Protocol Buffer 编译器将假设你要使用 <a href="https://developers.google.com/protocol-buffers/docs/proto">proto2</a>。
+而且必须是文件中第一个非空行并且非注释的行。</p>
 </li>
 <li>
-<p>yield and resume</p>
+<p><code>SearchRequest</code> 消息定义指定了三个字段（名/值对）,每一个字段表示你想要包含在消息中数据的一部分。
+每个字段都有名称和类型。</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_指定字段类型">指定字段类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>在上面的示例中，每个字段都是 <a href="https://developers.google.com/protocol-buffers/docs/proto3#scalar">标量类型</a>：两个整型（ <code>page_number</code> 和 <code>result_per_page</code> ）和一个字符串（ <code>query</code> ）。
+但你也可以为你的字段指定复合类型，包括枚举和其他消息类型。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_分配字段编号">分配字段编号</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>正如你所看到的，消息定义中的每个字段都有一个 <strong>唯一编号</strong> 。
+这些字段编号用来在 <a href="https://developers.google.com/protocol-buffers/docs/encoding">消息二进制格式</a> 中标识你的字段，并且当你的消息类型使用之后就不应再更改它们了。
+需要注意的是在范围 1 到 15 的字段编号编码时消耗 1 字节，其中包括字段编号和字段类型（你可以在 <a href="https://developers.google.com/protocol-buffers/docs/encoding#structure">Protocol Buffer 编码</a> 中得到更多相关信息）
+范围 16 到 2047 的字段号占用两个字节。
+所以你应该为非常频繁出现的字段保留 1 到 15 的字段编号。
+并且还要记得为未来可能频繁出现的元素留出一些空间。</p>
+</div>
+<div class="paragraph">
+<p>可以使用的最小字段编号是 1，最大是 2<sup>29</sup> - 1，或 5,3687,0911。
+另外你也不能使用 19000 到 19999 的编号（ <code>FieldDescriptor::kFirstReservedNumber</code> 到 <code>FieldDescriptor::kLastReservedNumber</code> ），因为他们是为 Protocol Buffers 实现保留的 —— 如果你在 <code>.proto</code> 文件中使用了其中任意编号编译器将报错。
+同样，你也不能使用之前 <a href="https://developers.google.com/protocol-buffers/docs/proto3#reserved">保留</a> 的字段编号。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_指定字段规则">指定字段规则</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>消息字段可以是以下两种之一：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>单一：一个符合语法的消息可以包含零个或一个此类字段（但是不能超过一个）。
+并且这是 <code>proto3</code> 默认的语法规则。</p>
 </li>
 <li>
-<p>Promise</p>
-</li>
-<li>
-<p>Coroutine</p>
-</li>
-<li>
-<p>LHS and RHS</p>
-</li>
-<li>
-<p>Iterators and generators</p>
+<p>重复（ <code>repeated</code> ）：这种字段在一个符合语法的消息中可以重复任意次（包括零次）。
+重复值的顺序将会被保留。</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<div class="title">执行下列代码时yield将会返回a的值，作为resume的返回值，待下次resume时将resume的值赋值给b，yield就像精神分裂一样</div>
-<p>local b = coroutine.yield(a)</p>
+<p>在 proto3 中，标量数字类型的重复（ <code>repeated</code> ）字段默认使用 <code>packed</code> 编码。
+你可以在 <a href="https://developers.google.com/protocol-buffers/docs/encoding#packed">Protocol Buffer Encoding</a> 找到更多 <code>packed</code> 编码的信息。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_添加更多消息类型">添加更多消息类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>多个消息类型可以定义在单个 <code>.proto</code> 文件中。
+如果你定义多个相关消息的话这非常有用 —— 比如，如果你想要定义 <code>SearchResponse</code> 消息类型对应的响应消息格式，你可以将其添加到同一个 <code>.proto</code> 文件中：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-protobuf hljs" data-lang="protobuf">message SearchRequest {
+	string query = 1;
+	int32 page_number = 2;
+	int32 result_per_page = 3;
+}
+
+message SearchResponse {
+ ...
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_添加注释">添加注释</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>要在你的 <code>.proto</code> 文件中添加注释，可以使用 C/C++ 风格的 <code>//</code> 和 <code>/**/</code> 语法。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-protobuf hljs" data-lang="protobuf">/* SearchRequest represents a search query, with pagination optionsto
+ * indicate wich results to include in the response. */
+
+ message SearchRequest {
+   string query = 1,
+   int32 page_number = 2;  // Which page number do we want?
+   int32 result_per_page = 3; // Number of results to return per page.
+ }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_保留字段">保留字段</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>如果你通过完全删除或注释掉某个字段来更新更新一个消息类型，未来的用户可以在对自己的类型进行更新后重新使用这个字段。
+如果他们以后再使用同一 <code>.proto</code> 文件的旧版本，会导致非常严重的问题，包括数据损坏，隐私问题等等。
+确保这种情况不会发生的一种方法是将你删掉的字段编号（和/或字段名，这会导致 JSON 序列化出现问题）指定为保留（ <code>reserved</code> ）字段。
+如果未来的任何用户尝试使用此字段标识，Protocol Buffer 编译器将会报错。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-protobuf hljs" data-lang="protobuf">message Foo {
+  reserved 2, 15, 9 to 11;
+  reserved "foo", "bar";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>注意你不能在同一个 <code>reserved</code> 语句中混用字段名称和字段编号。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_你的_proto_文件生成了什么">你的 <code>.proto</code> 文件生成了什么</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>当你使用 <a href="https://developers.google.com/protocol-buffers/docs/proto3#generating">Protocol Buffer 编译器</a> 编译 <code>.proto</code> 文件时，
+编译器将根据你选择的语言生成代码，你要使用文件中描述的消息类型，包括获取和设置字段的值、将消息序列化为输出流，以及从输入流中解析消息。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>对 <strong>C++</strong> 来说，编译器从每个 <code>.proto</code> 文件生成 <code>.h</code> 和 <code>.cc</code> 文件，并为文件中定义的每个消息类型提供一个类。</p>
+</li>
+<li>
+<p>对 <strong>Java</strong> 来说，编译器生成一个 <code>.java</code> 文件，其中包含每个消息类型的类，以及一个用来创建消息类实例的特殊 <code>Builder</code> 类。</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 <script src="/.highlightjs/highlight.min.js"></script>
