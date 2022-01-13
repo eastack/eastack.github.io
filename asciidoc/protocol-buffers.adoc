@@ -1,0 +1,119 @@
+= Protocol Buffers
+:toc: right
+
+[quote, https://developers.google.com/protocol-buffers]
+Protocol buffers are a language-neutral, platform-neutral extensible mechanism for serializing structured data.
+
+本指南讲解了如何使用 Protocol Buffer 语言来构造你的 Protocol Buffer 数据，包含 `.proto` 文件语法以及如何从你的 `.proto` 文件生成数据访问类。
+
+这是一个参考指南 —— 关于一个使用本文档中介绍的许多特性的引导示例，参见你所选语言的对应 https://developers.google.com/protocol-buffers/docs/tutorials[教程] 。
+
+== 定义一个消息类型
+
+首先我们看一个非常简单的示例。
+假如说你想定义一个搜索请求格式，每个搜索请求中包含一个 _查询字符串_ ，搜索结果你感兴趣的 _页码_ ，以及 _每页结果数_ 。
+那么你可以使用下面这个 `.proto` 文件来定义你的消息类型。
+
+[source,protobuf]
+----
+syntax = "proto3"
+
+message SearchRequest {
+	string query = 1;
+	int32 page_number = 2;
+	int32 result_per_page = 3;
+}
+----
+
+* 文件中的第一行指定了你将使用 `proto3` 语法：如果你不添加这一行那么 Protocol Buffer 编译器将假设你要使用 https://developers.google.com/protocol-buffers/docs/proto[proto2]。
+而且必须是文件中第一个非空行并且非注释的行。
+* `SearchRequest` 消息定义指定了三个字段（名/值对）,每一个字段表示你想要包含在消息中数据的一部分。
+每个字段都有名称和类型。
+
+== 指定字段类型
+
+在上面的示例中，每个字段都是 https://developers.google.com/protocol-buffers/docs/proto3#scalar[标量类型]：两个整型（ `page_number` 和 `result_per_page` ）和一个字符串（ `query` ）。
+但你也可以为你的字段指定复合类型，包括枚举和其他消息类型。
+
+== 分配字段编号
+
+正如你所看到的，消息定义中的每个字段都有一个 *唯一编号* 。
+这些字段编号用来在 https://developers.google.com/protocol-buffers/docs/encoding[消息二进制格式] 中标识你的字段，并且当你的消息类型使用之后就不应再更改它们了。
+需要注意的是在范围 1 到 15 的字段编号编码时消耗 1 字节，其中包括字段编号和字段类型（你可以在 https://developers.google.com/protocol-buffers/docs/encoding#structure[Protocol Buffer 编码] 中得到更多相关信息）
+范围 16 到 2047 的字段号占用两个字节。
+所以你应该为非常频繁出现的字段保留 1 到 15 的字段编号。
+并且还要记得为未来可能频繁出现的元素留出一些空间。
+
+可以使用的最小字段编号是 1，最大是 2^29^ - 1，或 5,3687,0911。 
+另外你也不能使用 19000 到 19999 的编号（ `FieldDescriptor::kFirstReservedNumber` 到 `FieldDescriptor::kLastReservedNumber` ），因为他们是为 Protocol Buffers 实现保留的 —— 如果你在 `.proto` 文件中使用了其中任意编号编译器将报错。
+同样，你也不能使用之前 https://developers.google.com/protocol-buffers/docs/proto3#reserved[保留] 的字段编号。
+
+== 指定字段规则
+
+消息字段可以是以下两种之一：
+
+* 单一：一个符合语法的消息可以包含零个或一个此类字段（但是不能超过一个）。
+并且这是 `proto3` 默认的语法规则。
+* 重复（ `repeated` ）：这种字段在一个符合语法的消息中可以重复任意次（包括零次）。
+重复值的顺序将会被保留。
+
+在 proto3 中，标量数字类型的重复（ `repeated` ）字段默认使用 `packed` 编码。
+你可以在 https://developers.google.com/protocol-buffers/docs/encoding#packed[Protocol Buffer Encoding] 找到更多 `packed` 编码的信息。
+
+== 添加更多消息类型
+
+多个消息类型可以定义在单个 `.proto` 文件中。
+如果你定义多个相关消息的话这非常有用 —— 比如，如果你想要定义 `SearchResponse` 消息类型对应的响应消息格式，你可以将其添加到同一个 `.proto` 文件中：
+
+[source, protobuf]
+----
+message SearchRequest {
+	string query = 1;
+	int32 page_number = 2;
+	int32 result_per_page = 3;
+}
+
+message SearchResponse {
+ ...
+}
+----
+
+== 添加注释
+
+要在你的 `.proto` 文件中添加注释，可以使用 C/C++ 风格的 `//` 和 `/**/` 语法。
+[source,protobuf]
+----
+/* SearchRequest represents a search query, with pagination optionsto
+ * indicate wich results to include in the response. */
+
+ message SearchRequest {
+   string query = 1,
+   int32 page_number = 2;  // Which page number do we want?
+   int32 result_per_page = 3; // Number of results to return per page.
+ }
+----
+
+== 保留字段
+
+如果你通过完全删除或注释掉某个字段来更新更新一个消息类型，未来的用户可以在对自己的类型进行更新后重新使用这个字段。
+如果他们以后再使用同一 `.proto` 文件的旧版本，会导致非常严重的问题，包括数据损坏，隐私问题等等。
+确保这种情况不会发生的一种方法是将你删掉的字段编号（和/或字段名，这会导致 JSON 序列化出现问题）指定为保留（ `reserved` ）字段。
+如果未来的任何用户尝试使用此字段标识，Protocol Buffer 编译器将会报错。
+
+[source, protobuf]
+----
+message Foo {
+  reserved 2, 15, 9 to 11;
+  reserved "foo", "bar";
+}
+----
+
+注意你不能在同一个 `reserved` 语句中混用字段名称和字段编号。
+
+== 你的 `.proto` 文件生成了什么
+
+当你使用 https://developers.google.com/protocol-buffers/docs/proto3#generating[Protocol Buffer 编译器] 编译 `.proto` 文件时，
+编译器将根据你选择的语言生成代码，你要使用文件中描述的消息类型，包括获取和设置字段的值、将消息序列化为输出流，以及从输入流中解析消息。
+
+* 对 *C++* 来说，编译器从每个 `.proto` 文件生成 `.h` 和 `.cc` 文件，并为文件中定义的每个消息类型提供一个类。
+* 对 *Java* 来说，编译器生成一个 `.java` 文件，其中包含每个消息类型的类，以及一个用来创建消息类实例的特殊 `Builder` 类。

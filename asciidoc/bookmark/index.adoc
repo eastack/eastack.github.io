@@ -147,4 +147,8 @@ https://gitlab.com/tijsg/swagger-template[Swagger Template - GitLab]
 
 * https://www.chungkwong.cc/[Chung Kwong]
 
+* https://sli.dev/[Slidev]
+
+* https://mermaid-js.github.io/[Mermaid]
+
 include::rust.adoc[]

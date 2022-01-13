@@ -139,3 +139,5 @@
 * https://my.oschina.net/superpdm/blog/129715[]
 
 * https://www.baeldung.com/java-annotation-processing-builder[]
+
+* https://juejin.cn/post/6870162226032934926[]

@@ -1,12 +1,12 @@
-= 配置树梅派
+= 配置树莓派
 :toc: right
-:description: 配置树梅派WIFI连接和开启SSH。 \ 
+:description: 配置树莓派WIFI连接和开启SSH。
 :keywords: raspberrypi, 配置, ssh, wifi
 
 
 == 系统下载与安装
 
-树梅派 https://www.raspberrypi.com/software/[官方] 很贴心的提供了Ubuntu、Windoes、MacOS下的镜安装工具，
+树莓派 https://www.raspberrypi.com/software/[官方] 很贴心的提供了Ubuntu、Windoes、MacOS下的镜安装工具，
 由于这里我使用的是ArchLinux所以不再对此过多赘述，我选择了手动下载镜像然后使用 `dd` 命令手动写入的方式。
 
 .下载完包含镜像的zip包后对其进行解压
@@ -15,8 +15,7 @@
 unar 2021-10-30-raspios-bullseye-armhf-lite.zip
 ----
 
-NOTE:: 这里需要注意一定要确保 `dd` 命令的 `of` 选项后所跟设备文件名准确无误后再摁下回车。
-否则在你一通行云流水的操作后，很可能随之而来的是后悔莫及。
+WARNING: 这里需要注意一定要确保 `dd` 命令的 `of` 选项后所跟设备文件名准确无误后再摁下回车。
 
 .之后插入内存卡将镜像写入
 [source, bash]
@@ -27,7 +26,7 @@ sudo dd if=2021-10-30-raspios-bullseye-armhf-lite.img of=/dev/sdb
 == 系统配置
 
 这里我并不想连接外接显示器，并且希望通过WIFI进行网络连接，
-所以直接挂载树梅派的 `boot` 分区进行相应配置。
+所以直接挂载树莓派的 `boot` 分区进行相应配置。
 
 详情可参考官方文档
 
@@ -52,7 +51,7 @@ sudo touch ssh
 
 === WIFI配置
 
-INFO:: 如果本机没有wpa_passphrase 命令可以到Wireshark提供的工具 https://www.wireshark.org/tools/wpa-psk.html[在线生成PSK]
+TIP: 如果本机没有wpa_passphrase 命令可以到Wireshark提供的工具 https://www.wireshark.org/tools/wpa-psk.html[在线生成PSK]
 
 .使用 `wpa_passphrase` 命令生成 `wpa_supplicant` 配置
 [source, bash]
@@ -87,6 +86,8 @@ network={
 sudo umount rpi
 ----
 
-之后把内存卡插到树梅派中接通电源开机，静静等待WIFI连接后即可以通过SSH连接树梅派了。
+之后把内存卡插到树莓派中接通电源开机，静静等待WIFI连接后即可以通过SSH连接树莓派了。
 
-NOTE:: 树梅派默认用户名为： *pi* 密码为： *raspberry* 。
+TIP: 树莓派默认用户信息如下： +
+用户名： *pi* +
+密码： *raspberry*

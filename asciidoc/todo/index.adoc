@@ -75,3 +75,8 @@
 * [ ] javascrip es module
 * [ ] 前端（布局、动画、路由、网络、H5）
 * [ ] 订单和状态模式
+* [ ] nc
+* [ ] rust-tokio
+* [ ] rust-serde
+* [ ] rust-rhai
+* [ ] rust-minijinja

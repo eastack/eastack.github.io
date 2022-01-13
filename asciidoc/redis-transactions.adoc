@@ -1,6 +1,6 @@
 = Redis 事务
 :toc: right
-:description: Redis 事务。 \ 
+:description: Redis 事务。
 :keywords: redis, transaction, 事务
 
 NOTE: 事务早已存在。
