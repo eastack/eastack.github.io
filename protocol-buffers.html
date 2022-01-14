@@ -444,7 +444,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
-<li><a href="#_定义一个消息类型">定义一个消息类型</a></li>
+<li><a href="#_定义一个消息类型">定义一个消息类型</a>
+<ul class="sectlevel2">
 <li><a href="#_指定字段类型">指定字段类型</a></li>
 <li><a href="#_分配字段编号">分配字段编号</a></li>
 <li><a href="#_指定字段规则">指定字段规则</a></li>
@@ -452,6 +453,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_添加注释">添加注释</a></li>
 <li><a href="#_保留字段">保留字段</a></li>
 <li><a href="#_你的_proto_文件生成了什么">你的 <code>.proto</code> 文件生成了什么</a></li>
+</ul>
+</li>
+<li><a href="#_标量数据类型">标量数据类型</a></li>
+<li><a href="#_默认值">默认值</a></li>
 </ul>
 </div>
 </div>
@@ -505,20 +510,15 @@ message SearchRequest {
 </li>
 </ul>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_指定字段类型">指定字段类型</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_指定字段类型">指定字段类型</h3>
 <div class="paragraph">
 <p>在上面的示例中，每个字段都是 <a href="https://developers.google.com/protocol-buffers/docs/proto3#scalar">标量类型</a>：两个整型（ <code>page_number</code> 和 <code>result_per_page</code> ）和一个字符串（ <code>query</code> ）。
 但你也可以为你的字段指定复合类型，包括枚举和其他消息类型。</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_分配字段编号">分配字段编号</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_分配字段编号">分配字段编号</h3>
 <div class="paragraph">
 <p>正如你所看到的，消息定义中的每个字段都有一个 <strong>唯一编号</strong> 。
 这些字段编号用来在 <a href="https://developers.google.com/protocol-buffers/docs/encoding">消息二进制格式</a> 中标识你的字段，并且当你的消息类型使用之后就不应再更改它们了。
@@ -533,10 +533,8 @@ message SearchRequest {
 同样，你也不能使用之前 <a href="https://developers.google.com/protocol-buffers/docs/proto3#reserved">保留</a> 的字段编号。</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_指定字段规则">指定字段规则</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_指定字段规则">指定字段规则</h3>
 <div class="paragraph">
 <p>消息字段可以是以下两种之一：</p>
 </div>
@@ -557,10 +555,8 @@ message SearchRequest {
 你可以在 <a href="https://developers.google.com/protocol-buffers/docs/encoding#packed">Protocol Buffer Encoding</a> 找到更多 <code>packed</code> 编码的信息。</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_添加更多消息类型">添加更多消息类型</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_添加更多消息类型">添加更多消息类型</h3>
 <div class="paragraph">
 <p>多个消息类型可以定义在单个 <code>.proto</code> 文件中。
 如果你定义多个相关消息的话这非常有用 —— 比如，如果你想要定义 <code>SearchResponse</code> 消息类型对应的响应消息格式，你可以将其添加到同一个 <code>.proto</code> 文件中：</p>
@@ -579,10 +575,8 @@ message SearchResponse {
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_添加注释">添加注释</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_添加注释">添加注释</h3>
 <div class="paragraph">
 <p>要在你的 <code>.proto</code> 文件中添加注释，可以使用 C/C++ 风格的 <code>//</code> 和 <code>/**/</code> 语法。</p>
 </div>
@@ -599,10 +593,8 @@ message SearchResponse {
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_保留字段">保留字段</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_保留字段">保留字段</h3>
 <div class="paragraph">
 <p>如果你通过完全删除或注释掉某个字段来更新更新一个消息类型，未来的用户可以在对自己的类型进行更新后重新使用这个字段。
 如果他们以后再使用同一 <code>.proto</code> 文件的旧版本，会导致非常严重的问题，包括数据损坏，隐私问题等等。
@@ -621,10 +613,8 @@ message SearchResponse {
 <p>注意你不能在同一个 <code>reserved</code> 语句中混用字段名称和字段编号。</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_你的_proto_文件生成了什么">你的 <code>.proto</code> 文件生成了什么</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_你的_proto_文件生成了什么">你的 <code>.proto</code> 文件生成了什么</h3>
 <div class="paragraph">
 <p>当你使用 <a href="https://developers.google.com/protocol-buffers/docs/proto3#generating">Protocol Buffer 编译器</a> 编译 <code>.proto</code> 文件时，
 编译器将根据你选择的语言生成代码，你要使用文件中描述的消息类型，包括获取和设置字段的值、将消息序列化为输出流，以及从输入流中解析消息。</p>
@@ -632,10 +622,101 @@ message SearchResponse {
 <div class="ulist">
 <ul>
 <li>
-<p>对 <strong>C++</strong> 来说，编译器从每个 <code>.proto</code> 文件生成 <code>.h</code> 和 <code>.cc</code> 文件，并为文件中定义的每个消息类型提供一个类。</p>
+<p>对于 <strong>C++</strong> ，编译器从每个 <code>.proto</code> 文件生成 <code>.h</code> 和 <code>.cc</code> 文件，并为文件中定义的每个消息类型提供一个类。</p>
 </li>
 <li>
-<p>对 <strong>Java</strong> 来说，编译器生成一个 <code>.java</code> 文件，其中包含每个消息类型的类，以及一个用来创建消息类实例的特殊 <code>Builder</code> 类。</p>
+<p>对于 <strong>Java</strong> ，编译器生成一个 <code>.java</code> 文件，其中包含每个消息类型的类，以及一个用来创建消息类实例的特殊 <code>Builder</code> 类。</p>
+</li>
+<li>
+<p>对于 <strong>Kotlin</strong> ，除了生成的 Java 代码，编译器为每个消息类型都生成了包含用来简化消息实例创建 DSL 的 <code>.kt</code> 文件。</p>
+</li>
+<li>
+<p>对于 <strong>Python</strong> 略有不同 —— Python 编译器会生成一个模块，其中包含 <code>.proto</code> 文件中每种消息类型的静态描述，这些描述将和元类一起在运行时创建所需的数据访问类。</p>
+</li>
+<li>
+<p>对于 <strong>Go</strong> ，编译器会生成一个 <code>.pb.go</code> 文件，其中包含文件中每种消息的类型。</p>
+</li>
+<li>
+<p>对于 <strong>Ruby</strong> ，编译器会生成一个 <code>.rb</code> 文件，其中包含一个含有你所定义消息类型的模块。</p>
+</li>
+<li>
+<p>对于 <strong>Objective-C</strong> ，编译器为每个 <code>.proto</code> 文件生成一个 <code>pbobjc.h</code> 和 <code>pbobjc.m</code> 文件，并为你文件中描述的每种消息类型提供一个类。</p>
+</li>
+<li>
+<p>对于 <strong>C#</strong> ，编译器为每个 <code>.proto</code> 文件生成一个 <code>.cs</code> 文件，为文件中描述的每种消息类型提供一个类。</p>
+</li>
+<li>
+<p>对于 <strong>Dart</strong> ，编译器会生成一个 <code>.pb.dart</code> 文件，其中包含你所定义的每个消息类型的类。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>你可以按照你所选语言的教程（proto3 版本即将推出）了解有关使用每种语言的API的更多信息。
+有关 API 的更多详细信息，请参阅相关 <a href="https://developers.google.com/protocol-buffers/docs/reference/overview">API 参考文献</a> (同样 proto3 版本即将推出)。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_标量数据类型">标量数据类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>一个标量消息字段可以又有下列类型之一 —— 下表现实了 <code>.proto</code> 文件中指定的类型，以及生成类中对应的类型：</p>
+</div>
+<div class="paragraph">
+<p>当你使用 <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protocol Buffer Encoding</a> 序列化你的消息时，你可以在这里找到更多有关类型编码的信息。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Kotlin 使用对应的 Java 类型，甚至无符号类型也和 Java 保持一致，来确保与 Java 代码混用时的兼容性。</p>
+</li>
+<li>
+<p>在 Java 中，无符号 32 位和 64 位整数使用对应的有符号表示，最高位简单的存储在最高位中。</p>
+</li>
+<li>
+<p>在所有情况下，位字段赋值都将会执行类型检查来确保值的有效性。</p>
+</li>
+<li>
+<p>64 位或无符号 32 位整数在解码时始终表示为长整型，但当位字段赋值时如果需要整型则可以是整型 。
+在任何情况下，设置的值应该与表示的类型相匹配。</p>
+</li>
+<li>
+<p>Python 字符串在解码是表示位 unicode 但如果是一个 ASCII 字符串也可以表示位 str</p>
+</li>
+<li>
+<p>整型使用于 64 位机器上，string 用在 32 位机器上。</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_默认值">默认值</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>当一个消息被解析后，如果解码后的消息不包含某些单例元素，解析后对象中对应的值将被设置为此字段的默认值。
+默认值是特定于类型的：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>对于字符串，默认值是空字符串。</p>
+</li>
+<li>
+<p>对于字节，默认值是空字节。</p>
+</li>
+<li>
+<p>对于布尔值，默认值是 false。</p>
+</li>
+<li>
+<p>对于数值类型，默认值是零。</p>
+</li>
+<li>
+<p>对于 <a href="https://developers.google.com/protocol-buffers/docs/proto3#enum">枚举</a>类型，默认值是 <strong>定义的首个枚举值</strong> ，其必须为 0。</p>
+</li>
+<li>
+<p>对一消息类型，该字段没有设置。确切的值于语言相关。详见 <a href="https://developers.google.com/protocol-buffers/docs/reference/overview">代码生成指南</a>。</p>
 </li>
 </ul>
 </div>
