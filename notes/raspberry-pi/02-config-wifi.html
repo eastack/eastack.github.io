@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>配置树梅派WIFI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>配置树梅派WIFI</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_生成配置所需的psk">生成配置所需的PSK</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>首先我们要</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>使用 <code>wpa_passphrase</code> 命令生成 <code>wpa_supplicant</code> 配置</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># wpa_passphrase 你的WIFI 你的WIFI密码</span>
+wpa_passphrase ipool wodemima</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>将生成结果添加到 <code>/boot/wpa_supplicant.conf</code> 文件中</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">.format
+----
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=CN</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>network={
+	ssid="&lt;你的WIFI名称&gt;"
+	psk="&lt;生成的PSK&gt;"
+}</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.example
+[source, plaintext]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=CN</p>
+</div>
+<div class="paragraph">
+<p>network={
+	ssid="iPool"
+	psk="074979a381adfc60ef28370752893e7b1913bd9f6289d90f21601d84859110f0"
+}</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

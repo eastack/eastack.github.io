@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>原始类型</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>原始类型</h1>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>原始类型</strong> 是没有任何类型参数的范型类或接口的名称。
+例如，我们有如下范型类 <code>Box</code> :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Box</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="no">T</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span> <span class="cm">/* ... */</span> <span class="o">}</span>
+    <span class="c1">// ...</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>要创建 <code>Box&lt;T&gt;</code> 的参数化类型，你需要为形式类型参数 <code>T</code> 提供实际的参数：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Box</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">intBox</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Box</span><span class="o">&lt;&gt;();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果省略实际类型参数，那么你创建了一个 <code>Box&lt;T&gt;</code> 的原始类型：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Box</span> <span class="n">intBox</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Box</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>所以， <code>Box</code> 是范型类型 <code>Box&lt;T&gt;</code> 的原始类型。
+但是，不无范型的类或接口并不是原始类型。</p>
+</div>
+<div class="paragraph">
+<p>原始类型出现在遗留代码中是因为许多 API 类（例如Collections)在 JDK 5.0 之前不是范型的。
+使用原始类型时，您基本上会获得pre-generics行为——一个 Box 为您提供Object。
+为了向后兼容，允许将参数化类型分配给它的原始类型：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Box</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringBox</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Box</span><span class="o">&lt;&gt;();</span>
+<span class="nc">Box</span> <span class="n">rawBox</span> <span class="o">=</span> <span class="n">stringBox</span><span class="o">;</span>               <span class="c1">// OK</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>但如果你非配一个原始类型到一个参数化类型，你将会得到警告。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Box</span> <span class="n">rawBox</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Box</span><span class="o">();</span>           <span class="c1">// rawBox is a raw type of Box&lt;T&gt;</span>
+<span class="nc">Box</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">intBox</span> <span class="o">=</span> <span class="n">rawBox</span><span class="o">;</span>     <span class="c1">// warning: unchecked conversion</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果你使用原始类型调用相应范型类中定义的范型方法，也会收到警告:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Box</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">stringBox</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Box</span><span class="o">&lt;&gt;();</span>
+<span class="nc">Box</span> <span class="n">rawBox</span> <span class="o">=</span> <span class="n">stringBox</span><span class="o">;</span>
+<span class="n">rawBox</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="mi">8</span><span class="o">);</span> <span class="c1">// warning: unchecked invoation to set(T)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>警告显示原始类型绕过了范型类型检查，将不安全代码的捕获推迟到了运行时。
+因此，你应该避免使用原始类型。</p>
+</div>
+<div class="paragraph">
+<p><a href="https://docs.oracle.com/javase/tutorial/java/generics/erasure.html">类型擦除</a> 部分部分提供哦你了更多有关Java编译器如何使用原始类型的信息。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_未检查的错误消息">未检查的错误消息</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>正如之前所述，当将遗留代码和范型代码混合时，你可能会遇到如下警告消息：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>Note: Example.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>使用对原始类型进行操作的旧 API 时可能会发生这种情况，如下例所示：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>public class WarningDemo {
+    public static void main(String[] args){
+        Box&lt;Integer&gt; bi;
+        bi = createBox();
+    }
+
+    static Box createBox(){
+        return new Box();
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>术语“未检查”意味着编译器没有足够的类型信息来执行确保类型安全所需的所有类型检查。默认情况下，“unchecked”警告是禁用的，尽管编译器会给出提示。 要查看所有“未检查”警告，请使用 -Xlint:unchecked 重新编译。</p>
+</div>
+<div class="paragraph">
+<p>使用 -Xlint:unchecked 重新编译前面的示例会显示以下附加信息：</p>
+</div>
+<div class="paragraph">
+<p>WarningDemo.java:4: warning: [unchecked] unchecked conversion
+found   : Box
+required: Box&lt;java.lang.Integer&gt;
+        bi = createBox();
+                      ^
+1 warning</p>
+</div>
+<div class="paragraph">
+<p>要完全禁用未经检查的警告，请使用 -Xlint:-unchecked 标志。 @SuppressWarnings("unchecked") 注释抑制未经检查的警告。 如果您不熟悉 @SuppressWarnings 语法，请参阅注解。</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

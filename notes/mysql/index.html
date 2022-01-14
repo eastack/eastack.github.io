@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>MySQL</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>MySQL</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_事务">事务</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_acid">ACID</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Atomicity(原子性)</p>
+</li>
+<li>
+<p>Consistency(一致性)</p>
+</li>
+<li>
+<p>Isolation(隔离性)</p>
+</li>
+<li>
+<p>Durability(持久性)</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">查询当前事务隔离级别</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="k">SELECT</span> <span class="o">@@</span><span class="k">GLOBAL</span><span class="p">.</span><span class="n">transaction_isolation</span><span class="p">,</span> <span class="o">@@</span><span class="k">GLOBAL</span><span class="p">.</span><span class="n">transaction_read_only</span><span class="p">;</span>
+<span class="k">SELECT</span> <span class="o">@@</span><span class="k">SESSION</span><span class="p">.</span><span class="n">transaction_isolation</span><span class="p">,</span> <span class="o">@@</span><span class="k">SESSION</span><span class="p">.</span><span class="n">transaction_read_only</span><span class="p">;</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_隔离级别">隔离级别</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>REPEATABLE READ(可重复读)</p>
+</li>
+<li>
+<p>READ COMMITTED(读已提交)</p>
+</li>
+<li>
+<p>READ UNCOMMITTED(读未提交)</p>
+</li>
+<li>
+<p>SERIALIZABLE(串行化)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_运行">运行</h3>
+<div class="listingblock">
+<div class="title">Server</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">docker run <span class="nt">--name</span> some-mysql <span class="nt">-e</span> <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>my-secret-pw <span class="nt">-d</span> mysql:tag</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Client</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">docker run <span class="nt">-it</span> <span class="nt">--network</span> some-network <span class="nt">--rm</span> mysql mysql <span class="nt">-hsome-mysql</span> <span class="nt">-uexample-user</span> <span class="nt">-p</span>
+docker run <span class="nt">-it</span> <span class="nt">--rm</span> mysql mysql <span class="nt">-hsome</span>.mysql.host <span class="nt">-usome-mysql-user</span> <span class="nt">-p</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

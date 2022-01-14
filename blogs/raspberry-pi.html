@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="description" content="配置树莓派WIFI连接和开启SSH。">
+<meta name="keywords" content="raspberrypi, 配置, ssh, wifi">
+<title>配置树莓派</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-right">
+<div id="header">
+<h1>配置树莓派</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_系统下载与安装">系统下载与安装</a></li>
+<li><a href="#_系统配置">系统配置</a>
+<ul class="sectlevel2">
+<li><a href="#_ssh配置">SSH配置</a></li>
+<li><a href="#_wifi配置">WIFI配置</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_系统下载与安装">系统下载与安装</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>树莓派 <a href="https://www.raspberrypi.com/software/">官方</a> 很贴心的提供了Ubuntu、Windoes、MacOS下的镜安装工具，
+由于这里我使用的是ArchLinux所以不再对此过多赘述，我选择了手动下载镜像然后使用 <code>dd</code> 命令手动写入的方式。</p>
+</div>
+<div class="listingblock">
+<div class="title">下载完包含镜像的zip包后对其进行解压</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">unar 2021-10-30-raspios-bullseye-armhf-lite.zip</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+这里需要注意一定要确保 <code>dd</code> 命令的 <code>of</code> 选项后所跟设备文件名准确无误后再摁下回车。
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">之后插入内存卡将镜像写入</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>2021-10-30-raspios-bullseye-armhf-lite.img <span class="nv">of</span><span class="o">=</span>/dev/sdb</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_系统配置">系统配置</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>这里我并不想连接外接显示器，并且希望通过WIFI进行网络连接，
+所以直接挂载树莓派的 <code>boot</code> 分区进行相应配置。</p>
+</div>
+<div class="paragraph">
+<p>详情可参考官方文档</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.raspberrypi.com/documentation/computers/configuration.html#setting-up-a-headless-raspberry-pi">Setting up a Headless Raspberry Pi</a></p>
+</li>
+<li>
+<p><a href="https://www.raspberrypi.com/documentation/computers/remote-access.html#ssh">Setting up an SSH Server</a></p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">挂载 <code>boot</code> 分区</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">mkdir </span>rpi
+<span class="nb">sudo </span>mount /dev/sdb1 rpi</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ssh配置">SSH配置</h3>
+<div class="listingblock">
+<div class="title">开启SSH</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">cd </span>rpi
+<span class="nb">sudo touch </span>ssh</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wifi配置">WIFI配置</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+如果本机没有wpa_passphrase 命令可以到Wireshark提供的工具 <a href="https://www.wireshark.org/tools/wpa-psk.html">在线生成PSK</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">使用 <code>wpa_passphrase</code> 命令生成 <code>wpa_supplicant</code> 配置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">wpa_passphrase 你的WIFI 你的WIFI密码</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">生成如下内容（记得把注释掉的原始密码删除）</div>
+<div class="content">
+<pre>network={
+	ssid="你的WIFI"
+	#psk="你的WIFI密码"
+	psk=07b00558311240a51c1caf3007ba4dc9c0140a5b1589e64c6361e9b2b0367eb5
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">最后拼接成下面这样写入到 <code>./rpi/wpa_supplicant.conf</code> 中</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=CN
+
+network={
+	ssid="你的WIFI"
+	psk=07b00558311240a51c1caf3007ba4dc9c0140a5b1589e64c6361e9b2b0367eb5
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">一切就绪，最后记得卸载分区</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>umount rpi</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>之后把内存卡插到树莓派中接通电源开机，静静等待WIFI连接后即可以通过SSH连接树莓派了。</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+树莓派默认用户信息如下：<br>
+用户名： <strong>pi</strong><br>
+密码： <strong>raspberry</strong>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

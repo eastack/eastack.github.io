@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>显示gradle使用的仓库</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Gradle下载源码与文档</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">use eclipse plugin</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="groovy"><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'java'</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'eclipse'</span>
+
+<span class="n">eclipse</span> <span class="o">{</span>
+    <span class="n">classpath</span> <span class="o">{</span>
+        <span class="n">downloadJavadoc</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="n">downloadSources</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gradle cleanEclipse eclipse</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">use idea plugin</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="groovy"><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'java'</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">'idea'</span>
+
+<span class="n">idea</span> <span class="o">{</span>
+    <span class="n">module</span> <span class="o">{</span>
+        <span class="n">downloadJavadoc</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="n">downloadSources</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gradle cleanIdea idea</code></pre>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_显示gradle使用的仓库">显示gradle使用的仓库</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">添加以下task到build.gradle</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="gradle"><span class="n">task</span> <span class="n">showRepos</span> <span class="o">{</span>
+    <span class="n">doLast</span> <span class="o">{</span>
+        <span class="k">repositories</span><span class="o">.</span><span class="na">each</span> <span class="o">{</span>
+            <span class="n">println</span> <span class="s2">"repository: ${it.name} ('${it.url}')"</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">执行下列命令显示使用的仓库</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gradle <span class="nt">-q</span> showRepos</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

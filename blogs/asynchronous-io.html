@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="description" content="数据结构对齐（内存对齐）翻译。 数据结构对齐是数据在计算机内存中排布和访问的方式。 其由三个独立但相关的问题组成：数据对齐、数据结构填充和打包。">
+<meta name="keywords" content="数据结构对齐, data structure alignment, 翻译">
+<title>[译]异步I/O</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-right">
+<div id="header">
+<h1>[译]异步I/O</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_形式">形式</a></li>
+<li><a href="#_参考">参考</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>In computer science, asynchronous I/O (also non-sequential I/O) is a form of input/output processing that permits other processing to continue before the transmission has finished.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>在计算机科学领域，异步I/O（又称非顺序I/O）是一种输入/输出处理形式其允许在传输完成之前执行其他操作。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Input and output (I/O) operations on a computer can be extremely slow compared to the processing of data.
+An I/O device can incorporate mechanical devices that must physically move, such as a hard drive seeking a track to read or write; this is often orders of magnitude slower than the switching of electric current.
+For example, during a disk operation that takes ten milliseconds to perform, a processor that is clocked at one gigahertz could have performed ten million instruction-processing cycles.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>与数据处理相比，计算机上的输入和输出（I/O）操作可能非常慢。
+I/O 设备也会包含必须进行物理移动的机械设备，例如硬盘在读取或写入时要进行寻道操作； 这通常比电路切换慢几个数量级。
+例如，当执行一个耗时10毫秒的磁盘操作期间，时钟频率为1GHz的处理器则可能已经执行了1000万个指令处理周期。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>A simple approach to I/O would be to start the access and then wait for it to complete.
+But such an approach (called synchronous I/O, or blocking I/O) would block the progress of a program while the communication is in progress, leaving system resources idle.
+When a program makes many I/O operations (such as a program mainly or largely dependent on user input), this means that the processor can spend almost all of its time idle waiting for I/O operations to complete.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>一种简单的I/O方式是进行访问并等待其完成。
+但是这种方法（称为同步I/O，或阻塞I/O）会在通信进行时阻塞程序的进程，从而使系统资源空闲。
+当一个程序进行许多I/O操作时（例如一个程序主要或很大程度上依赖于用户输入），这意味着处理器几乎可以将所有时间都用于等待I/O操作完成。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Alternatively, it is possible to start the communication and then perform processing that does not require that the I/O be completed.
+This approach is called asynchronous input/output.
+Any task that depends on the I/O having completed (this includes both using the input values and critical operations that claim to assure that a write operation has been completed) still needs to wait for the I/O operation to complete, and thus is still blocked, but other processing that does not have a dependency on the I/O operation can continue.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>或者，可以开始通信，然后执行不需要I/O完成的操作。
+这种方式称为异步输入/输出。
+任何依赖于I/O完成的任务（这包括使用输入值和声称确保写操作已完成的关键操作）仍然需要等待I/O操作完成，因此这些操作仍然是被阻塞的，但不依赖于I/O操作的其他处理可以继续。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Many operating system functions exist to implement asynchronous I/O at many levels.
+In fact, one of the main functions of all but the most rudimentary of operating systems is to perform at least some form of basic asynchronous I/O, though this may not be particularly apparent to the user or the programmer.
+In the simplest software solution, the hardware device status is polled at intervals to detect whether the device is ready for its next operation.
+(For example, the CP/M operating system was built this way.Its system call semantics did not require any more elaborate I/O structure than this, though most implementations were more complex, and thereby more efficient.)
+Direct memory access (DMA) can greatly increase the efficiency of a polling-based system, and hardware interrupts can eliminate the need for polling entirely.
+Multitasking operating systems can exploit the functionality provided by hardware interrupts, whilst hiding the complexity of interrupt handling from the user.
+Spooling was one of the first forms of multitasking designed to exploit asynchronous I/O.
+Finally, multithreading and explicit asynchronous I/O APIs within user processes can exploit asynchronous I/O further, at the cost of extra software complexity.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>目前已有许多操作系统函数用来在多个级别实现异步I/O。
+事实上，除了最基本的功能之外，所有操作系统的主要功能之一就是执行至少某种形式的基本异步I/O，尽管这对用户或程序员来说感知可能不是特别明显。
+在最简单的软件解决方案中，定时轮询硬件设备的状态以检测设备是否准备好进行下一次操作。
+（例如，CP/M 操作系统就是这样构建的。它的系统调用语义不需要比这更复杂的 I/O 结构，尽管大多数实现更复杂，因此效率更高。）
+直接内存访问（DMA）可以大大提高基于轮询的系统的效率，硬件中断可以完全消除轮询的需要。
+多任务操作系统可以利用硬件中断提供的功能，同时向用户隐藏中断处理的复杂性。
+假脱机是旨在利用异步 I/O 的最早的多任务处理形式之一。
+最后，用户进程中的多线程和显式异步I/O API可以进一步利用异步I/O，但代价是额外的软件复杂性。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Asynchronous I/O is used to improve throughput, latency, and/or responsiveness.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>异步I/O用于提高吞吐量、延迟和/或响应能力。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_形式">形式</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I/O 的形式和 POSIX 函数的例子：</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">阻塞</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">非阻塞</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">同步</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">write, read</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">write, read + poll / select</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">异步</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">aio_write, aio_read</p></td>
+</tr>
+</tbody>
+</table>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>All forms of asynchronous I/O open applications up to potential resource conflicts and associated failure.
+Careful programming (often using mutual exclusion, semaphores, etc.) is required to prevent this.</p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>When exposing asynchronous I/O to applications there are a few broad classes of implementation.
+The form of the API provided to the application does not necessarily correspond with the mechanism actually provided by the operating system; emulations are possible.
+Furthermore, more than one method may be used by a single application, depending on its needs and the desires of its programmer(s).
+Many operating systems provide more than one of these mechanisms, it is possible that some may provide all of them.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参考">参考</h2>
+<div class="sectionbody">
+<div class="ulist bibliography">
+<ul class="bibliography">
+<li>
+<p><a id="原文"></a>[原文] <a href="https://en.wikipedia.org/wiki/Asynchronous_I/O">Asynchronous I/O</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>开启树梅派的SSH</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>开启树梅派的SSH</h1>
+</div>
+<div id="content">
+<div class="paragraph">
+<p>向内存卡中写入系统映像后，挂载 <code>/dev/sdx1</code> 。
+然后在挂载磁盘根路径下创建一个名为 <code>SSH</code> 的空文件，便可以使树梅派在开机时自动启动 <code>SSH</code> 服务器。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>mount /dev/sda1 /mnt
+<span class="nb">sudo touch</span> /mnt/SSH
+<span class="nb">sudo </span>umount /dev/sda1</code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

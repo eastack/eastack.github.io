@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Mustache</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-right">
+<div id="header">
+<h1>Mustache</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_摘要">摘要</a></li>
+<li><a href="#_简介">简介</a></li>
+<li><a href="#_标签类型">标签类型</a>
+<ul class="sectlevel2">
+<li><a href="#_变量">变量</a></li>
+</ul>
+</li>
+<li><a href="#_段">段</a>
+<ul class="sectlevel2">
+<li><a href="#_false或空列表">False或空列表</a></li>
+<li><a href="#_非空列表">非空列表</a></li>
+<li><a href="#_lambdas">Lambdas</a></li>
+<li><a href="#_非false值">非False值</a></li>
+<li><a href="#_反选段">反选段</a></li>
+<li><a href="#_注释">注释</a></li>
+<li><a href="#_片段">片段</a></li>
+<li><a href="#_设置分隔符">设置分隔符</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>轻逻辑模板。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_摘要">摘要</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">一个典型的 Mustache 模板</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="mustache">Hello <span class="k">{{</span><span class="nv">name</span><span class="k">}}</span>
+You have just won <span class="k">{{</span><span class="nv">value</span><span class="k">}}</span> dollars!
+<span class="k">{{#</span><span class="nn">in_ca</span><span class="k">}}</span>
+Well, <span class="k">{{</span><span class="nv">taxed_value</span><span class="k">}}</span> dollars, after taxes.
+<span class="k">{{/</span><span class="nn">in_ca</span><span class="k">}}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">给定以下散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Chris"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"taxed_value"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="w"> </span><span class="err">-</span><span class="w"> </span><span class="err">(</span><span class="mi">10000</span><span class="w"> </span><span class="err">*</span><span class="w"> </span><span class="mf">0.4</span><span class="err">)</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"in_ca"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">将会产生以下输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>Hello Chris
+You have just won 10000 dollars!
+Well, 6000.0 dollars, after taxes.</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_简介">简介</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Mustache 可以用于 HTML，配置文件，源码 - 等等。
+他的工作原理是使用提供的散列或对象在模板中展开标签。</p>
+</div>
+<div class="paragraph">
+<p>我们称其为 <em>“ 轻逻辑 ”</em> 是因为它没有 <code>if</code> 语句，没有 <code>else</code> 子句，或 <code>for</code> 循环。
+取而代之只有标签。
+有些标签被替换为一个值，有些被替换为空，而另一些被替换为一系列值。
+此文档解释说明了 Mustache 标签的不同类型。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_标签类型">标签类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>标签使用双大括号表示。
+<code>{{person}}</code> 和 <code>{{#person}}</code> 都是标签。
+在这两个例子中，我们都将 <strong>person</strong> 称为键或标签键。
+让我们来谈谈标签的几种不同类型。</p>
+</div>
+<div class="sect2">
+<h3 id="_变量">变量</h3>
+<div class="paragraph">
+<p>最基础的标签类型是变量类。
+一个 <code>{{name}}</code> 标签在模板中将会当前上下文中寻找名为 <code>name</code> 的 KEY。
+如果没有名为 <code>name</code> 的 KEY 将会递归查找父级上下文。
+如果已经查找到最顶级的上下问但还是没有发现名为 <code>name</code> 的 KEY，什么都不会被渲染。</p>
+</div>
+<div class="paragraph">
+<p>默认情况下所有变量都会被进行 HTML 转义。
+如果你想输出未转义的 HTML，使用三对大括号 <code>{{{name}}}</code> 。</p>
+</div>
+<div class="paragraph">
+<p>你还可以使用 <code>&amp;</code> 来取消转义一个变量： <code>{{&amp; name}}</code> 。
+这在你改变分割符时会非常有用（参考下面的 “设置分隔符”）。</p>
+</div>
+<div class="paragraph">
+<p>默认情况下变量 “缺失” 将会返回一个空字符串。
+其行为可在你使用的 Mustache 库中进行配置。
+比如在 Ruby 版本的 Mustache 库中在此情况下可以抛出一个异常。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="rouge highlight"><code>* {{name}}
+* {{age}}
+* {{company}}
+* {{{company}}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code>{
+  "name": "Chris",
+  "company": "&lt;b&gt;GitHub&lt;/b&gt;"
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>* Chris
+*
+* &amp;lt;b&amp;gt;GitHub&amp;lt;/b&amp;gt;
+* &lt;b&gt;GitHub&lt;/b&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_段">段</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>段依赖当前上下问中 KEY 的值，将文本块渲染一次或多次。</p>
+</div>
+<div class="paragraph">
+<p>一个段以 <code>#</code> 开头以 <code>/</code> 结束。
+从这里 <code>{{#person}}</code> 开始一个 “person” 段直到 <code>{{/person}}</code> 结束。</p>
+</div>
+<div class="paragraph">
+<p>段的行为取决于 KEY 的值。</p>
+</div>
+<div class="sect2">
+<h3 id="_false或空列表">False或空列表</h3>
+<div class="paragraph">
+<p>如果 <strong>person</strong> KEY 存在并且其值为 <code>false</code> 或空列表，井号和斜线之间的内容将不会被渲染。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="rouge highlight"><code>Shown.
+{{#person}}
+  Never shown!
+{{/person}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code>{
+  "person": false
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>Shown.</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_非空列表">非空列表</h3>
+<div class="paragraph">
+<p>如果 &amp;person 键存在且其值不为 <code>false</code> ，井号和斜线之间的内容将会被渲染一次或多此。</p>
+</div>
+<div class="paragraph">
+<p>当值是一个非空列表时，段中的文本将会为列表中的每个值进行一次渲染。
+段中的上下文将会被设置为每次循环中
+每次迭代时，段中的上下文将被设置为当前项。
+这样我们就可以遍历集合了。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="rouge highlight"><code>{{#repo}}
+  &lt;b&gt;{{name}}&lt;/b&gt;
+{{/repo}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code>{
+  "repo": [
+    { "name": "resque" },
+    { "name": "hub" },
+    { "name": "rip" }
+  ]
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>&lt;b&gt;resque&lt;/b&gt;
+&lt;b&gt;hub&lt;/b&gt;
+&lt;b&gt;rip&lt;/b&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lambdas">Lambdas</h3>
+<div class="paragraph">
+<p>当其值是一个可调用对象时，比如一个函数或lambda表达式，此对象将被调用并传递给文本块。
+传递的文本是字面文本块，其未经渲染。
+<code>{{tags}}</code>  将不会被扩展 - 这应该由 lambda 自身完成。
+这样你可以实现过滤器或者缓存。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="rouge highlight"><code>{{#wrapped}}
+  {{name}} is awesome.
+{{/wrapped}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code>{
+  "name": "Willy",
+  "wrapped": function() {
+    return function(text, render) {
+      return "&lt;b&gt;" + render(text) + "&lt;/b&gt;"
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>&lt;b&gt;Willy is awesome.&lt;/b&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_非false值">非False值</h3>
+<div class="paragraph">
+<p>当值不是False也不是一个列表时，其将做为块单次渲染的上下文。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="rouge highlight"><code>{{#person?}}
+  Hi {{name}}!
+{{/person?}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code>{
+  "person?": { "name": "Jon" }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>Hi Jon!</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_反选段">反选段</h3>
+<div class="paragraph">
+<p>一个反选段以 <code>^</code> 开始以 <code>/</code> 结束。
+从这里 <code>{{^person}}</code> 开始一个 "person" 反选段直到 <code>{{/person}}</code> 结束。</p>
+</div>
+<div class="paragraph">
+<p>段根据键对应的值可以用来渲染文本一次或多次，而反选段会根据键的反意值渲染文本一次
+因此，如果键不存在或是一个空列表，反选段将被渲染。</p>
+</div>
+<div class="listingblock">
+<div class="title">模板</div>
+<div class="content">
+<pre class="rouge highlight"><code>{{#repo}}
+  &lt;b&gt;{{name}}&lt;/b&gt;
+{{/repo}}
+{{^repo}}
+  No repos :(
+{{/repo}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">散列值</div>
+<div class="content">
+<pre class="rouge highlight"><code>{
+  "repo": []
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">输出</div>
+<div class="content">
+<pre class="rouge highlight"><code>No repos :(</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_注释">注释</h3>
+<div class="paragraph">
+<p>注释以 <code>!</code> 开头且其被忽略。</p>
+</div>
+<div class="listingblock">
+<div class="title">下面的模板：</div>
+<div class="content">
+<pre class="rouge highlight"><code>&lt;h1&gt;Today{{! ignore me }}.&lt;/h1&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">将会如下渲染</div>
+<div class="content">
+<pre class="rouge highlight"><code>&lt;h1&gt;Today.&lt;/h1&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>注释可以包含换行。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_片段">片段</h3>
+<div class="paragraph">
+<p>片段以 <code>&gt;</code> 开始，象这样 <code>{{&gt; box}}</code> 。</p>
+</div>
+<div class="paragraph">
+<p>片段在运行时渲染（而不是编译时），因此递归片段是可行的。
+只是要避免死循环。</p>
+</div>
+<div class="paragraph">
+<p>其还继承了调用上下文。
+在 <a href="http://en.wikipedia.org/wiki/ERuby">ERB</a> 中你可能需要这样：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>&lt;%= partial :next_more, :start =&gt; start, :size =&gt; size %&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>在 Mustache 只需要这样：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>{{&gt; next_more}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>为什么？
+因为 <code>next_more.mustache</code> 文件将会从调用上下文中继承 <code>size</code> 和 <code>start</code> 。</p>
+</div>
+<div class="paragraph">
+<p>通过这种方式，你可能会想将片段视为引用，导入，模板扩展，嵌套模板或子模板，即使从字面上看并非如此。</p>
+</div>
+<div class="paragraph">
+<p>例如下面的模板和片段：</p>
+</div>
+<div class="listingblock">
+<div class="title">base.mustache:</div>
+<div class="content">
+<pre class="rouge highlight"><code>&lt;h2&gt;Names&lt;/h2&gt;
+{{#names}}
+  {{&gt; user}}
+{{/names}}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">user.mustache:</div>
+<div class="content">
+<pre class="rouge highlight"><code>&lt;strong&gt;{{name}}&lt;/strong&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以被当作扩展后的单个模板：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>&lt;h2&gt;Names&lt;/h2&gt;
+{{#names}}
+  &lt;strong&gt;{{name}}&lt;/strong&gt;
+{{/names}}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_设置分隔符">设置分隔符</h3>
+<div class="paragraph">
+<p>设置分割符的标签以 <code>=</code> 开头并修改分隔符从 <code>{{</code> 和 <code>}}</code> 为自定义字符串。</p>
+</div>
+<div class="paragraph">
+<p>参考以下下示例：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>{{这里使用默认标签}}
+{{!下面一条修改分隔符为&lt;% %&gt;}}
+{{=&lt;% %&gt;=}}
+&lt;% 这里使用ERB风格标签 %&gt;
+{{!下面一条修改分隔符为之前的默认值}}
+&lt;%={{ }}=%&gt;
+{{这里又使用回了默认标签}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>根据 ctemplates 说这对TeX之类的语言很有用，因为TeX可能在文本中出现双括号，并且很难用于标记。</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+自定义分隔符不可以包含空格或者等号。
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

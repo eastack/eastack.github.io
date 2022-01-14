@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Untitled</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="nginx"><span class="c1">#user html;</span>
+<span class="k">worker_processes</span>  <span class="mi">1</span><span class="p">;</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="c1">#error_log  logs/error.log;</span>
+<span class="c1">#error_log  logs/error.log  notice;</span>
+<span class="c1">#error_log  logs/error.log  info;</span>
+
+<span class="c1">#pid        logs/nginx.pid;</span>
+
+
+<span class="k">events</span> <span class="p">{</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="kn">worker_connections</span>  <span class="mi">1024</span><span class="p">;</span> <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="p">}</span>
+
+
+<span class="k">http</span> <span class="p">{</span>
+    <span class="kn">include</span>       <span class="s">mime.types</span><span class="p">;</span> <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="kn">default_type</span>  <span class="nc">application/octet-stream</span><span class="p">;</span> <i class="conum" data-value="5"></i><b>(5)</b>
+
+    <span class="c1">#log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '</span>
+    <span class="c1">#                  '$status $body_bytes_sent "$http_referer" '</span>
+    <span class="c1">#                  '"$http_user_agent" "$http_x_forwarded_for"';</span>
+
+    <span class="c1">#access_log  logs/access.log  main;</span>
+
+    <span class="kn">sendfile</span>        <span class="no">on</span><span class="p">;</span> <i class="conum" data-value="6"></i><b>(6)</b>
+    <span class="c1">#tcp_nopush     on;</span>
+
+    <span class="c1">#keepalive_timeout  0;</span>
+    <span class="kn">keepalive_timeout</span>  <span class="mi">65</span><span class="p">;</span>
+
+    <span class="c1">#gzip  on;</span>
+
+    <span class="kn">server</span> <span class="p">{</span>
+        <span class="kn">listen</span>       <span class="mi">80</span><span class="p">;</span>
+        <span class="kn">server_name</span>  <span class="s">localhost</span><span class="p">;</span>
+
+        <span class="c1">#charset koi8-r;</span>
+
+        <span class="c1">#access_log  logs/host.access.log  main;</span>
+
+        <span class="kn">location</span> <span class="n">/</span> <span class="p">{</span>
+            <span class="kn">root</span>   <span class="n">/usr/share/nginx/html</span><span class="p">;</span>
+            <span class="kn">index</span>  <span class="s">index.html</span> <span class="s">index.htm</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">#error_page  404              /404.html;</span>
+
+        <span class="c1"># redirect server error pages to the static page /50x.html</span>
+        <span class="c1">#</span>
+        <span class="kn">error_page</span>   <span class="mi">500</span> <span class="mi">502</span> <span class="mi">503</span> <span class="mi">504</span>  <span class="n">/50x.html</span><span class="p">;</span>
+        <span class="kn">location</span> <span class="p">=</span> <span class="n">/50x.html</span> <span class="p">{</span>
+            <span class="kn">root</span>   <span class="n">/usr/share/nginx/html</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1"># proxy the PHP scripts to Apache listening on 127.0.0.1:80</span>
+        <span class="c1">#</span>
+        <span class="c1">#location ~ \.php$ {</span>
+        <span class="c1">#    proxy_pass   http://127.0.0.1;</span>
+        <span class="c1">#}</span>
+
+        <span class="c1"># pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</span>
+        <span class="c1">#</span>
+        <span class="c1">#location ~ \.php$ {</span>
+        <span class="c1">#    root           html;</span>
+        <span class="c1">#    fastcgi_pass   127.0.0.1:9000;</span>
+        <span class="c1">#    fastcgi_index  index.php;</span>
+        <span class="c1">#    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;</span>
+        <span class="c1">#    include        fastcgi_params;</span>
+        <span class="c1">#}</span>
+
+        <span class="c1"># deny access to .htaccess files, if Apache's document root</span>
+        <span class="c1"># concurs with nginx's one</span>
+        <span class="c1">#</span>
+        <span class="c1">#location ~ /\.ht {</span>
+        <span class="c1">#    deny  all;</span>
+        <span class="c1">#}</span>
+    <span class="p">}</span>
+
+
+    <span class="c1"># another virtual host using mix of IP-, name-, and port-based configuration</span>
+    <span class="c1">#</span>
+    <span class="c1">#server {</span>
+    <span class="c1">#    listen       8000;</span>
+    <span class="c1">#    listen       somename:8080;</span>
+    <span class="c1">#    server_name  somename  alias  another.alias;</span>
+
+    <span class="c1">#    location / {</span>
+    <span class="c1">#        root   html;</span>
+    <span class="c1">#        index  index.html index.htm;</span>
+    <span class="c1">#    }</span>
+    <span class="c1">#}</span>
+
+
+    <span class="c1"># HTTPS server</span>
+    <span class="c1">#</span>
+    <span class="c1">#server {</span>
+    <span class="c1">#    listen       443 ssl;</span>
+    <span class="c1">#    server_name  localhost;</span>
+
+    <span class="c1">#    ssl_certificate      cert.pem;</span>
+    <span class="c1">#    ssl_certificate_key  cert.key;</span>
+
+    <span class="c1">#    ssl_session_cache    shared:SSL:1m;</span>
+    <span class="c1">#    ssl_session_timeout  5m;</span>
+
+    <span class="c1">#    ssl_ciphers  HIGH:!aNULL:!MD5;</span>
+    <span class="c1">#    ssl_prefer_server_ciphers  on;</span>
+
+    <span class="c1">#    location / {</span>
+    <span class="c1">#        root   html;</span>
+    <span class="c1">#        index  index.html index.htm;</span>
+    <span class="c1">#    }</span>
+    <span class="c1">#}</span>
+
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>指定 worker processes 的数量 <a href="http://nginx.org/en/docs/ngx_core_module.html#worker_processes" class="bare">http://nginx.org/en/docs/ngx_core_module.html#worker_processes</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>为影响连接处理的指令提供配置上下文 <a href="http://nginx.org/en/docs/ngx_core_module.html#events" class="bare">http://nginx.org/en/docs/ngx_core_module.html#events</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>为 http server 指令提供上下文 <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#http" class="bare">http://nginx.org/en/docs/http/ngx_http_core_module.html#http</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>顾名思义，用来 include 其他配置文件支持通配符 <a href="http://nginx.org/en/docs/ngx_core_module.html#include" class="bare">http://nginx.org/en/docs/ngx_core_module.html#include</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>响应的默认 MIME 类型 <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#default_type" class="bare">http://nginx.org/en/docs/http/ngx_http_core_module.html#default_type</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>sendfile&#8230;&#8203; <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile" class="bare">http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile</a></td>
+</tr>
+</table>
+</div>
+</div>
+</body>
+</html>

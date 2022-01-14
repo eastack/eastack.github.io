@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Java反射实战</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Java反射实战</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_一些基础">一些基础</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>我们常面对的一些问题常常可以通过反射简单而优雅的解决。
+没有反射，我们的解决方案会变的杂乱，笨重且脆弱。
+考虑以下场景：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>你的项目经历打算做一个可插拔的框架，知道系统即使在构建和部署之后还是需要能够接受新的组件。
+你安置了一些接口，并准备了一个修补 <code>jar</code> 包的机制，但你知道这些无法完全满足可插拔的需求。</p>
+</li>
+<li>
+<p>客户端程序已经开发有几个月了，但销售告诉你使用另一种不同的远程机制将增加销售额。
+尽管使用新的远程机制是一个明智的商业决定，但是现在你必须重新实现所有的远程接口。</p>
+</li>
+<li>
+<p>你负责模块的公共API需要只允许来自特殊包的调用，防止外人滥用你的模块。
+你为每个API调用添加了一个参数，其将保存调用类的包名。
+但是现在合法用户必须改变他们的调用，而且恶意代码可以伪造包名。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>这些场景说明，模块化，远程访问和安全性等等这些似乎没有太多共同点。
+但确实有：其中每项都包含需求的变化，且只有根据程序结构进行决策和修改代码才能满足需求。</p>
+</div>
+<div class="paragraph">
+<p>重新实现接口，修补JAR文件，及修改方法调用都是非乏味且机械的任务。
+如此的机械，以至于你可以写一个算法来描述必要的步骤。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>检查程序的结构或数据。</p>
+</li>
+<li>
+<p>根据检查结构作出决策。</p>
+</li>
+<li>
+<p>根据决策修改程序的行为，结构或数据。</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>作为程序员这些你可能非常熟悉，但是他们并不是你想象中的程序所做的任务。
+最终，假如你需要适配代码则需要一个程序员坐在键盘前来完成，而不是有运行在计算机上的程序来完成。
+学习反射允许你越过这一假设并让你的程序为你左这种适配。
+考虑以下几个简单示例：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">printName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这一行</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="o">(</span><span class="k">new</span> <span class="nc">HelloWorld</span><span class="o">()).</span><span class="na">printName</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>将字符串 <code>HelloWorld</code> 输出到标准输出。
+现在假设 <code>x</code> 是 <code>HelloWorld</code> 或其子类的实例。
+这一行</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="n">x</span><span class="o">.</span><span class="na">printName</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>将类名输出到标准输出。</p>
+</div>
+<div class="paragraph">
+<p>这个小的例子更引人注目其包含前面提到的每一步。
+<code>printName</code> 方法检查对象的类（ <code>this.getClass()</code> ）。
+这样，通过委托给对象的类来决定打印什么。
+实际上是通过返回的名称来决定的。
+不需要重写，方法 <code>printName</code> 就对 <code>HelloWorld</code> 子类的行为与其自身不同。
+<code>printName</code> 方法是灵活的，其适应继承 <code>HelloWorld</code> 的类从而导致行为改变。
+当我们在范围和复杂性上构建示例时，我们将向你展示更多使用反射获得灵活性的方法。</p>
+</div>
+<div class="sect2">
+<h3 id="_反射的价值">反射的价值</h3>
+<div class="paragraph">
+<p><strong>反射</strong> 反射是一个运行中程序检查自身和软件环境及根据其检查结果改变其行为的能力。</p>
+</div>
+<div class="paragraph">
+<p>为了进行自我检查，一个程序需要有自己的描述。
+这就是我们称之为 <strong>元数据</strong> 的信息。
+在面向对象的世界中，元数据被组织成名为 <strong>mataobjects</strong> 的对象。
+元对象的运行时自我检查称为 <strong>自省</strong> 。</p>
+</div>
+<div class="paragraph">
+<p>正如我们在上的面小例子看到的，自省这一步之后是行为改变。
+一般反射API可以使用三种技术来使行为改变：直接修改元对象、使用元数据和 <strong>调解</strong> （代码允许在程序执行的各个阶段调解）。
+Java提供了一套丰富的使用元数据的操作，以及一些重要的调解功能。
+此外，Java不允许直接修改元对象从而避免了许多复杂性。</p>
+</div>
+<div class="paragraph">
+<p>这些特性使反射有能力让你的软件变的灵活。
+使用反射编程的应用程序更容易适应不断变化的需求。
+反射组件更易于被其他应用完美重用。
+这些好处已在你的JDK中。</p>
+</div>
+<div class="paragraph">
+<p>反射很强大，但也不是魔术。
+为了使你的软件变得灵活你必须先掌握这门技术。
+仅仅学习API的使用和其概念是不够的。
+你还要必须能够区分绝对需要反射的情况和可以有益的使用反射的情况，以及应该避免反射的情况。
+这本书里的例子将帮助你慧德这项技能。
+另外，当你读完本书，你将会理解到目前位置阻碍反射广泛使用的三个问题。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>安全</p>
+</li>
+<li>
+<p>代码复杂性</p>
+</li>
+<li>
+<p>运行时性能</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>你将会发现对安全的关注被误导了。
+Java制作是如此的精良其反射API也同样严禁的受到约束，因此安全性可以被简单的控制。
+通过学习何时使用反射，何时不使用反射你将避免不表的复杂代码，这些代码通常都是使用反射不熟练的结果。
+另外，你将会学习评估你的设计的性能，从而确保生成的代码满足性能要求。</p>
+</div>
+<div class="paragraph">
+<p>这篇简介简述了反射，但几乎没有提到它的价值。
+软件维护成本是开发成本的三到四倍或更多倍。
+软件市场正在增加对灵活性的需求。
+知道如何生产灵活的代码会增加你在市场上的价值。
+反射——反思后的行为改变——是通往灵活软件的路。
+反射的承诺是伟大的，它的时代已经来临。
+让我们开始吧。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_走进程序员乔治">走进程序员乔治</h3>
+<div class="paragraph">
+<p>乔治是一家先进的动物模拟软件公司负责野生动物组件的程序员。
+在他的日常工作中，乔治每天都要面临许多挑战比如前面提到的那些。
+在这本书中，我们将跟随乔治发现使用反射解决问题的好处。</p>
+</div>
+<div class="paragraph">
+<p>乔治目前正在一个实现用户界面的团队中工作。
+乔治的团队使用几个标准的Java可视化组件，其他一些是内部开发的开源组件，还有一些是从第三方获得许可的组件。
+所有这些组件都集成到团队应用的用户界面中。</p>
+</div>
+<div class="paragraph">
+<p>每个组件提供一个 <code>setColor</code> 方法，其接受 <code>java.awt.Color</code> 作为参数。
+但是，这些组件层次结构的设置使得他们唯一通用基类是 <code>java.lang.Object</code> 。
+无法使用支持 <code>setColor</code> 方法的公共类型引用这些组件。</p>
+</div>
+<div class="paragraph">
+<p>这种情况给乔治的团队带来了问题。
+他们只想调用 <code>setColor</code> 方法而不管组件的具体类型。
+缺少声明 <code>setColor</code> 的通用类型意味着团队需要做更多的工作。
+如果这个场景看起来不自然，我们邀请您探索JDK的API，看看支持相同方法但没有实现公共接口的类的数量。</p>
+</div>
+<div class="sect3">
+<h4 id="_选择反射">选择反射</h4>
+<div class="paragraph">
+<p>给定一个组件，团队的代码必须完成以下两个步骤：
+1. 找到组件支持的 <code>setColor</code> 方法。
+2. 调用 <code>setColor</code> 方法传入所需颜色。</p>
+</div>
+<div class="paragraph">
+<p>手动完成这些步骤有很多选择。
+让我们审视以下每个方法。</p>
+</div>
+<div class="paragraph">
+<p>如果乔治团队控制所有源代码，组件就能够重构为实现声明 <code>setColor</code> 方法的通用接口。
+那么，每个组件能够使用此接口类型引用而且 <code>setColor</code> 方法能在不知道具体类型的情况下调用。
+然而，团队并不能控制标准Java组件或第三方组件。
+即使他们修改了开源组件，开源项目也可能不会接受更改而留给团队自己额外维护。</p>
+</div>
+<div class="paragraph">
+<p>或者团队可以为每个组件实现一个适配器。
+每个这样的适配器可以实现一个通用接口并代理setColor调用到具体组件。
+然而，由于团队正在使用大量的组件类，此解决方案将导致要维护的类数量激增。
+另外，因为大量组件实例的存在，此解决方案将会导致系统运行时对象数量激增。
+这些权衡让使用适配器成为不可取的选择。</p>
+</div>
+<div class="paragraph">
+<p>另一种选择是使用 <code>instanceof</code> 和对象转换来在运行时发现具体类型，但其给乔治的团队留下了几个维护问题。
+首先，代码会因为条件语句和强制转换而变得臃肿，让代码变得难以阅读和理解。
+其次，代码会与每种具体类型相耦合。
+这种耦合会使团队更难以添加，移除或更改组件。
+这些问题让使用 <code>instanceof</code> 和对象转换变得不太合适。</p>
+</div>
+<div class="paragraph">
+<p>这些选择中的每一个都涉及程序更改，而且这些更改会调整或发现组件的类型。
+乔治明白只需要找到 <code>setColor</code> 方法并调用它就可以。
+学习了一点反射知识后，它明白怎样在运行时查询一个类对象的方法。
+他知道一旦找到方法就可以使用反射来调用它。
+反射特别适合解决这个问题因为其解决方案不会受类型信息约束。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_编写反射解决方案">编写反射解决方案</h4>
+<div class="paragraph">
+<p>为了解决团队的问题，乔治写来一个静态工具方法 <code>setObjectColor</code> 如下 1.1 所示。
+乔治的团队可以将视觉组件和颜色一起传递给这个实用方法。
+此方法查找类对象支持的 <code>setColor</code> 方法，并以颜色作为参数进行调用。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">setObjectColor</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">,</span> <span class="nc">Color</span> <span class="n">color</span><span class="o">)</span> <span class="o">{</span>
+  <span class="nc">Class</span> <span class="n">cls</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+  <span class="k">try</span> <span class="o">{</span>
+    <span class="nc">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"setColor"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Class</span><span class="o">[]</span> <span class="o">{</span><span class="nc">Color</span><span class="o">.</span><span class="na">class</span><span class="o">});</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="n">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">obj</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">[]</span> <span class="o">{</span><span class="n">color</span><span class="o">});</span> <i class="conum" data-value="3"></i><b>(3)</b>
+  <span class="o">}</span> <span class="k">catch</span><span class="o">(</span><span class="nc">NoSuchMethodException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span> <i class="conum" data-value="4"></i><b>(4)</b>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="n">cls</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" does not support method setColor(Color)"</span><span class="o">);</span>
+  <span class="o">}</span> <span class="k">catch</span><span class="o">(</span><span class="nc">IllegalAccessException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span> <i class="conum" data-value="5"></i><b>(5)</b>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">"Insufficient access permissions to call"</span> <span class="o">+</span> <span class="s">"setColor(:Color) in class "</span> <span class="o">+</span> <span class="n">cls</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+  <span class="o">}</span> <span class="k">catch</span><span class="o">(</span><span class="nc">InvocationTargetException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span> <i class="conum" data-value="6"></i><b>(6)</b>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">ex</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>获得类对象</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>获得方法类对象</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>在 <code>obj</code> 上调用返回的方法</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td><code>obj</code> 的类不支持 <code>setColor</code> 方法</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>无法调用 <code>setColor</code> 方法</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td><code>setColor</code> 方法抛出异常</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>此实用方法满足了团队能够在不知道组件具体类型的情况下设置组件颜色的需求。
+该方法在不侵入任何逐渐源码的情况下实现了其目标。
+它还避免了源码的膨胀，运行时内存占用膨胀，及不必要的耦合。
+乔治实现了一个非常灵活有效的解决方案。</p>
+</div>
+<div class="paragraph">
+<p>清单 1.1 中的两行使用反射来检查参数obj的结构：</p>
+</div>
+<div class="paragraph">
+<p>（1） 这一行代码查询其类对象。<br>
+（2） 这一行向查询类中带有颜色参数的 <code>setColor</code> 方法。</p>
+</div>
+<div class="paragraph">
+<p>结合起来，这两行完成了寻找要调用的 <code>setColor</code> 方法的第一个任务。</p>
+</div>
+<div class="paragraph">
+<p>这些查询都是 <strong>intropection</strong> 的一种形式，是允许程序检查自身的反射特性的术语。
+我们说setObjectColor <em>introspects</em> 它的参数 <code>obj</code>。
+一个类的每个特性都有相应的自省形式。
+接下来的几章内我们将研究每一种自省的形式。</p>
+</div>
+<div class="paragraph">
+<p>清单 1.1 中的这一行实际影响程序的行为：</p>
+</div>
+<div class="paragraph">
+<p>（3） 这一行在 <code>obj</code> 上调用返回的方法并传入颜色。</p>
+</div>
+<div class="paragraph">
+<p>这种反射方法调用也可以称为动态调用。
+<strong>动态调用</strong> 是一特性，其使程序能够在运行时调用对象上的方法，而无需在编译时指定。</p>
+</div>
+<div class="paragraph">
+<p>在这个例子中，乔治写代码时并不知道那个 <code>setColor</code> 方法会被调用，因为他不知道参数 <code>obj</code> 的类型。
+乔治写的程序在运行时通过自省来发现那个 <code>setColor</code> 方法可用。
+动态调用使乔治的程序能够通过自省获得信息采取行动，并使解决方案发挥作用。
+影响程序行为的其他反射机制将贯穿本书的其余部分。</p>
+</div>
+<div class="paragraph">
+<p>不是所有的类都支持 <code>setColor</code> 方法。
+静态调用 <code>setColor</code> 时如果对象的类不支持该方法，则编译会报错。
+当使用自省时其不知道是否支持，只有到运行时才知道是否支持 <code>setColor</code> 方法。</p>
+</div>
+<div class="paragraph">
+<p>（4） <code>obj</code> 的类不支持 <code>setColor</code> 方法。</p>
+</div>
+<div class="paragraph">
+<p>对于自省代码来说，处理这种异常情况很重要。
+乔治的团队保证每个视觉组件都支持 <code>setColor</code> 方法。
+如果 <code>obj</code> 参数的类型不支持该方法，则他的使用程序方法被传递了一个非法参数。
+他通过让 <code>setObjectColor</code> 抛出一个 <code>IllegalArgumentException</code> 来处理这个问题。</p>
+</div>
+<div class="paragraph">
+<p>实用方法 <code>setObjectColor</code> 可能无法访问非公开的 <code>setColor</code> 方法。
+另外，在动态调用期间， <code>setColor</code> 方法可能会抛出异常。</p>
+</div>
+<div class="paragraph">
+<p>（5） 清单 1.1 中没有访问权限来调用 <code>protected</code> 、  <code>private</code>  、 <code>packatge</code> 之类可见性的 <code>setColor</code> 方法。
+（6） 调用的 <code>setColor</code> 方法抛出异常</p>
+</div>
+<div class="paragraph">
+<p>使用动态调用的方式完善处理这些异常情况至关重要。
+简单起见，清单1.1中的代码通过在运行时异常中包装它们来处理这些异常。
+当然，对于生产代码，这将被包装在一个团队取得一致意见的异常中，并在实用方法的 <code>throws</code> 从句中声明。</p>
+</div>
+<div class="paragraph">
+<p>所有这些运行时处理要比强制类型转换并静态调用更费时间。
+如果信息在编译时是已知的，则不需要调用自省的方法。
+动态调用通过在运行时而不是编译时解析及检查要调用的方法引带来了延迟。
+第9章将讨论分析技术来平衡性能及反射给你带来的巨大灵活性好处之间的权衡。</p>
+</div>
+<div class="paragraph">
+<p>本章剩余部分聚焦必要概念来完全理解清单 1.1。
+我们详细审视乔治用来让其工作的类。
+我们还将讨论Java支持的要素，这些要素允许乔治这样一个灵活的解决方案。</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_审查正在运行的程序">审查正在运行的程序</h3>
+<div class="paragraph">
+<p>反射是程序在运行时审查及改变其行为和结构的能力。
+前面提到的场景已经暗示反射给程序员带来了一些令人赞叹的好处。
+让我们仔细看看反射能力对Java意味着什么。</p>
+</div>
+<div class="paragraph">
+<p>把自省想象成对着镜子看自己。
+镜子为你提供了自己的形象——供你用来审查的映像/反射。
+对着镜子审视自己会给你各种有用的信息，比如你穿什么衬衫配棕色裤子或者是否有绿色的东西卡在你的牙缝里。
+这些信息在调整你的衣柜和卫生方面是无价的。</p>
+</div>
+<div class="paragraph">
+<p>镜子也能告诉你关于你行为的事情。
+你可以检查一个笑容看起来是否真诚或一个手势是否夸张。
+这些信息对于理解怎样调整你的行为来为别人留下良好的印象至关重要。</p>
+</div>
+<div class="paragraph">
+<p>类似的，一个程序为了自省则必须获得自身的描述。
+这种自我表述是反射系统中最重要的结构元素。
+通过检查自我表述，一个程序可以获得关于自身结构及行为的有效信息从而作出决策。</p>
+</div>
+<div class="paragraph">
+<p>清单 1.1 中使用 <code>Class</code> 和 <code>Method</code> 的实例来找到要调用的合适的 <code>setColor</code> 方法。
+这些对象是Java自我描述（self-representation）的一部分。
+我们将进行程序自我描述的对象称为元对象（metaobjects）。
+<em>Meta</em> 是一个前缀通常表示 <em>大约或超过</em> 。
+在这种情况下，元数据是保存程序信息的对象。</p>
+</div>
+<div class="paragraph">
+<p><code>Class</code> 和 <code>Method</code> 是其实例代表程序的类。
+我们称其为类的元对象或元对象类。
+元对象类是Java反射API的主要组成部分。</p>
+</div>
+<div class="paragraph">
+<p>我们称用来完成应用程序主要用途的对象称为基础对象。
+在上面 <code>setObjectColor</code> 的示例中，调用乔治方法的应用程序以及作为参数传递给它的对象都是基础对象。
+我们称程序的非反射部分为 <strong>基础程序</strong> 。</p>
+</div>
+<div class="paragraph">
+<p>元对象代表正在运行的应用程序的一部分因此可以描述基本程序。
+图 1.1 显示了基础对象和代表他们类的对象之间的 <code>instanceof/实例</code> 关系。
+图 1.1 中使用的图标约定是UML。
+对于不熟悉UML的读者来说，我们将在第1.7节中简要面熟这些约定。
+目前，重要的是要理解该图，该图可以理解为“fido（基本级别/base level）对象是Dog的一个实例，以及一个类对象（元数据级/metalevel）。</p>
+</div>
+<div class="paragraph">
+<p>元对象是反射式编程的一种方便的自我表示。
+想象一下如果乔治试图使用源代码或字节码作为表示，他在完成任务时会有什么麻烦。
+他必须解析程序甚至开始检查类的方法。
+相反Java元对象提供了他所需要的所有信息，而无需额外的解析。</p>
+</div>
+<div class="paragraph">
+<p>元对象通常还提供改变程序结构，行为和数据的方法。
+在我们的示例中，乔治;使用动态调用来调用其通过自省找到的方法。
+进行更改的其他反射能力包括，反射构造，动态加载和拦截方法调用。
+本书展示了如何使用这些和其他机制来解决常见确困难的软件问题。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="{images}/java/reflection/java-reflection-in-action/figure-1.svg" alt="Object Level">
+</div>
+<div class="title">Figure 1: <strong>Dog</strong> 是一个类对象，表示Dog类的元对象。对象 <strong>fido</strong> 是应用中一个Dog操作的一个实例。图中用依赖关系表示的 <code>instanceof</code> 关系将基本级别的对象连接到表示元级别类的对象。</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_在运行时获得方法">在运行时获得方法</h3>
+<div class="paragraph">
+<p>在我们开始时的例子中，乔治 <code>setObjectColor</code> 方法传递一个 <code>Object</code> 类型的参数 <code>obj</code> 。
+在知道该参数的类之前，该方法无法进行任何自省。
+因此，其第一步就是查询参数的类：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Class</span> <span class="n">cls</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>getClass</code> 方法用于在运行时访问对象的类。
+<code>getClass</code> 方法通常用于开始反射式编程，因为许多反射式任务需要类对象。
+<code>getClass</code> 是由 <code>java.lang.Object</code> 引入的，因此任何Java对象可以使用此方法获得其类对象。
+<code>getClass</code> 方法是 <code>final</code> 修饰的。
+这样可以放置Java程序员欺骗反射程序。
+如果不是 <code>final</code> 修饰的，一个程序可以覆盖 <code>getClass</code> 方法并反回错误的类。</p>
+</div>
+<div class="paragraph">
+<p><code>getClass</code> 方法返回一个 <code>java.lang.Object</code> 实例。
+Java用 <code>Class</code> 的实例来表示组成程序的类的元对象。
+在本书中，我们使用术语“类对象”来表示 <code>java.lang.Object</code> 的实例。
+类对象是最重要的元对象，因为所有Java程序都仅由类组成。</p>
+</div>
+<div class="paragraph">
+<p>类对象提供了关于一个类的字段、方法、构造函数、和嵌套类的程序元数据。
+类对象还提供关于继承层次结构的信息，并提供对反射工具的访问。
+在本章中我们将聚焦代码清单1.1中Class的使用，何其基本原理。</p>
+</div>
+<div class="paragraph">
+<p>一旦 <code>setObjectColor</code> 方法获得其参数的类对象，它将在该类对象中查找其要调用的方法。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"setColor"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Class</span><span class="o">[]</span> <span class="o">{</span><span class="nc">Color</span><span class="o">.</span><span class="na">class</span><span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>查询中的第一个参数是一个包含要查询方法名的字符串，在此例中是 <code>setColor</code> 。
+第二个参数是一个类对象数组其确定了要查询方法的参数。
+在此例中我们想要一个接受一个 <code>Color</code> 类型参数的方法，因此我们传递给 <code>getMethod</code> 一个值包含一个Color类对象元素的数组。</p>
+</div>
+<div class="paragraph">
+<p>注意，此次不使用 <code>getClass</code> 来提供Color的类对象。
+<code>getClass</code> 方法对于从一个对象引用获得类对象很有用，但当我们只知道类的名字时，我们需要另一种方式。
+类字面量是Java静态指定类对象的方式。
+从语法上来说，任何后跟 <code>.class</code> 的类名都将算做其对应类对象。
+在本示例中，乔治知道 <code>setObjectColor</code> 方法总是需要一个 <code>Color</code> 对象作为参数。
+因此他使用 <code>Color.class</code> 来指定。</p>
+</div>
+<div class="paragraph">
+<p><code>Class</code> 还有其他方法可以自省。
+这些方法的签名和返回值类型如表1.1所示。
+如上例所示，查询使用 <code>Class</code> 数组来指示参数的类型。</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">方法</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">简介</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Method getMethod(String name, Class[] parameterTypes)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回一个 <code>Method</code> 对象其表表一个有第二个参数指定签名的目标 <code>Class</code> 对象的公开方法（不管是自己类中声明的还是继承来的）。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Method getMethods()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回一个 <code>Method</code> 对象数组，这些对象代表目标 <code>Class</code> 对象支持的所有公共方法。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Method getDeclaredMethod(String name, Class[] parameterTypes)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回一个 <code>Method</code> 对象其表示一个有第二个参数指定的签名的目标类对象声明的方法。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Method getDeclaredMethods()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回一个 <code>Method</code> 对象数组其表示目标类对象声明的所有方法。</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>在查询无参数方法时，传入 <code>null</code> 是合法的，其表示一个零长度数组。
+顾名思义，getDeclaredMethod和getDeclaredMethods返回由类显式声明的方法的方法对象。
+声明的方法集不包括该类继承的方法。
+但是，这二个查询返回所有可见的方法（public、protected、package、private）</p>
+</div>
+<div class="paragraph">
+<p>查询 <code>getMethod</code> 和 <code>getMethods</code> 返回类的公共方法的方法对象。
+这两个方法覆盖的方法即包括由类声明的方法，也包括从超类继承的方法。
+但是这些查询只返回类的公开方法。</p>
+</div>
+<div class="paragraph">
+<p>使用 <code>getDeclaredMethod</code> 查询类的程序员可能不小心指定了该类未声明的方法。
+在此例中，抛出NoSuchMethodException异常，查询失败。
+当用 <code>getMethod</code> 从一个类中的公开方法中查询一个方法失败时，抛出同样的异常。</p>
+</div>
+<div class="paragraph">
+<p>在这个例子中，乔治需要找到一个方法，他使用了表1.1中的方法来查找。
+一旦检索到，这些方法对象将用来访问有关方法的信息，甚至调用它们。
+我们将在本章稍后详细讨论方法对象，但受限让我们仔细看看表1.1中的方法如何使用类对象。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_用类对象表示类型">用类对象表示类型</h3>
+<div class="paragraph">
+<p>对表1.1中方法的讨论表明Java反射使用Class的实例来表示类型。
+例如，清单1.1中的getMethod使用Class数组来指示所需方法的参数类型。
+对于将对象作为参数的方法，这似乎很好，但是不是有类声明创建的类型呢？</p>
+</div>
+<div class="paragraph">
+<p>考录清单1.2, 其中显示了 <code>java.util.Vector</code> 的部分代码片段。
+一个方法使用接口类型作为参数，另一个使用数组，第三个使用基本数据类型。
+你必须知道怎样对Vector之类的具有此类参数方法的类进行自省。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Vector</span><span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span> <span class="nc">Collection</span> <span class="n">c</span> <span class="o">)</span> <span class="o">{}</span>
+  <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span>    <span class="nf">copyInto</span><span class="o">(</span> <span class="nc">Object</span><span class="o">[]</span> <span class="n">anArray</span> <span class="o">)</span> <span class="o">{}</span>
+  <span class="kd">public</span> <span class="kd">synchronized</span> <span class="nc">Object</span>  <span class="nf">get</span><span class="o">(</span> <span class="kt">int</span> <span class="n">index</span> <span class="o">)</span> <span class="o">{}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">方法</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">简介</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String getName()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回目标Class对象的全限定名</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class getComponentType()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">如果目标对象是数组的Class对象，则返回表示数组元素类型的Class对象</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean isArray()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">当且仅当目标目标对象表示一个数组时才返回 <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean isInterface()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">当且仅当目标目标对象表示一个接口时才返回 <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean isInterface()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">当且仅当目标目标对象表示一个原始类型时才返回 <code>true</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Java通过引入类对象来表示原始类型，数组和接口类型。
+这些类对象无法完成许多其他类对象可以执行的所有操作。
+例如，你无法为原始类型和接口创建新的实例。
+但是此类类对象对于进行自省是必要的。
+表1.2显示了支持表示Class类型的方法。</p>
+</div>
+<div class="paragraph">
+<p>本节的其余部分将更详细的说明Java如何使用类对象表示原始类型，接口和数组类型。
+在本节结束之前，你应该知道如何使用 <code>getMethod</code> 之类的方法（如清单1.2所示）对Vector.class进行自省。</p>
+</div>
+<div class="sect3">
+<h4 id="_表示原始类型">表示原始类型</h4>
+<div class="paragraph">
+<p>虽然原始类型根本就不是对象，但是Java还是使用类对象来表示所有的8个原始类型。
+调用表1.1中的方法时，可以使用类字面量来指示类对象。
+例如，要指定int类型可以使用 <code>int.class</code> 。
+查询Vector类的 <code>get</code> 方法可以使用：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Method</span> <span class="n">m</span>  <span class="o">=</span> <span class="nc">Vector</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"get"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Class</span><span class="o">[]</span> <span class="o">{</span><span class="kt">int</span><span class="o">.</span><span class="na">class</span><span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以使用 <code>isPrimitive</code> 方法来辨别一个类对象是否表示一个原始类型。</p>
+</div>
+<div class="paragraph">
+<p>关键字 <code>void</code> 不是Java中的类型，其用来表示一个方法没有返回值。
+但是Java确实有一个类对象表示 <code>void</code> 。
+对于 <code>void.class</code> <code>isPrimitive</code> 方法返回true。
+在1.6节，我们涵盖了方法的自省。
+在自省方法的返回类型时 <code>void.class</code> 用来指示一个方法没有返回值。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_表示接口">表示接口</h4>
+<div class="paragraph">
+<p>Java还引入了一个类对象来表示每个声明的接口。
+Vector类的 <code>addAll</code> 方法将Collection接口的实现作为参数。
+查询Vector类的 <code>addAll</code> 方法可以写成：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Method</span> <span class="n">m</span> <span class="o">=</span> <span class="nc">Vector</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span> <span class="s">"addAll"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Class</span><span class="o">[]</span> <span class="o">{</span><span class="nc">Collection</span><span class="o">.</span><span class="na">class</span><span class="o">}</span> <span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>可以查询表示接口的类对象以获取该接口支持的方法和常量。
+方法 <code>isInterface</code> 可以用来鉴别表示接口的类对象。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_表示数组类型">表示数组类型</h4>
+<div class="paragraph">
+<p>Java数组是对象，但他们的类是由JVM在运行时创建。
+为每个元素类型和尺寸创建一个新类。
+Java数组类型同时实现了 <code>Cloneable</code> 和 <code>java.io.Serializable</code> 接口。</p>
+</div>
+<div class="paragraph">
+<p>数组的类字面量和其他任何类型的字面量一样被指定。
+例如，要指定一维Object数组的参数， 可以使用类字面量 <code>Object[].class</code> 。
+查询Vector类的 <code>copyInto</code> 方法书写如下：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Method</span> <span class="n">m</span> <span class="o">=</span> <span class="nc">Vector</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"copyInto"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Class</span><span class="o">[]{</span><span class="nc">Object</span><span class="o">[].</span><span class="na">class</span><span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>类对象是否表示数组可以使用  <code>Class</code> 的 <code>isArray</code> 方法检测。
+数组类型的成员变量可以使用 <code>getComponentType</code> 获得。
+Java将多维数组视为嵌套一维数组。
+因此，以下代码</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kt">int</span><span class="o">[][].</span><span class="na">class</span><span class="o">.</span><span class="na">getComponentType</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>返回 <code>int[].class</code> 。
+注意组件类型和元素和元素类型之间的区别。
+对于数组类型 <code>int[][]</code> ，其组件类型为 <code>int[]</code> 而元素类型为 <code>int[]</code> 。</p>
+</div>
+<div class="paragraph">
+<p>并非所有Java方法都像乔治的 <code>setColor</code> 方法接收非接口，非数组的对象参数。
+在许多情况下使用表1.2的方法对 <code>Vector</code> 的方法进行自省很重要。
+现在你理解了如何对Java方法进行自省，那么让我们来看以下获得方法对象后我们可以做什么。</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_解解method对象">解解Method对象</h3>
+<div class="paragraph">
+<p>前几节中的大多数示例都使用了关键字 <code>Method</code> ，但没有对其进行解释。
+<code>Method</code> 是表1.1中所有查询方法的返回类型，乔治使用此类型在代码清单1.1中调用了 <code>setColor</code> 方法。
+那么， <code>java.lang.reflect.Method</code> 是表示方法的元对象类就不奇怪了。
+表1.3显示了一些元对象类 <code>Method</code> 支持的方法。</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Method支持的方法</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">方法</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">描述</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class getDeclaringClass()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回声明此 <code>Method</code> 对象表示的方法的类对象。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class[] getExceptionTypes()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回表示此方法对象表示的方法声明的异常类的对象数组</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int getModifiers()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回此 <code>Method</code> 对象表示的方法的修饰符转码为 <code>int</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String getName()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回此 <code>Method</code> 对象代表的方法的方法名</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class[] getParameterTypes()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回以声明顺序排序的形参类对象数组</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class getReturnType()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回此 <code>Method</code> 对象表示的方法的返回值类对象。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object invoke(Object obj, Object[] args)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">在指定对象上以指定的对象数组作为参数调用此 <code>Method</code> 对象代表的方法</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>每个 <code>Method</code> 对象提供关于方法的方法名、参数类型、返回值类型、以及异常等信息。
+一个 <code>Method</code> 对象同时也提供能力来调用其所表示的方法。
+在我们的示例中，我们最感兴趣的是其调用方法的能力，因此此节剩余的内容我们将注意力集中于 <code>invoke</code> 方法。</p>
+</div>
+<div class="sect3">
+<h4 id="_使用动态调用">使用动态调用</h4>
+<div class="paragraph">
+<p>动态调用使程序可以在运行时调用一个方法，而无需在编译时指定其方法。
+在1.2节乔治在写程序时不知道那个setColor方法将会被调用。
+其程序依靠自省检查其参数obj的类，在运行时发现需要调用的方法。
+作为自省的结果，表示 <code>setColor</code> 方法的 <code>Method</code> 对象存储在变量 <code>method</code> 中。</p>
+</div>
+<div class="paragraph">
+<p>按照代码清单1.1进行自省后，此行将动态调用 <code>setColor</code> 方法：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="n">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">obj</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">[]</span> <span class="o">{</span><span class="n">color</span><span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这里变量 <code>color</code> 持有一个 <code>Color</code> 类型的变量。
+此行使用 <code>invoke</code> 方法调用前面使用自省获得的 <code>setColor</code> 方法。
+<code>setColor</code> 方法在 <code>obj</code> 上调用并将 <code>color</code> 的值作为参数传递给它。</p>
+</div>
+<div class="paragraph">
+<p>第一个参数作为此次方法调用的目标，或者说要执行方法的对象。
+乔治传入 <code>obj</code> 因为他像在 <code>obj</code> 上调用 <code>setColor</code> 方法。
+但如果 <code>obj</code> 的类将 <code>setColor</code> 方法声明为静态方法，其第一个参数将被呼略因为静态方法不需要调用目标对象。
+对于静态方法可以将null作为调用的第一个参数，而不会引发异常。</p>
+</div>
+<div class="paragraph">
+<p>调用的第二个参数 <code>args</code> 是一个对象数组。
+<code>invoke</code> 方法将此数组元素作为动态调用方法的实参。
+对于没有参数的放法，第二个参数可以是零长度数组或null。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_在动态调用中使用原始类型">在动态调用中使用原始类型</h4>
+<div class="paragraph">
+<p><code>invoke</code> 的第二个是一个Object数组，并且其返回值也是Object。
+当然，Java中的许多方法接受原始值作为参数并返回原始值。
+理解如何在 <code>invoke</code> 方法中使用原始类型非常重要。</p>
+</div>
+<div class="paragraph">
+<p>如果参数是原始类型， <code>invoke</code> 期待 <code>args</code> 数组的元素为原始值对应的包装类型。
+例如，当调用带有 <code>int</code> 参数的方法时，需要将 <code>int</code> 参数包装于 <code>java.lang.Integer</code> 然后放置在 <code>args</code> 数组中。
+<code>invoke</code> 方法在将参数传读给此方法调用的实际代码之前对参数进行解包。</p>
+</div>
+<div class="paragraph">
+<p><code>invoke</code> 方法通过在返回原始类型之前将他们包装起来来处理返回值。
+因此，当调用具有 <code>int</code> 返回值类型的方法时，程序将会收到一个 <code>Integer</code> 类型的返回值。
+如果调用方法声明为返回 <code>void</code> 则 <code>invoke</code> 方法返回 <code>null</code> 。</p>
+</div>
+<div class="paragraph">
+<p>因此，原始类型在传递给动态调用的方法时需要进行包装，而当接收其返回值时则会进行解包。
+为了清楚起见，请考虑下面示例中变量 <code>obj</code> 动态调用 <code>hashCode</code> 方法。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"hashCode"</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+<span class="kt">int</span> <span class="n">code</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Integer</span> <span class="n">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">obj</span><span class="o">,</span> <span class="kc">null</span><span class="o">)).</span><span class="na">intValue</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>第一行自省了无参的 <code>hashCode</code> 方法。
+此查询不会失败因为此方法在 <code>Object</code> 中就有声明。
+<code>hashCode</code> 方法返回 <code>int</code> 。
+第二行动态调用 <code>hashCode</code> 并将返回值储存在变量 <code>code</code> 中。
+注意，返回返回值包装在Integer中，并被强制转换解包。
+以上代码图解见时序图1.2中。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="{images}/java/reflection/java-reflection-in-action/figure-1.2.svg" alt="Object Level">
+</div>
+<div class="title">Figure 1.2: 使用时序图来说明 <code>getMethod</code> 方法调用。返回的箭头标记有返回值的类型。<code>invoke</code> 调用将返回的 <code>int</code> 值包装在包装在 <code>Integer</code> 对象中。</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_避免调用陷阱">避免调用陷阱</h4>
+<div class="paragraph">
+<p>有时，乔治想，“ <em>如果我有一个表示setColor的方法，为什么我需要每次都自省？我可以在第一次查询后进行缓存，并优化其余的查询。</em> ”
+当他尝试此操作时，他从随后的 <code>invoke</code> 调用中得到许多 <code>IllegalArgumentException</code> 。
+此异常消息意味着，此方法是在一个不是声明它的类的实例上调用的。</p>
+</div>
+<div class="paragraph">
+<p>乔治优化失败了因为他假设拥有相同签名的方法为相同方法。
+实际不是如此。
+在Java中，每个方法都由其签名和声明类来标识。</p>
+</div>
+<div class="paragraph">
+<p>让我们仔细审视下这个错误。
+图1.3显示了 <code>Animal</code> 和 <code>Shape</code> 类，他们都声明了具有相同签名的 <code>setColor</code> 方法。
+这两个 <code>setColor</code> 方法在Java中不是相同的方法因为它们没有相同的声明类。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="{images}/java/reflection/java-reflection-in-action/figure-1.3.svg" alt="Object Level">
+</div>
+<div class="title">Figure 1.3: 一幅UML类图。Dog是Animal的子类。Animal类和Shape类各声明了一个拥有相同签名的 <code>setColor</code> 方法。Java语言认为所示的两个方法是不同的方法。但是Dog的setColor方法和Animal的是相同的。</div>
+</div>
+<div class="paragraph">
+<p>另一个类Dog扩展了Animal并继承了其setColor方法。
+Dog的setColor方法和Animal的setColor方法相同，因为Dog的此方法是从Animal继承而来的。
+Dog的setColor方法与Shape的不是同一个。
+因此，当处理这种情况时，通常最简单的方式是每次都自省而不是使用缓存。</p>
+</div>
+<div class="paragraph">
+<p>调用 <code>invoke</code> 时也会发生其他异常。
+如果在类上调用 <code>invoke</code> 时没有适当的方法访问权限， <code>invoke</code> 抛出一个 <code>IllegalAccessException</code> 。
+例如，当试图在类外部调用一个私有方法时会发生此异常。</p>
+</div>
+<div class="paragraph">
+<p>在多种情况下均可抛出 <code>IllegalAccessException</code> 。
+执行其类不支持的方法的调用产生一个 <code>IllegalArgumentException</code> 。
+提供错误长度的参数数组或输入错误的类型也会产生 <code>IllegalArgumentException</code> 。
+如果所调用的方法发生任何异常，那么该异常将被包装于 <code>InvocationTargetException</code> 中并抛出。</p>
+</div>
+<div class="paragraph">
+<p>动态调用是Java反射中一个很重要的特性。
+如果没有这一特性，每个方法调用必须在编译时硬编码，这样就会阻止程序员灵活的去做乔治代码清单1.1中类似的事。
+在后面的章节中，我们将回到更高级程序的动态调用中，并介绍使用自省获取信息的其他强大方法。</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_图解反射">图解反射</h3>
+<div class="paragraph">
+<p>在这本书中，我们在像图1.4这样的图中使用UML。
+熟悉UML的人可能会注意到，图1.4结合了UML类图和对象图。
+反射使用元对象在运行时表示图中的所有类图实体。
+因此，将类图和对象图结合，对于清晰传达反射设计很有用。</p>
+</div>
+<div class="paragraph">
+<p>UML通常仅包含类或不对象。
+建模反射需要将两者结合，并使用instanceOf依赖关系将对象和其实例化类关联起来。
+UML定义了instanceOf依赖项，其意义与Java的instanceOf操作符相同。
+但是，本书只使用instanceOf依赖项来表明对象是类的直接实例。
+清楚起见，我们将图1.4区分为base level和metalevel，尽管该区分不是标准UML的。
+关于UML的更多细节，参见附录C。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="{images}/java/reflection/java-reflection-in-action/figure-1.4.svg" alt="figure 1.4">
+</div>
+<div class="title">Figure 1.4: 这是描述克隆羊Dolly的UML图。此图显示了一个对象dolly，它是Sheep类的实例。其将Sheep描述为实现了Cloneable的Mammal。关于此图最重要的是其同时包含对象和类，这对于描述反射系统是必须的。</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_浏览继承层次结构">浏览继承层次结构</h3>
+<div class="paragraph">
+<p>当乔治的团队使用代码清单1.1中的 <code>setObjectColor</code> 一段时间之后，玛莎遇到了一些问题。
+玛莎告诉乔治 <code>setObjectColor</code> 没有看到其组件继承的 <code>setColor</code> 方法。
+探索继承结构后，乔治和玛莎发现继承的方法是受保护的，因此下面的代码没有找到该方法。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">"setColor"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Class</span><span class="o">[]</span> <span class="o">{</span><span class="nc">Color</span><span class="o">.</span><span class="na">class</span><span class="o">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>乔治意识到这需要一个可以自省所有可见的方法，声明方法，继承方法的方法。
+回顾表1.1中的方法，乔治注意到没有方法左这个，因此他决定自己写一个。
+代码清单1.3中显示了 <code>getSupportedMethod</code> 方法的源码，此方法是乔治为完成该查询而写的。
+乔治将 <code>getSupportedMethod</code> 方法，放置在其便利设备Mopex中。
+这是乔治使用的Mopex中诸多便利方法之一，并且在整本书中我们会解释并使用它们。
+.代码清单1.3 Mopex.getSupportedMethod</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="nc">Method</span> <span class="nf">getSupportedMethod</span> <span class="o">(</span><span class="nc">Class</span> <span class="n">cls</span><span class="o">,</span>
+                                         <span class="nc">String</span> <span class="n">name</span><span class="o">,</span>
+                                         <span class="nc">Class</span><span class="o">[]</span> <span class="n">paramTypes</span><span class="o">)</span>
+  <span class="kd">throws</span> <span class="nc">NoSuchMethodException</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">cls</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">NoSuchMethodException</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="k">try</span> <span class="o">{</span>
+      <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="na">getDeclaredMethod</span><span class="o">(</span><span class="n">name</span><span class="o">,</span> <span class="n">parameterTypes</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">NoSuchMethodException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">return</span> <span class="nf">getSupportedMethod</span><span class="o">(</span><span class="n">cls</span><span class="o">.</span><span class="na">getSuperclass</span><span class="o">(),</span> <span class="n">name</span><span class="o">,</span> <span class="n">paramTypes</span><span class="o">);</span>
+    <span class="o">}</span>
+  <span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>getSupportedMethod</code> 是一个递归方法其遍历继承层次使用 <code>getDeclaredMethod</code> 来查找具有正确签名的方法。
+其使用该行代码完成遍历。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">return</span> <span class="n">getSupportedMethod</span><span class="o">(</span><span class="n">cls</span><span class="o">.</span><span class="na">getSuperclass</span><span class="o">(),</span> <span class="n">name</span><span class="o">,</span> <span class="n">paramTypes</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>方法 <code>getSuperclass</code> 返回表示目标类扩展类的类对象。
+如果类没有使用 <code>extends</code> 语句， <code>getSuperclass</code> 返回Object的类对象。
+如果 <code>cls</code> 表示Object， <code>getSuperclass</code> 返回null，并且在下一次调用 <code>getSupportedMethod</code> 方法时抛会出 <code>NoSuchMethodException</code> 异常。</p>
+</div>
+<div class="paragraph">
+<p>现在乔治已经实现了 <code>getSupportedMethod</code> 方法，其执行了他想要的自省操作，他可以修改 <code>setObjectColor</code> 来使用此新功能。
+代码清单1.4显示了 <code>setObjectColor</code> 方法的更新。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">setObjectColor</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">,</span> <span class="nc">Color</span> <span class="n">color</span><span class="o">)</span> <span class="o">{</span>
+  <span class="nc">Class</span> <span class="n">cls</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+  <span class="k">try</span> <span class="o">{</span>
+    <span class="nc">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">Mopex</span><span class="o">.</span><span class="na">getSupportedMethod</span><span class="o">(</span><span class="n">cls</span><span class="o">,</span>
+                                             <span class="s">"setColor"</span><span class="o">,</span>
+                                             <span class="k">new</span> <span class="nc">Class</span><span class="o">[]{</span><span class="nc">Color</span><span class="o">.</span><span class="na">class</span><span class="o">});</span>
+    <span class="n">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">obj</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">[]{</span><span class="n">color</span><span class="o">});</span>
+  <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">NoSuchMethodException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="n">cls</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span>
+                                       <span class="o">+</span> <span class="s">" does not support"</span>
+                                       <span class="o">+</span> <span class="s">" method setColor(:Color)"</span>
+                                       <span class="o">+</span> <span class="n">cls</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+  <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InvocationTargetException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">ex</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>此更新使 <code>setObjectColor</code> 能够获取 <code>getMethod</code> 方法无法从元对象获取的private、package和protected方法。
+但是，此更新不保证有权限来调用这些方法。
+如果 <code>setObjectColor</code> 无法访问继承的方法，并且抛出 <code>IllegalAccessException</code> 异常而不是 <code>NoSuchMethodException</code> 。</p>
+</div>
+<div class="paragraph">
+<p>乔治刚刚发现一种反射方式可以节省其精力。
+在进行反射增强前，他和玛莎需要探索继承层次结构来来诊断玛莎的问题。
+乔治增强遍历继承层次结构并报告了问题，从而避免了麻烦。
+在第二章，我们将讨论使用反射绕过可见性检查。
+现在，让我们继续讨论此工具能为乔治和玛莎带来的可能的增强。</p>
+</div>
+<div class="sect3">
+<h4 id="_内省继承层次">内省继承层次</h4>
+<div class="paragraph">
+<p>如上一节所示，运行时访问关于继承层次结构的信息可以防止额外的工作。
+获取类的父类只是Java反射提供的用于处理继承层次的众多操作之一。
+表1.4展示了Class类中声明的关于继承的方法的签名和返回值类型，和接口实现。</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">方法</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">简介</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class[] getInterfaces()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回一个包含 <code>Class</code> 对象数组，其表表目标 <code>Class</code> 对象的直接父接口。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Class getSuperclass()</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">返回表示目标 <code>Class</code> 对象的直接父类 <code>Class</code> 对象或null（如果父类是Object的话）。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean isAssignableFrom(Class cls)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">当且仅当目标对象表示的类或接口与指定的 <code>Class</code> 参数相同或与其父类或父接口相同时返回 <code>true</code> 。</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean isInstance(Object obj)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">当且仅当指定对象与目标类对象表示的对象赋值兼容时返回 <code>true</code> 。</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>getInterfaces</code> 方法返回表示接口的类对象。
+当在表示类的类对象上调用时， <code>getInterfaces</code> 返回类声明中 <code>implements</code> 子句中指定的接口的类对象。
+当在表示接口的类对象上调用时， <code>getInterfaces</code> 返回接口定义中 <code>extends</code> 子句指定接口的类对象。</p>
+</div>
+<div class="paragraph">
+<p>注意 <code>getInterfaces</code> 和 <code>getSuperclass</code> 方法中的命名与Java语言规范中定义的术语稍有不同。
+直接父类是指类声明中 <code>extends</code> 子句中命名的类。
+如果从Y到X有多一个或多个直接父类链接组成的序列，那么X是Y的父类。
+直接父接口和父接口有对应的定义。
+Consequently， <code>getSuperclass</code> return the direct superclass and <code>getInterfaces</code> returns the direct superinterfaces.
+因此， <code>getSuperclass</code> 返回父类， <code>getInterfaces</code> 返回直接父接口。</p>
+</div>
+<div class="paragraph">
+<p>获取一个类的所有方法，程序必须遍历继承层次结构。
+幸运的是，对于查询类对象是不是另一个类对象的子类来说此步骤不是不许的。
+此操作可以使用 <code>isAssignableFrom</code> 方法来完成。
+<code>isAssignableFrom</code> 这个名字有点令人困惑。
+下面示例便于我们思考：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="no">X</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="no">Y</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>as "an X field can be assigned a value from a Y field."
+大致意思是“X类型的字段可以赋一个Y类型的值”。
+例如如下代码均返回 <code>true</code> ：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Object</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">List</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">Vector</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="kt">double</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="kt">double</span><span class="o">.</span><span class="na">class</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>但以下代码返回 <code>false</code> ：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Object</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="kt">double</span><span class="o">.</span><span class="na">class</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>isInstance</code> 方法是 <code>instanceof</code> 的Java反射动态版本。
+如果目标类对象表示一个类，且其参数是一个此类或此类它类任意子类的实例 <code>isInstance</code> 返回 <code>true</code> 。
+如果目标类对象表示一个接口， 且其参数的类实现了此接口或此接口的其他任意子接口 <code>isInstance</code> 返回 <code>true</code> 。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_透露一些惊喜">透露一些惊喜</h4>
+<div class="paragraph">
+<p>在Java反射API中，有些关系乍一看让人感到惊讶。
+我们现在讨论这些关系将为我们在本书及一般的反射编程中做好准备。
+这样做好准备可以更好的进行反射式编程。</p>
+</div>
+<div class="paragraph">
+<p><code>isInstance</code> 方法可以用来展示Java反射API中关于参数类对象的有趣事实。
+下面这行代码：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Class</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isInterface</span><span class="o">(</span><span class="nc">Class</span><span class="o">.</span><span class="na">class</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>返回 <code>true</code> 。
+这意味着此类对象是Class自己的一个实例，从而产生图1.5中的 <code>instanceOf`循环依赖。
+`Class</code> 是元类的一个示例，是一个用来描述实例是类的类的术语。
+<code>Class</code> 是Java唯一的元类。</p>
+</div>
+<div class="paragraph">
+<p>在Java中，所有对象都有一个实例化的 <code>Class</code> ，并且所有类都是对象。
+没有循环依赖，则系统必须支持无限高塔的类对象，每一个都是其上一个的实例。
+Java使用循环来解决这个问题。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="{images}/java/reflection/java-reflection-in-action/figure-1.5.svg" alt="Object Level">
+</div>
+<div class="title">Figure 1.5: 对象fido是Dog类的实例。Dog是Class类的实例。Class同样是Class的实例。Class是元类因为它是一个类其实例也是类。</div>
+</div>
+<div class="paragraph">
+<p>表1.5中呈现的循环性让人们感到不舒服，因为我们本能的不信任循环定义。
+但是作为程序员我们熟悉其他类型的循环定义。
+例如，递归。
+使用递归的方法，是根据自身来定义的。
+当正确使用时，递归工作良好。
+同样， <code>java.lang.Class</code> 的定义同样有一些约束，这些约束使这种循环工作的很好。</p>
+</div>
+<div class="paragraph">
+<p>关于递归的更多信息，查看 <em>Putting Metaclasses to Work</em> 。
+《Putting Metaclasses to Work》是一本关于反射和元对象原型的高阶书籍由本书作者之一书写。
+对于那些对反射理论和基础概念感兴趣的读者是很好的资源。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_其他反射循环">其他反射循环</h4>
+<div class="paragraph">
+<p>将继承添加到前面的图中我们将获得图1.6中的排布。
+继承为图添加了更多的循环。
+<code>Object</code> 是一个 <code>Class</code> 的实例，其可以被验证，因为下面的行返回 <code>true</code> 。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="{images}/java/reflection/java-reflection-in-action/figure-1.6.svg" alt="Object Level">
+</div>
+<div class="title">Figure 1.6: Object处于Java继承层次顶端，因此元对象类，包括Class，都是Object的子类。这意味着Object的方法是反射API的一部分。所有Java类都是其唯一的元类Class的实例。这两个条件在图中创建了一个循环。</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Class</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isInstance</span><span class="o">(</span><span class="nc">Object</span><span class="o">.</span><span class="na">class</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Class是Object的子类，可以按如下代码验证：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Object</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="nc">Class</span><span class="o">.</span><span class="na">class</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>其总是返回 <code>true</code> 。
+概念上，在Java中我们已经知道了这些事实，每个对象有一个实例化的Class并且所有Class都属于Object。
+然而，令人欣慰的是，反射模型与我们前面对语言的理解一致。</p>
+</div>
+<div class="paragraph">
+<p>新的循环意味着 <code>Class</code> 和 <code>Object</code> 上的附加约束。
+这些约束在JVM加载 <code>java.lang</code> 包时确立。
+Again，a full explanation of the constraints may be found in Putting Metaclasses to Work
+同样，关于这些限制的完整解释可以在《Putting Metaclasses to Work》中找到。</p>
+</div>
+<div class="paragraph">
+<p>图1.6也说明了为什么 <code>Object</code> 是反射API的一部分。
+所有元对象继承自 <code>Object</code> ，并且其继承了其方法。
+因此，其每个方法都可用于反射式编程。</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_总结">总结</h3>
+<div class="paragraph">
+<p>反射允许程序来审查它们自己并在运行时改变其结构和行为。
+即使简单使用反射也允许程序员写代码来做程序员平时做的事情。
+这些简单的方法包括获取对象的类，检查类的方法，在运行时发现及调用方法，及浏览继承结构。</p>
+</div>
+<div class="paragraph">
+<p>元对象类 <code>Class</code> 和 <code>Method</code> 表示运行时程序的类和方法。
+其他元对象表示程序的其它部分例如字段，调用栈，类加载器。
+<code>Class</code> 有额外的方法来支持其他元对象。
+从这些元对象查询信息被称为自省。</p>
+</div>
+<div class="paragraph">
+<p>元对象也提供改变程序结构和行为的能力。
+使用动态调用，一个 <code>Method</code> 元对象可以控制调用其表示的方法。
+反射提供类一些其它方式来影响一个程序的行为和结构，例如反射访问，修改，构造及动态加载。</p>
+</div>
+<div class="paragraph">
+<p>这里有几个使用反射解决问题的例子。
+一个反射解决方案通常以从元对象查询运行中程序的信息开始。
+之后使用自省采集信息，一个反射程序使用这些信息来改变此程序的行为。</p>
+</div>
+<div class="paragraph">
+<p>每个新元对象允许我们扩展示例的范围和数量。
+这些示例揭示了我们学到的教训和我们使用的技术。
+他们每一个都包含相同的模式，通过内省获取信息，然后使用这些信息以某种方式来改变程序。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

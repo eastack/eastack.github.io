@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>JDK 源码阅读</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>JDK 源码阅读</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_flow_接口">Flow 接口</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="nn">java.util.concurrent</span><span class="o">;</span>
+
+<span class="cm">/**
+ * Interrelated interfaces and static methods for establishing
+ * flow-controlled components in which {@link Publisher Publishers}
+ * produce items consumed by one or more {@link Subscriber
+ * Subscribers}, each managed by a {@link Subscription
+ * Subscription}.
+ * 相关的接口和静态方法用来建立 Flow 控制的组件。
+ * Publishers生产元素然后被一个或多个 Subscribers 消费，每个被一个 Subscription 管理。
+ *
+ * &lt;p&gt;These interfaces correspond to the &lt;a
+ * href="http://www.reactive-streams.org/"&gt; reactive-streams&lt;/a&gt;
+ * specification.  They apply in both concurrent and distributed
+ * asynchronous settings: All (seven) methods are defined in {@code
+ * void} "one-way" message style. Communication relies on a simple form
+ * of flow control (method {@link Subscription#request}) that can be
+ * used to avoid resource management problems that may otherwise occur
+ * in "push" based systems.
+ * 响应式流规范。
+ * 其同事应用于并发和分布式异步环境：所有（7个）方法定义为void返回值，“单向”消息风格。
+ * 通信依靠一种简单的流量控制形式，其可以用来避免可能发生在基于“push”的系统中的资源管理问题。
+ * &lt;p&gt;&lt;b&gt;Examples.&lt;/b&gt; A {@link Publisher} usually defines its own
+ * {@link Subscription} implementation; constructing one in method
+ * {@code subscribe} and issuing it to the calling {@link
+ * Subscriber}. It publishes items to the subscriber asynchronously,
+ * normally using an {@link Executor}.  For example, here is a very
+ * simple publisher that only issues (when requested) a single {@code
+ * TRUE} item to a single subscriber.  Because the subscriber receives
+ * only a single item, this class does not use buffering and ordering
+ * control required in most implementations (for example {@link
+ * SubmissionPublisher}).
+ * 例如。
+ * 一个 Publisher 通常定义其自身的 Subscription 实现;
+ * 在subscribe方法中实例化一个，并将其发布给订阅者。
+ * 其异步的发布元素到订阅者，通常使用一个 Executor 。
+ * 例如，这里有一个非常简单的 publisher 它只发布一个（当需要时) TRUE 元素到单个 subscriber。
+ * 应为此 subscriber 只收到一个元素，这个类在多数实现中没有缓存和排序控制的需求（例如 SubmissionPublisher）。
+
+ * &lt;pre&gt; {@code
+ * class OneShotPublisher implements Publisher&lt;Boolean&gt; {
+ *   private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
+ *   private boolean subscribed; // true after first subscribe
+ *   public synchronized void subscribe(Subscriber&lt;? super Boolean&gt; subscriber) {
+ *     if (subscribed)
+ *       subscriber.onError(new IllegalStateException()); // only one allowed
+ *     else {
+ *       subscribed = true;
+ *       subscriber.onSubscribe(new OneShotSubscription(subscriber, executor));
+ *     }
+ *   }
+ *   static class OneShotSubscription implements Subscription {
+ *     private final Subscriber&lt;? super Boolean&gt; subscriber;
+ *     private final ExecutorService executor;
+ *     private Future&lt;?&gt; future; // to allow cancellation
+ *     private boolean completed;
+ *     OneShotSubscription(Subscriber&lt;? super Boolean&gt; subscriber,
+ *                         ExecutorService executor) {
+ *       this.subscriber = subscriber;
+ *       this.executor = executor;
+ *     }
+ *     public synchronized void request(long n) {
+ *       if (!completed) {
+ *         completed = true;
+ *         if (n &lt;= 0) {
+ *           IllegalArgumentException ex = new IllegalArgumentException();
+ *           executor.execute(() -&gt; subscriber.onError(ex));
+ *         } else {
+ *           future = executor.submit(() -&gt; {
+ *             subscriber.onNext(Boolean.TRUE);
+ *             subscriber.onComplete();
+ *           });
+ *         }
+ *       }
+ *     }
+ *     public synchronized void cancel() {
+ *       completed = true;
+ *       if (future != null) future.cancel(false);
+ *     }
+ *   }
+ * }}&lt;/pre&gt;
+ *
+ * &lt;p&gt;A {@link Subscriber} arranges that items be requested and
+ * processed.  Items (invocations of {@link Subscriber#onNext}) are
+ * not issued unless requested, but multiple items may be requested.
+ * Many Subscriber implementations can arrange this in the style of
+ * the following example, where a buffer size of 1 single-steps, and
+ * larger sizes usually allow for more efficient overlapped processing
+ * with less communication; for example with a value of 64, this keeps
+ * total outstanding requests between 32 and 64.
+ * Because Subscriber method invocations for a given {@link
+ * Subscription} are strictly ordered, there is no need for these
+ * methods to use locks or volatiles unless a Subscriber maintains
+ * multiple Subscriptions (in which case it is better to instead
+ * define multiple Subscribers, each with its own Subscription).
+ *
+ * &lt;pre&gt; {@code
+ * class SampleSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
+ *   final Consumer&lt;? super T&gt; consumer;
+ *   Subscription subscription;
+ *   final long bufferSize;
+ *   long count;
+ *   SampleSubscriber(long bufferSize, Consumer&lt;? super T&gt; consumer) {
+ *     this.bufferSize = bufferSize;
+ *     this.consumer = consumer;
+ *   }
+ *   public void onSubscribe(Subscription subscription) {
+ *     long initialRequestSize = bufferSize;
+ *     count = bufferSize - bufferSize / 2; // re-request when half consumed
+ *     (this.subscription = subscription).request(initialRequestSize);
+ *   }
+ *   public void onNext(T item) {
+ *     if (--count &lt;= 0)
+ *       subscription.request(count = bufferSize - bufferSize / 2);
+ *     consumer.accept(item);
+ *   }
+ *   public void onError(Throwable ex) { ex.printStackTrace(); }
+ *   public void onComplete() {}
+ * }}&lt;/pre&gt;
+ *
+ * &lt;p&gt;The default value of {@link #defaultBufferSize} may provide a
+ * useful starting point for choosing request sizes and capacities in
+ * Flow components based on expected rates, resources, and usages.
+ * Or, when flow control is never needed, a subscriber may initially
+ * request an effectively unbounded number of items, as in:
+ *
+ * &lt;pre&gt; {@code
+ * class UnboundedSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
+ *   public void onSubscribe(Subscription subscription) {
+ *     subscription.request(Long.MAX_VALUE); // effectively unbounded
+ *   }
+ *   public void onNext(T item) { use(item); }
+ *   public void onError(Throwable ex) { ex.printStackTrace(); }
+ *   public void onComplete() {}
+ *   void use(T item) { ... }
+ * }}&lt;/pre&gt;
+ *
+ * @author Doug Lea
+ * @since 9
+ */</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Flow</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nf">Flow</span><span class="o">()</span> <span class="o">{}</span> <span class="c1">// uninstantiable</span>
+
+    <span class="cm">/**
+     * A producer of items (and related control messages) received by
+     * Subscribers.  Each current {@link Subscriber} receives the same
+     * items (via method {@code onNext}) in the same order, unless
+     * drops or errors are encountered. If a Publisher encounters an
+     * error that does not allow items to be issued to a Subscriber,
+     * that Subscriber receives {@code onError}, and then receives no
+     * further messages.  Otherwise, when it is known that no further
+     * messages will be issued to it, a subscriber receives {@code
+     * onComplete}.  Publishers ensure that Subscriber method
+     * invocations for each subscription are strictly ordered in &lt;a
+     * href="package-summary.html#MemoryVisibility"&gt;&lt;i&gt;happens-before&lt;/i&gt;&lt;/a&gt;
+     * order.
+     *
+     * &lt;p&gt;Publishers may vary in policy about whether drops (failures
+     * to issue an item because of resource limitations) are treated
+     * as unrecoverable errors.  Publishers may also vary about
+     * whether Subscribers receive items that were produced or
+     * available before they subscribed.
+     *
+     * @param &lt;T&gt; the published item type
+     */</span>
+    <span class="nd">@FunctionalInterface</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">interface</span> <span class="nc">Publisher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+        <span class="cm">/**
+         * Adds the given Subscriber if possible.  If already
+         * subscribed, or the attempt to subscribe fails due to policy
+         * violations or errors, the Subscriber's {@code onError}
+         * method is invoked with an {@link IllegalStateException}.
+         * Otherwise, the Subscriber's {@code onSubscribe} method is
+         * invoked with a new {@link Subscription}.  Subscribers may
+         * enable receiving items by invoking the {@code request}
+         * method of this Subscription, and may unsubscribe by
+         * invoking its {@code cancel} method.
+         *
+         * @param subscriber the subscriber
+         * @throws NullPointerException if subscriber is null
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">subscribe</span><span class="o">(</span><span class="nc">Subscriber</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="no">T</span><span class="o">&gt;</span> <span class="n">subscriber</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * A receiver of messages.  The methods in this interface are
+     * invoked in strict sequential order for each {@link
+     * Subscription}.
+     *
+     * @param &lt;T&gt; the subscribed item type
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">interface</span> <span class="nc">Subscriber</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+        <span class="cm">/**
+         * Method invoked prior to invoking any other Subscriber
+         * methods for the given Subscription. If this method throws
+         * an exception, resulting behavior is not guaranteed, but may
+         * cause the Subscription not to be established or to be cancelled.
+         *
+         * &lt;p&gt;Typically, implementations of this method invoke {@code
+         * subscription.request} to enable receiving items.
+         *
+         * @param subscription a new subscription
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSubscribe</span><span class="o">(</span><span class="nc">Subscription</span> <span class="n">subscription</span><span class="o">);</span>
+
+        <span class="cm">/**
+         * Method invoked with a Subscription's next item.  If this
+         * method throws an exception, resulting behavior is not
+         * guaranteed, but may cause the Subscription to be cancelled.
+         *
+         * @param item the item
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onNext</span><span class="o">(</span><span class="no">T</span> <span class="n">item</span><span class="o">);</span>
+
+        <span class="cm">/**
+         * Method invoked upon an unrecoverable error encountered by a
+         * Publisher or Subscription, after which no other Subscriber
+         * methods are invoked by the Subscription.  If this method
+         * itself throws an exception, resulting behavior is
+         * undefined.
+         *
+         * @param throwable the exception
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onError</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">throwable</span><span class="o">);</span>
+
+        <span class="cm">/**
+         * Method invoked when it is known that no additional
+         * Subscriber method invocations will occur for a Subscription
+         * that is not already terminated by error, after which no
+         * other Subscriber methods are invoked by the Subscription.
+         * If this method throws an exception, resulting behavior is
+         * undefined.
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onComplete</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * Message control linking a {@link Publisher} and {@link
+     * Subscriber}.  Subscribers receive items only when requested,
+     * and may cancel at any time. The methods in this interface are
+     * intended to be invoked only by their Subscribers; usages in
+     * other contexts have undefined effects.
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">interface</span> <span class="nc">Subscription</span> <span class="o">{</span>
+        <span class="cm">/**
+         * Adds the given number {@code n} of items to the current
+         * unfulfilled demand for this subscription.  If {@code n} is
+         * less than or equal to zero, the Subscriber will receive an
+         * {@code onError} signal with an {@link
+         * IllegalArgumentException} argument.  Otherwise, the
+         * Subscriber will receive up to {@code n} additional {@code
+         * onNext} invocations (or fewer if terminated).
+         *
+         * @param n the increment of demand; a value of {@code
+         * Long.MAX_VALUE} may be considered as effectively unbounded
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">request</span><span class="o">(</span><span class="kt">long</span> <span class="n">n</span><span class="o">);</span>
+
+        <span class="cm">/**
+         * Causes the Subscriber to (eventually) stop receiving
+         * messages.  Implementation is best-effort -- additional
+         * messages may be received after invoking this method.
+         * A cancelled subscription need not ever receive an
+         * {@code onComplete} or {@code onError} signal.
+         */</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cancel</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**
+     * A component that acts as both a Subscriber and Publisher.
+     *
+     * @param &lt;T&gt; the subscribed item type
+     * @param &lt;R&gt; the published item type
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">interface</span> <span class="nc">Processor</span><span class="o">&lt;</span><span class="no">T</span><span class="o">,</span><span class="no">R</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="nc">Subscriber</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;,</span> <span class="nc">Publisher</span><span class="o">&lt;</span><span class="no">R</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="o">}</span>
+
+    <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">DEFAULT_BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">256</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * Returns a default value for Publisher or Subscriber buffering,
+     * that may be used in the absence of other constraints.
+     *
+     * @implNote
+     * The current value returned is 256.
+     *
+     * @return the buffer size value
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">defaultBufferSize</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="no">DEFAULT_BUFFER_SIZE</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>响应式编程简介</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>响应式编程简介</h1>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Reactor is an implementation of the Reactive Programming paradigm, which can be summed up as follows:</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Reactor 是对响应式编程范式的实现，可以总结如下：</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Reactive programming is an asynchronous programming paradigm concerned with data streams and the propagation of change.
+This means that it becomes possible to express static (e.g. arrays) or dynamic (e.g. event emitters) data streams with ease via the employed programming language(s).</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; https://en.wikipedia.org/wiki/Reactive_programming<br>
+<cite>Wikipedia</cite>
+</div>
+</div>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>响应式编程是一种关注数据流和变化传播的异步编程范式。
+这意味着可以通过使用的编程语言轻松表达静态的（例如：数组）或动态的（例如：事件发生器）数据流。</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; https://en.wikipedia.org/wiki/Reactive_programming<br>
+<cite>维基百科</cite>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>As a first step in the direction of reactive programming, Microsoft created the Reactive Extensions (Rx) library in the .NET ecosystem. Then RxJava implemented reactive programming on the JVM. As time went on, a standardization for Java emerged through the Reactive Streams effort, a specification that defines a set of interfaces and interaction rules for reactive libraries on the JVM. Its interfaces have been integrated into Java 9 under the Flow class.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>作为响应式编程之路上的第一步，微软率先在 .NET 生态系统中创建了响应式扩展（Reactive Extensions (Rx)）库。
+之后 RxJava 在 JVM 上实现了响应式编程。
+随着时间的推移，最终在 <a href="https://www.reactive-streams.org">Reactive Streams</a> 的努力下催生了 Java 中响应式流标准的规范化。
+该规范为 JVM 上的反应式库定义了一组接口和交互规则。
+这些接口现已集成在 Java 9 的 <code>Flow</code> 类下。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>The reactive programming paradigm is often presented in object-oriented languages as an extension of the Observer design pattern.
+You can also compare the main reactive streams pattern with the familiar Iterator design pattern, as there is a duality to the Iterable-Iterator pair in all of these libraries.
+One major difference is that, while an Iterator is pull-based, reactive streams are push-based.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>反应式编程范式通常在面向对象语言中作为观察者设计模式的扩展提供。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Using an iterator is an imperative programming pattern, even though the method of accessing values is solely the responsibility of the Iterable.
+Indeed, it is up to the developer to choose when to access the next() item in the sequence.
+In reactive streams, the equivalent of the above pair is Publisher-Subscriber.
+But it is the Publisher that notifies the Subscriber of newly available values as they come, and this push aspect is the key to being reactive.
+Also, operations applied to pushed values are expressed declaratively rather than imperatively: The programmer expresses the logic of the computation rather than describing its exact control flow.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>使用迭代器是一种命令式编程模式，即使访问值的方式完全是 Iterable 的责任。
+实际上，由开发人员选择何时访问序列中的 next() 项。
+在反应式流中，与上述相等的是发布者和订阅者。
+但是是发布者在新可用值到来时通知订阅者，而这种推送形式是反应式的关键。
+此外，应用于推送值的操作是以声明方式而不是命令方式表达的：程序员表达计算的逻辑而不是描述其确切的控制流程。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>In addition to pushing values, the error-handling and completion aspects are also covered in a well defined manner.
+A Publisher can push new values to its Subscriber (by calling onNext) but can also signal an error (by calling onError) or completion (by calling onComplete).
+Both errors and completion terminate the sequence.
+This can be summed up as follows:</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>除了推送值之外，错误处理和完成也以明确定义的方式进行了介绍。
+发布者可以向其订阅者推送新值（通过调用 onNext），但也可以发出错误信号（通过调用 onError）或完成（通过调用 onComplete）。
+错误和完成都会终止序列。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>This approach is very flexible.
+The pattern supports use cases where there is no value, one value, or n values (including an infinite sequence of values, such as the continuing ticks of a clock).</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>这种方式非常灵活。
+这种模式支持没有值，一个值或多个值（包括无限值序列，例如时钟的连续滴答）的情况。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>But why do we need such an asynchronous reactive library in the first place?</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>但是首先我们为什么需要这样一个异步响应式库？</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_blocking_can_be_wasteful阻塞可能会产生浪费">Blocking Can Be Wasteful/阻塞可能会产生浪费</h2>
+<div class="sectionbody">
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Modern applications can reach huge numbers of concurrent users, and, even though the capabilities of modern hardware have continued to improve, performance of modern software is still a key concern.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>现代应用程序可以覆盖大量并发用户，尽管现代硬件的功能不断提高，但现代软件的性能仍然是一个关键问题。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>There are, broadly, two ways one can improve a program’s performance:
+* parallelize to use more threads and more hardware resources.
+* seek more efficiency in how current resources are used.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>总的来说，有两种方法可以提高程序的性能：
+* 并行化以使用更多线程和更多硬件资源。
+* 在如何使用当前资源方面寻求更高的效率。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Usually, Java developers write programs by using blocking code.
+This practice is fine until there is a performance bottleneck.
+Then it is time to introduce additional threads, running similar blocking code.
+But this scaling in resource utilization can quickly introduce contention and concurrency problems.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>通常，Java 开发人员使用阻塞代码编写程序。
+这种做法很好，直到出现性能瓶颈。
+然后是时候引入额外的线程，运行类似的阻塞代码。
+但是这种资源利用率的扩展会很快引入争用和并发问题。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Worse still, blocking wastes resources.
+If you look closely, as soon as a program involves some latency (notably I/O, such as a database request or a network call), resources are wasted because threads (possibly many threads) now sit idle, waiting for data.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>更糟糕的是，阻塞会浪费资源。
+如果你仔细观察，一旦程序涉及一些延迟（特别是 I/O，例如数据库请求或网络调用），资源就会被浪费，因为线程（可能很多线程）现在处于空闲状态，等待数据。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>So the parallelization approach is not a silver bullet.
+It is necessary to access the full power of the hardware, but it is also complex to reason about and susceptible to resource wasting.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>所以并行化的方式并不是银弹。
+有必要访问硬件的全部功能，但推理也很复杂，并且容易浪费资源。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_asynchronicity_to_the_rescue异步来拯救">Asynchronicity to the Rescue?/异步来拯救？</h2>
+<div class="sectionbody">
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>The second approach mentioned earlier, seeking more efficiency, can be a solution to the resource wasting problem.
+By writing asynchronous, non-blocking code, you let the execution switch to another active task that uses the same underlying resources and later comes back to the current process when the asynchronous processing has finished.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>前面提到的第二种方法，寻求更高的效率，可以解决资源浪费问题。
+通过编写异步，非阻塞代码，你可以让执行切换到另一个使用相同底层资源的活动人物，并在异步处理完成后返回到当前进程。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>But how can you produce asynchronous code on the JVM? Java offers two models of asynchronous programming:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Callbasks</dt>
+<dd>
+<p>Asynchronous methods do not have a return value but take an extra callback parameter (a lambda or anonymous class) that gets called when the result is available. A well known example is Swing’s EventListener hierarchy.</p>
+</dd>
+<dt class="hdlist1">Futures</dt>
+<dd>
+<p>Asynchronous methods immediately return a Future&lt;T&gt;. The asynchronous process computes a T value, but the Future object wraps access to it. The value is not immediately available, and the object can be polled until the value is available. For instance, an ExecutorService running Callable&lt;T&gt; tasks use Future objects.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>但是如何在JVM上生成异步代码呢？
+Java为异步编程提供了两个模块：</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Callbacks</dt>
+<dd>
+<p>异步方法没有返回值，但需要一个额外的回调参数（一个 lambda 或匿名类），当结果可用时会调用该参数。 一个众所周知的例子是 Swing 的 EventListener 层次结构。</p>
+</dd>
+<dt class="hdlist1">Futures</dt>
+<dd>
+<p>异步方法立即返回 Future&lt;T&gt;。 异步进程计算 T 值，但 Future 对象包装了对它的访问。 该值不会立即可用，并且可以轮询该对象直到该值可用。 例如，运行 Callable&lt;T&gt; 任务的 ExecutorService 使用 Future 对象。</p>
+</dd>
+</dl>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Are these techniques good enough? Not for every use case, and both approaches have limitations.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>这些技术够好吗？ 并非适用于每个用例，两种方法都有局限性。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Callbacks are hard to compose together, quickly leading to code that is difficult to read and maintain (known as “Callback Hell”).</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>回调很难组合在一起，很快导致代码难以阅读和维护（称为“回调地狱”）。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参考">参考</h2>
+<div class="sectionbody">
+<div class="ulist bibliography">
+<ul class="bibliography">
+<li>
+<p><a id="原文"></a>[原文] <a href="https://en.wikipedia.org/wiki/Data_structure_alignment">Data structure alignment</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

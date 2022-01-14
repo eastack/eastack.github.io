@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Spring Security</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Spring Security</h1>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_配置流程">配置流程</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Security 入口是一个 Filter</p>
+</div>
+<div class="paragraph">
+<p>WebFilterChainProxy 是 WebFilter 的一个实现类，此为 Spring Security 入口，其中包含与 Spring Security 有关的过滤器(SecurityWebFilterChain)列表，在请求到来调用 <code>filter</code> 方法时逐个调用。</p>
+</div>
+<div class="listingblock">
+<div class="title">WebFluxSecurityConfigutration</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nd">@Bean</span><span class="o">(</span><span class="no">SPRING_SECURITY_WEBFILTERCHAINFILTER_BEAN_NAME</span><span class="o">)</span>
+<span class="nd">@Order</span><span class="o">(</span><span class="no">WEB_FILTER_CHAIN_FILTER_ORDER</span><span class="o">)</span>
+<span class="nc">WebFilterChainProxy</span> <span class="nf">springSecurityWebFilterChainFilter</span><span class="o">()</span> <span class="o">{</span>
+	<span class="k">return</span> <span class="k">new</span> <span class="nf">WebFilterChainProxy</span><span class="o">(</span><span class="n">getSecurityWebFilterChains</span><span class="o">());</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
