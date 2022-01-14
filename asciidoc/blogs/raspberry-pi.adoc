@@ -68,7 +68,7 @@ network={
 ----
 
 .最后拼接成下面这样写入到 `./rpi/wpa_supplicant.conf` 中
-[source, plantext]
+[source, plaintext]
 ----
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1

@@ -13,7 +13,7 @@ wpa_passphrase ipool wodemima
 ----
 +
 2. 将生成结果添加到 `/boot/wpa_supplicant.conf` 文件中
-[source, plantext]
+[source, plaintext]
 +
 .format
 ----
@@ -28,7 +28,7 @@ network={
 ----
 +
 .example
-[source, plantext]
+[source, plaintext]
 +
 ----
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev

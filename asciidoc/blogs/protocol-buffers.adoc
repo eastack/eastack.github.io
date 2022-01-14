@@ -131,16 +131,46 @@ message Foo {
 == 标量数据类型
 
 一个标量消息字段可以又有下列类型之一 —— 下表现实了 `.proto` 文件中指定的类型，以及生成类中对应的类型：
+|===
+|.proto Type|Notes|C++ Type|Java/Kotlin Type <<_1, ^[1]^>>|Python Type<<_3, ^[3]^>>|Go Type|Ruby Type|C# Type|PHP Type|Dart Type
+
+|double||double|double|float|float64|Float|double|float|double
+|float||float|float|float|float32|Float|float|float|double
+|int32|Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.|int32|int|int|int32|Fixnum or Bignum (as required)|int|integer|int
+|int64|Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.|int64|long|int/long<<_4, ^[4]^>>|int64|Bignum|long|integer/string<<_6, ^[6]^>>|Int64
+|uint32|Uses variable-length encoding.|uint32|int<<_2, ^[2]^>>|int/long<<_4, ^[4]^>>|uint32|Fixnum or Bignum (as required)|uint|integer|int
+|uint64|Uses variable-length encoding.|uint64|long<<_2, ^[2]^>>|int/long<<_4, ^[4]^>>|uint64|Bignum|ulong|integer/string<<_6, ^[6]^>>|Int64
+|sint32|Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.|int32|int|int|int32|Fixnum or Bignum (as required)|int|integer|int
+|sint64|Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.|int64|long|int/long<<_4, ^[4]^>>|int64|Bignum|long|integer/string<<_6, ^[6]^>>|Int64
+|fixed32|Always four bytes. More efficient than uint32 if values are often greater than 228.|uint32|int<<_2, ^[2]^>>|int/long<<_4, ^[4]^>>|uint32|Fixnum or Bignum (as required)|uint|integer|int
+|fixed64|Always eight bytes. More efficient than uint64 if values are often greater than 256.|uint64|long<<_2, ^[2]^>>|int/long<<_4, ^[4]^>>|uint64|Bignum|ulong|integer/string<<_6, ^[6]^>>|Int64
+|sfixed32|Always four bytes.|int32|int|int|int32|Fixnum or Bignum (as required)|int|integer|int
+|sfixed64|Always eight bytes.|int64|long|int/long<<_4, ^[4]^>>|int64|Bignum|long|integer/string<<_6, ^[6]^>>|Int64
+|bool||bool|boolean|bool|bool|TrueClass/FalseClass|bool|boolean|bool
+|string|A string must always contain UTF-8 encoded or 7-bit ASCII text, and cannot be longer than 232.|string|String|str/unicode<<_5, ^[5]^>>|string|String (UTF-8)|string|string|String
+|bytes|May contain any arbitrary sequence of bytes no longer than 232.|string|ByteString|str (Python 2)bytes (Python 3)|[]byte|String (ASCII-8BIT)|ByteString|string|List
+|===
 
 当你使用 https://developers.google.com/protocol-buffers/docs/encoding[Protocol Buffer Encoding] 序列化你的消息时，你可以在这里找到更多有关类型编码的信息。
 
-1. Kotlin 使用对应的 Java 类型，甚至无符号类型也和 Java 保持一致，来确保与 Java 代码混用时的兼容性。
-2. 在 Java 中，无符号 32 位和 64 位整数使用对应的有符号表示，最高位简单的存储在最高位中。
-3. 在所有情况下，位字段赋值都将会执行类型检查来确保值的有效性。
-4. 64 位或无符号 32 位整数在解码时始终表示为长整型，但当位字段赋值时如果需要整型则可以是整型 。
+[#_1]
+^[1]^ Kotlin 使用对应的 Java 类型，甚至无符号类型也和 Java 保持一致，来确保与 Java 代码混用时的兼容性。
+
+[#_2]
+^[2]^ 在 Java 中，无符号 32 位和 64 位整数使用对应的有符号表示，最高位简单的存储在最高位中。
+
+[#_3]
+^[3]^ 在所有情况下，位字段赋值都将会执行类型检查来确保值的有效性。
+
+[#_4]
+^[4]^ 64 位或无符号 32 位整数在解码时始终表示为长整型，但当位字段赋值时如果需要整型则可以是整型 。
 在任何情况下，设置的值应该与表示的类型相匹配。
-5. Python 字符串在解码是表示位 unicode 但如果是一个 ASCII 字符串也可以表示位 str
-6. 整型使用于 64 位机器上，string 用在 32 位机器上。
+
+[#_5]
+^[5]^ Python 字符串在解码是表示位 unicode 但如果是一个 ASCII 字符串也可以表示位 str
+
+[#_6]
+^[6]^ 整型使用于 64 位机器上，string 用在 32 位机器上。
 
 == 默认值
 
@@ -154,4 +184,39 @@ message Foo {
 * 对于 https://developers.google.com/protocol-buffers/docs/proto3#enum[枚举]类型，默认值是 *定义的首个枚举值* ，其必须为 0。
 * 对一消息类型，该字段没有设置。确切的值于语言相关。详见 https://developers.google.com/protocol-buffers/docs/reference/overview[代码生成指南]。
 
+重复字段的默认值为空（通常是对应语言中的空值）
 
+对于消息中的标量字段需要注意，消息一经解析就再也无法得知一个字段是显式设置为默认值（例如对于布尔值将设置为 `false` ）还是直接没有设置：
+当你定义消息类型时这一点你应该铭记于心。
+所以，当你不希望某些行为默认发生时，不要使用布尔值来切换某些行为。
+同时注意如果标量消息字段设置为其默认值时，这个值将不会被序列化。 
+
+查看你选择语言的 https://developers.google.com/protocol-buffers/docs/reference/overview[代码生成指南]获得更多关于生成的代码中默认值的工作细节。
+
+== 枚举
+
+当你定义一个消息类型时，你可能希望其中一个字段的值是一个预定义列表中某一个值。
+例如，假设你想要为每个 `SearchRequest` 添加一个 `corpus` 字段，这里 corpus 可以是 `UNIVERSAL` ， `WEB` ， `IMAGES` ， `LOCAL` ， `NEWS` ， `PRODUCTS` 或 `VIDEO` 。
+这可以通过在你定义的消息中添加一个包含每种可能常量值的 `enum`  轻松搞定。
+
+下面的示例中我们添加了一个名为 `Corpus` 的 `enum` 以及一个类型为 `Corpus` 的字段：
+[source, protobuf]
+----
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+  int32 result_per_page = 3;
+  enum Corpus {
+    UNIVERSAL = 0;
+    WEB = 1;
+    IMAGES = 2;
+    LOCAL = 3;
+    NEWS = 4;
+    PRODUCTS = 5;
+    VIDEO = 6;
+  }
+  Corpus corpus = 4;
+}
+
+
+----
