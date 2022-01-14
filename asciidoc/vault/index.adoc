@@ -6,7 +6,7 @@
 vault secrets enable pki
 ----
 .默认密钥引擎挂载在和引擎名称相同的路径下。如果想修改路径可以使用 `-path` 选型进行指定。
-[source, text]
+[source, plantext]
 ----
 Success! Enabled the pki secrets engine at: pki/
 ----

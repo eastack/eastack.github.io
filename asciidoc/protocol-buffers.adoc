@@ -14,7 +14,7 @@ Protocol buffers are a language-neutral, platform-neutral extensible mechanism f
 假如说你想定义一个搜索请求格式，每个搜索请求中包含一个 _查询字符串_ ，搜索结果你感兴趣的 _页码_ ，以及 _每页结果数_ 。
 那么你可以使用下面这个 `.proto` 文件来定义你的消息类型。
 
-[source,protobuf]
+[source, protobuf]
 ----
 syntax = "proto3"
 
@@ -81,7 +81,7 @@ message SearchResponse {
 == 添加注释
 
 要在你的 `.proto` 文件中添加注释，可以使用 C/C++ 风格的 `//` 和 `/**/` 语法。
-[source,protobuf]
+[source, protobuf]
 ----
 /* SearchRequest represents a search query, with pagination optionsto
  * indicate wich results to include in the response. */
