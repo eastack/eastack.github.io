@@ -80,3 +80,5 @@
 * [ ] rust-serde
 * [ ] rust-rhai
 * [ ] rust-minijinja
+* [ ] rust
+* [ ] ePBF
