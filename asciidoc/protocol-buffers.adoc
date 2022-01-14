@@ -30,12 +30,12 @@ message SearchRequest {
 * `SearchRequest` 消息定义指定了三个字段（名/值对）,每一个字段表示你想要包含在消息中数据的一部分。
 每个字段都有名称和类型。
 
-== 指定字段类型
+=== 指定字段类型
 
 在上面的示例中，每个字段都是 https://developers.google.com/protocol-buffers/docs/proto3#scalar[标量类型]：两个整型（ `page_number` 和 `result_per_page` ）和一个字符串（ `query` ）。
 但你也可以为你的字段指定复合类型，包括枚举和其他消息类型。
 
-== 分配字段编号
+=== 分配字段编号
 
 正如你所看到的，消息定义中的每个字段都有一个 *唯一编号* 。
 这些字段编号用来在 https://developers.google.com/protocol-buffers/docs/encoding[消息二进制格式] 中标识你的字段，并且当你的消息类型使用之后就不应再更改它们了。
@@ -48,7 +48,7 @@ message SearchRequest {
 另外你也不能使用 19000 到 19999 的编号（ `FieldDescriptor::kFirstReservedNumber` 到 `FieldDescriptor::kLastReservedNumber` ），因为他们是为 Protocol Buffers 实现保留的 —— 如果你在 `.proto` 文件中使用了其中任意编号编译器将报错。
 同样，你也不能使用之前 https://developers.google.com/protocol-buffers/docs/proto3#reserved[保留] 的字段编号。
 
-== 指定字段规则
+=== 指定字段规则
 
 消息字段可以是以下两种之一：
 
@@ -60,7 +60,7 @@ message SearchRequest {
 在 proto3 中，标量数字类型的重复（ `repeated` ）字段默认使用 `packed` 编码。
 你可以在 https://developers.google.com/protocol-buffers/docs/encoding#packed[Protocol Buffer Encoding] 找到更多 `packed` 编码的信息。
 
-== 添加更多消息类型
+=== 添加更多消息类型
 
 多个消息类型可以定义在单个 `.proto` 文件中。
 如果你定义多个相关消息的话这非常有用 —— 比如，如果你想要定义 `SearchResponse` 消息类型对应的响应消息格式，你可以将其添加到同一个 `.proto` 文件中：
@@ -78,7 +78,7 @@ message SearchResponse {
 }
 ----
 
-== 添加注释
+=== 添加注释
 
 要在你的 `.proto` 文件中添加注释，可以使用 C/C++ 风格的 `//` 和 `/**/` 语法。
 [source,protobuf]
@@ -93,7 +93,7 @@ message SearchResponse {
  }
 ----
 
-== 保留字段
+=== 保留字段
 
 如果你通过完全删除或注释掉某个字段来更新更新一个消息类型，未来的用户可以在对自己的类型进行更新后重新使用这个字段。
 如果他们以后再使用同一 `.proto` 文件的旧版本，会导致非常严重的问题，包括数据损坏，隐私问题等等。
@@ -110,10 +110,48 @@ message Foo {
 
 注意你不能在同一个 `reserved` 语句中混用字段名称和字段编号。
 
-== 你的 `.proto` 文件生成了什么
+=== 你的 `.proto` 文件生成了什么
 
 当你使用 https://developers.google.com/protocol-buffers/docs/proto3#generating[Protocol Buffer 编译器] 编译 `.proto` 文件时，
 编译器将根据你选择的语言生成代码，你要使用文件中描述的消息类型，包括获取和设置字段的值、将消息序列化为输出流，以及从输入流中解析消息。
 
-* 对 *C++* 来说，编译器从每个 `.proto` 文件生成 `.h` 和 `.cc` 文件，并为文件中定义的每个消息类型提供一个类。
-* 对 *Java* 来说，编译器生成一个 `.java` 文件，其中包含每个消息类型的类，以及一个用来创建消息类实例的特殊 `Builder` 类。
+* 对于 *C++* ，编译器从每个 `.proto` 文件生成 `.h` 和 `.cc` 文件，并为文件中定义的每个消息类型提供一个类。
+* 对于 *Java* ，编译器生成一个 `.java` 文件，其中包含每个消息类型的类，以及一个用来创建消息类实例的特殊 `Builder` 类。
+* 对于 *Kotlin* ，除了生成的 Java 代码，编译器为每个消息类型都生成了包含用来简化消息实例创建 DSL 的 `.kt` 文件。
+* 对于 *Python* 略有不同 —— Python 编译器会生成一个模块，其中包含 `.proto` 文件中每种消息类型的静态描述，这些描述将和元类一起在运行时创建所需的数据访问类。
+* 对于 *Go* ，编译器会生成一个 `.pb.go` 文件，其中包含文件中每种消息的类型。
+* 对于 *Ruby* ，编译器会生成一个 `.rb` 文件，其中包含一个含有你所定义消息类型的模块。
+* 对于 *Objective-C* ，编译器为每个 `.proto` 文件生成一个 `pbobjc.h` 和 `pbobjc.m` 文件，并为你文件中描述的每种消息类型提供一个类。
+* 对于 *C#* ，编译器为每个 `.proto` 文件生成一个 `.cs` 文件，为文件中描述的每种消息类型提供一个类。
+* 对于 *Dart* ，编译器会生成一个 `.pb.dart` 文件，其中包含你所定义的每个消息类型的类。
+
+你可以按照你所选语言的教程（proto3 版本即将推出）了解有关使用每种语言的API的更多信息。
+有关 API 的更多详细信息，请参阅相关 https://developers.google.com/protocol-buffers/docs/reference/overview[API 参考文献] (同样 proto3 版本即将推出)。
+
+== 标量数据类型
+
+一个标量消息字段可以又有下列类型之一 —— 下表现实了 `.proto` 文件中指定的类型，以及生成类中对应的类型：
+
+当你使用 https://developers.google.com/protocol-buffers/docs/encoding[Protocol Buffer Encoding] 序列化你的消息时，你可以在这里找到更多有关类型编码的信息。
+
+1. Kotlin 使用对应的 Java 类型，甚至无符号类型也和 Java 保持一致，来确保与 Java 代码混用时的兼容性。
+2. 在 Java 中，无符号 32 位和 64 位整数使用对应的有符号表示，最高位简单的存储在最高位中。
+3. 在所有情况下，位字段赋值都将会执行类型检查来确保值的有效性。
+4. 64 位或无符号 32 位整数在解码时始终表示为长整型，但当位字段赋值时如果需要整型则可以是整型 。
+在任何情况下，设置的值应该与表示的类型相匹配。
+5. Python 字符串在解码是表示位 unicode 但如果是一个 ASCII 字符串也可以表示位 str
+6. 整型使用于 64 位机器上，string 用在 32 位机器上。
+
+== 默认值
+
+当一个消息被解析后，如果解码后的消息不包含某些单例元素，解析后对象中对应的值将被设置为此字段的默认值。
+默认值是特定于类型的：
+
+* 对于字符串，默认值是空字符串。
+* 对于字节，默认值是空字节。
+* 对于布尔值，默认值是 false。
+* 对于数值类型，默认值是零。
+* 对于 https://developers.google.com/protocol-buffers/docs/proto3#enum[枚举]类型，默认值是 *定义的首个枚举值* ，其必须为 0。
+* 对一消息类型，该字段没有设置。确切的值于语言相关。详见 https://developers.google.com/protocol-buffers/docs/reference/overview[代码生成指南]。
+
+
