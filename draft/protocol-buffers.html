@@ -30,7 +30,11 @@
 </li>
 <li><a href="#_标量数据类型">标量数据类型</a></li>
 <li><a href="#_默认值">默认值</a></li>
-<li><a href="#_枚举">枚举</a></li>
+<li><a href="#_枚举">枚举</a>
+<ul class="sectlevel2">
+<li><a href="#_保留值">保留值</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -493,7 +497,7 @@ Protocol buffers are a language-neutral, platform-neutral extensible mechanism f
 <p>对于数值类型，默认值是零。</p>
 </li>
 <li>
-<p>对于 <a href="https://developers.google.com/protocol-buffers/docs/proto3#enum">枚举</a>类型，默认值是 <strong>定义的首个枚举值</strong> ，其必须为 0。</p>
+<p>对于 <a href="https://developers.google.com/protocol-buffers/docs/proto3#enum">枚举</a>类型，默认值是 <strong>定义的首个枚举值</strong> ，其编号必须为 0。</p>
 </li>
 <li>
 <p>对一消息类型，该字段没有设置。确切的值于语言相关。详见 <a href="https://developers.google.com/protocol-buffers/docs/reference/overview">代码生成指南</a>。</p>
@@ -542,6 +546,99 @@ Protocol buffers are a language-neutral, platform-neutral extensible mechanism f
   <span class="p">}</span>
   <span class="n">Corpus</span> <span class="na">corpus</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如你所见， <code>Corpus</code> 枚举的第一个常量映射到了编号 0：每个枚举的定义都 <strong>必须</strong> 包含一个映射到编号 0 的常量作为其首个元素。
+这是因为：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>必须有一个为零的值，这样我们就能将 0 作为数字默认值。</p>
+</li>
+<li>
+<p>在 <code>proto2</code> 中第一个枚举值总是被作为默认值，为了保持与其语义的兼容，这里零值必须是第一个元素。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>你可以通过定义别名来分配相同的值到不同的枚举常量。
+为此，你需要将 <code>allow_alias</code> 选项设置为 <code>true</code> ，否则当 protocol 编译器发现别名时将会抛出错误信息。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">MyMessage1</span> <span class="p">{</span>
+  <span class="kd">enum</span> <span class="n">EnumAllowingAlias</span> <span class="p">{</span>
+    <span class="k">option</span> <span class="na">allow_alias</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="na">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="na">STARTED</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="na">RUNNING</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">MyMessage2</span> <span class="p">{</span>
+  <span class="kd">enum</span> <span class="n">EnumNotAllowingAlias</span> <span class="p">{</span>
+    <span class="na">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="na">STARTED</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="c1">// RUNNING = 1;  // Uncommenting this line will cause a compile error inside Google and a warning message outside.</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>枚举常量必须在 32 位整型的范围内。
+因为 <code>enum</code> 值处理时使用 [varint] 编码，因为对负数进行编码效率低下因此不推荐使用。
+你可以将 <code>enum</code> 定义在消息定义内部（就像上面例子中展示的）或外部 —— 这种 <code>enum</code> 可以在整个 <code>.proto</code> 文件中的所有消息定义中使用。
+你也可以使用 <code><em>MessageType</em>.<em>EnumType</em></code> 这种语法来将一个消息中定义的 <code>enum</code> 类型作为其它消息的字段类型。</p>
+</div>
+<div class="paragraph">
+<p>当你使用 Protocol Buffer 编译器编译一个包含 <code>enum</code> 定义的 <code>.proto</code> 文件时，
+对于 Java、Kotlin 或 C++ 来说生成的代码中将会包含对应的 <code>enum</code> ，
+而对 Python 来说将会生成一个用来在运行时生成的类中创建常量符号与整型值集合 的特殊类 <code>EnumDescriptor</code> 。</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<strong>警告</strong> 生成的代码可能会受到特定语言的枚举数限制（low thousands for one language）。
+所以请检查你所使用语言的限制。
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>在反序列化时，无法识别的枚举值将会被保留在消息中，
+尽管消息反序列化时如何进行表示是特定于语言的。
+在支持值可超出指定符号范围之外的开放枚举类型的语言比如 C++ 和 Go，
+未知的枚举值被简单的存储为其底层整数表示。
+在封闭枚举类型的语言中例如 Java，枚举中的一个用例被用来存储无法识别的值，并且底层的整数可以通过特殊的访问器进行访问。
+在这两种情况下，如果消息被序列化，那么无法识别的值也会和消息一起进行序列化。</p>
+</div>
+<div class="paragraph">
+<p>关于消息中的 <code>enum</code> 在你的应用中是如何工作的可以查看你所使用语言的 <a href="https://developers.google.com/protocol-buffers/docs/reference/overview">代码生成指南</a>。</p>
+</div>
+<div class="sect2">
+<h3 id="_保留值">保留值</h3>
+<div class="paragraph">
+<p>如果你通过直接删除或注释掉的形式完全移除了一个枚举条目来更新枚举类型，将来的用户可以在进行自己的重新时使用这个数字值。
+如果他们之后又使用了同一 <code>.proto</code> 文件的旧版本，这可能会导致严重的问题，包括数据损坏，隐私问题等。
+确保这不会发生的一种方式是将你删除的条目的数字值指定为预留（ <code>reserved</code> ）。如果将来有用户尝试使用这些标识符 Protocol Buffer 编译器将会抛出错误。
+你可以通过使用 <code>max</code> 关键字指定保留的数字值范围达到最大可能值。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">enum</span> <span class="n">Foo</span> <span class="p">{</span>
+  <span class="n">reserved</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">9</span> <span class="k">to</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">40</span> <span class="k">to</span> <span class="k">max</span><span class="p">;</span>
+  <span class="n">reserved</span> <span class="s">"FOO"</span><span class="p">,</span> <span class="s">"BAR"</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>注意你不能在一个 <code>reserved</code> 语句中混用字段名和数字值 。</p>
 </div>
 </div>
 </div>
