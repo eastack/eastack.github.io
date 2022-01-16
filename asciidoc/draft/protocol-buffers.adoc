@@ -284,5 +284,208 @@ enum Foo {
 }
 ----
 
-注意你不能在一个 `reserved` 语句中混用字段名和数字值 。
+注意你不能在一个 `reserved` 语句中混用字段名和数字值。
+
+== 使用其它消息类型
+
+你可以使用其他消息类型作为字段类型。
+比如说，你想要将 `Results` 消息放到每个 `SearchResponse` 消息中 —— 你可以在同一个 `.proto` 文件中定义一个 `Result` 消息类型然后在 `SearchResponse` 指定一个 `Result` 类型的字段：
+
+[source, protobuf]
+----
+message SearchResponse {
+  repeated Result results = 1;
+}
+
+message Result {
+  string url = 1;
+  string title = 2;
+  repeated string snippets = 3;
+}
+----
+
+=== 导入定义
+
+在上面的示例中，`Result` 消息类型和 `SearchResponse` 定义在同一个文件中 —— 那如果你想用一个定义在另一个 `.proto` 文件中的消息类型作为字段类型那？
+
+你可以通过 _导入_ 他们来使用定义在其他 `.proto` 文件中的定义。
+为了导入其他 `.proto` 定义，你需要在你的文件头部添加一个导入语句：
+
+[source, protobuf]
+----
+import "myproject/other_protos.proto";
+----
+
+默认情况下，你只能使用直接导入的 `.proto` 文件中的定义。
+但无论如何，有时你可能需要将 `.proto` 文件移动到一个新的位置。
+相比于直接移动 `.proto` 文件然后一次性修改所有引用，你可以在旧的位置放一个占位用的 `.proto` 文件，
+使用 `import public` 标记重定向所有导入到新的位置。
+
+*注意 `public import` 功能目前在 Java 中暂时还不支持*
+
+----
+`import public` dependencies can be transitively relied upon by any code importing the proto containing the `import public` statement.
+// 这里是在不知道该怎么翻译（编）了
+----
+`import public` 的依赖可以通过任何导入包含 `import public` 语句的 `proto` 的代码进行传递。
+例如：
+
+[source, protobuf]
+----
+// new.proto
+// All defintions are moved here
+----
+
+[source, protobuf]
+----
+// old.proto
+// This is the proto that all clients are importing.
+import public "new.proto";
+import "other.proto";
+----
+
+[source, protobuf]
+----
+// client.proto
+import "old.proto";
+// You use defintions from old.proto and new.proto, but not other.proto
+----
+
+Protocol 编译器使用在命令行中使用 `-I` / `--proto_path` 标志指定的目录集合中搜索导入的文件。
+如果没有指定此标志，编译器在被调用的目录下查找。
+通常你应该将 `--proto_path` 标志设置为项目根目录并在所有导入而地方使用全限定名。
+
+=== 使用 proto2 消息类型
+
+可以导入 proto2 消息类型并用在 proto3 消息中，反过来也是这样。
+无论如何，proto2 枚举无法直接用在 proto3 语法中（如果导入的 proto2 消息使用那没有问题）。
+
+== 嵌套类型
+
+你可以定义并将消息类型用在其他消息类型中，如下所示 —— 这里 `Result` 消息定义在 `SearchResponse` 消息中：
+
+[source, protobuf]
+----
+message SearchResponse {
+  message Result {
+    string url = 1;
+    string title = 2;
+    repeated string snippets = 3;
+  }
+  repeat Result results = 1;
+}
+----
+
+如果你想在父消息类型外重用此消息类型，你可以像 `_Parent_._Type_` 这样应用它：
+
+[source, protobuf]
+----
+message SomeOtherMessage {
+  SearchResponse.Result result = 1;
+}
+----
+
+你还可以按照你的需求对消息进行嵌套：
+[source, protobuf]
+----
+message Outer {      // Level 0
+  message MiddleAA {   // Level1
+    message Inner {      // Level2
+      int64 ival = 1;
+      bool booly = 2;
+    }
+  }
+  message MiddleBB {   // Level1
+    message Inner {      // Level2
+      int32 ival = 1;
+      bool booly = 2;
+    }
+  }
+}
+----
+
+== 更新一个消息类型
+
+如果现有而消息类型无法满足你所有的需求 —— 比如，
+你希望为消息格式添加一个附加字段 —— 但你还想使用旧格式创建的代码，别慌！
+要做到更新消息类型而不损坏任何之前已经存在的代码真的非常简单。
+只要记住下面这几个规则就可以：
+
+* 不要修改任何已有字段的字段编号
+* 如果你添加了一个新的字段，任何使用你的“旧”消息格式序列化的消息仍然可以被新生成的代码解析。
+你应该将这些元素的默认值铭记于心，从而保证新代码可以与旧代码生成的消息正确交互。
+同样，新代码创建的消息也可以被旧代码解析：旧的二进制文件只是在解析时简单的将新字段忽略掉。
+详情查看 https://developers.google.com/protocol-buffers/docs/proto3#unknowns[未知字段] 这一章。
+* 只要更新的消息类型中不再使用这个字段号，就可以删除这个字段。
+你可能想要重命名这个字段，也许是添加前缀 “OBSOLETE_” 或者让字段编号成为被 https://developers.google.com/protocol-buffers/docs/proto3#reserved[预留]的，这样将来的用户在你的 `.proto` 文件中就不会意外重用这些编号了。
+* `int32` ， `uint32` , `int64` , `uint64` 以及 `bool` 都是兼容的 —— 
+这意味着你可以修改一个字段从这些类型中的一个类型到另一个，
+而不破坏向后或向前的兼容性。
+如果从线上解析出一个数字但其并不与对应的类型匹配，你将得到与你在 C++ 中手动强转为该类型相同的效果
+（比如，一个 64 位的数字被读取为 32 位，其将被截断为 32 位）。
+* `sint32` 和 `sint64` 之间是相互兼容的，但与其他整数类型不兼通。
+* 对于 `string` 和 `bytes` 来说，只要自己诶是有效的 UTF-8 彼此之间就是兼容的。
+* 如果字节包含消息的编码版本，那么潜入消息和字节兼容。
+* `fixed32` 与 `sfixed32` 兼容，`fixed64` 与 `sfixed64` 兼容。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
