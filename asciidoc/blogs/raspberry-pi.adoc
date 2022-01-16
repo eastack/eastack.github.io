@@ -3,35 +3,46 @@
 :description: 配置树莓派WIFI连接和开启SSH。
 :keywords: raspberrypi, 配置, ssh, wifi
 
+家里的吸尘器（我那带散热风扇的树梅派）总是折腾一番后就被闲置吃灰，下次再折腾的时经常会忘记密码之类的，索性重装。虽然整体流程上早已轻车熟路，但也总是碰到些许细节需要 `Google` 一番才能确定，所以在这里对整个操作过记录一下，方便日后自己快速查阅，希望也能对你对你有所帮助。
+
+由于我使用的是 Arch Linux 所以对此不再对此过多赘述。
+所以下面所有操作都是在 Arch Linux 下进行的了，但处理方式配置细节等可以参考。
 
 == 系统下载与安装
 
-树莓派 https://www.raspberrypi.com/software/[官方] 很贴心的提供了Ubuntu、Windoes、MacOS下的镜安装工具，
-由于这里我使用的是ArchLinux所以不再对此过多赘述，我选择了手动下载镜像然后使用 `dd` 命令手动写入的方式。
+首先我在 https://www.raspberrypi.com/software/operating-systems/[官方镜像下载主页] 下载了 Raspberry Pi OS Lite 版本的镜像。
+镜像下载后是 `zip` 格式的对其解压后就可以获得 `.img` 的镜像文件了。
 
-.下载完包含镜像的zip包后对其进行解压
+.解压下载的镜像压缩包
 [source, bash]
 ----
+// unar <下载后的镜像文件路径>
 unar 2021-10-30-raspios-bullseye-armhf-lite.zip
 ----
 
-WARNING: 这里需要注意一定要确保 `dd` 命令的 `of` 选项后所跟设备文件名准确无误后再摁下回车。
+之后就可以插入内存卡，使用 `dd` 命令将镜像写入内存卡了。
+
+WARNING: 这里需要注意一定要再三确认 `dd` 命令的 `of` 选项参数是你想要写入镜像的磁盘文件名称，因为使用 `dd` 写入后会导致指定磁盘的所有原有文件丢失。
 
 .之后插入内存卡将镜像写入
 [source, bash]
 ----
-sudo dd if=2021-10-30-raspios-bullseye-armhf-lite.img of=/dev/sdb
+sudo dd if=<解压后的镜像文件路径> of=<你的内存卡的设备路径>
+// sudo dd if=2021-10-30-raspios-bullseye-armhf-lite.img of=/dev/sdb
 ----
 
 == 系统配置
 
-这里我并不想连接外接显示器，并且希望通过WIFI进行网络连接，
-所以直接挂载树莓派的 `boot` 分区进行相应配置。
+简单起见这里我不想再连接外接显示器开机后再使用 `GUI` 对树梅派进行配置了，
+这里我选择通过直接选择修改配置文件的形式来完成配置。
 
-详情可参考官方文档
+具体详情步骤及原理可参考以下官方文档
 
 * https://www.raspberrypi.com/documentation/computers/configuration.html#setting-up-a-headless-raspberry-pi[Setting up a Headless Raspberry Pi]
 * https://www.raspberrypi.com/documentation/computers/remote-access.html#ssh[Setting up an SSH Server]
+
+要访问配置文件我们首先要对对应的分区进行挂载
+下面我们挂载树莓派的 `boot` 分区。
 
 .挂载 `boot` 分区
 [source, bash]
@@ -40,7 +51,11 @@ mkdir rpi
 sudo mount /dev/sdb1 rpi
 ----
 
-=== SSH配置
+分区挂载成功之后我们就可以开始进行配置了。
+
+=== SSH 配置
+
+开启 SSH 服务器非常简单，直接在 `boot` 分区根路径下创建一个名为 `ssh` 的文件即可。
 
 .开启SSH
 [source, bash]
@@ -49,15 +64,19 @@ cd rpi
 sudo touch ssh
 ----
 
-=== WIFI配置
+=== WIFI 配置
 
-TIP: 如果本机没有wpa_passphrase 命令可以到Wireshark提供的工具 https://www.wireshark.org/tools/wpa-psk.html[在线生成PSK]
+然后下面我们配置 WIFI 同样非常简单，直接将相关配置写入到 `boot` 分区根路径下的 `wpa_supplicant.conf` 文件中即可。
+下面我们生成 WIFI 的配置。
+
+TIP: 如果本机没有 `wpa_passphrase` 命令可以到 Wireshark 提供的工具 https://www.wireshark.org/tools/wpa-psk.html[在线生成PSK]
 
 .使用 `wpa_passphrase` 命令生成 `wpa_supplicant` 配置
 [source, bash]
 ----
 wpa_passphrase 你的WIFI 你的WIFI密码
 ----
+
 .生成如下内容（记得把注释掉的原始密码删除）
 ----
 network={
@@ -67,7 +86,8 @@ network={
 }
 ----
 
-.最后拼接成下面这样写入到 `./rpi/wpa_supplicant.conf` 中
+最后再加上其他配置拼接成下面这样写入到 `wpa_supplicant.conf` 中即可
+
 [source, plaintext]
 ----
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
@@ -80,13 +100,13 @@ network={
 }
 ----
 
-.一切就绪，最后记得卸载分区
+.一切就绪，最后我们卸载分区
 [source, bash]
 ----
 sudo umount rpi
 ----
 
-之后把内存卡插到树莓派中接通电源开机，静静等待WIFI连接后即可以通过SSH连接树莓派了。
+之后将内存卡插到树莓派中通电开机就可以了，静静等待 WIFI 连接后我们就可以通过 SSH 连接到树莓派了。
 
 TIP: 树莓派默认用户信息如下： +
 用户名： *pi* +

@@ -1,7 +1,7 @@
-all: clean build
+all: build
 
 build:
-	@cp -r static public
+	@cp -rT static public
 	@docker run --rm \
 	  --user $(shell id -u):$(shell id -g) \
 	  --volume $(shell pwd):/documents \
