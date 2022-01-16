@@ -35,6 +35,14 @@
 <li><a href="#_保留值">保留值</a></li>
 </ul>
 </li>
+<li><a href="#_使用其它消息类型">使用其它消息类型</a>
+<ul class="sectlevel2">
+<li><a href="#_导入定义">导入定义</a></li>
+<li><a href="#_使用_proto2_消息类型">使用 proto2 消息类型</a></li>
+</ul>
+</li>
+<li><a href="#_嵌套类型">嵌套类型</a></li>
+<li><a href="#_更新一个消息类型">更新一个消息类型</a></li>
 </ul>
 </div>
 </div>
@@ -638,8 +646,195 @@ Protocol buffers are a language-neutral, platform-neutral extensible mechanism f
 </div>
 </div>
 <div class="paragraph">
-<p>注意你不能在一个 <code>reserved</code> 语句中混用字段名和数字值 。</p>
+<p>注意你不能在一个 <code>reserved</code> 语句中混用字段名和数字值。</p>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_使用其它消息类型">使用其它消息类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>你可以使用其他消息类型作为字段类型。
+比如说，你想要将 <code>Results</code> 消息放到每个 <code>SearchResponse</code> 消息中 —— 你可以在同一个 <code>.proto</code> 文件中定义一个 <code>Result</code> 消息类型然后在 <code>SearchResponse</code> 指定一个 <code>Result</code> 类型的字段：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">SearchResponse</span> <span class="p">{</span>
+  <span class="k">repeated</span> <span class="n">Result</span> <span class="na">results</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">Result</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">url</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">title</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">snippets</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_导入定义">导入定义</h3>
+<div class="paragraph">
+<p>在上面的示例中，<code>Result</code> 消息类型和 <code>SearchResponse</code> 定义在同一个文件中 —— 那如果你想用一个定义在另一个 <code>.proto</code> 文件中的消息类型作为字段类型那？</p>
+</div>
+<div class="paragraph">
+<p>你可以通过 <em>导入</em> 他们来使用定义在其他 <code>.proto</code> 文件中的定义。
+为了导入其他 <code>.proto</code> 定义，你需要在你的文件头部添加一个导入语句：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="k">import</span> <span class="s">"myproject/other_protos.proto"</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>默认情况下，你只能使用直接导入的 <code>.proto</code> 文件中的定义。
+但无论如何，有时你可能需要将 <code>.proto</code> 文件移动到一个新的位置。
+相比于直接移动 <code>.proto</code> 文件然后一次性修改所有引用，你可以在旧的位置放一个占位用的 <code>.proto</code> 文件，
+使用 <code>import public</code> 标记重定向所有导入到新的位置。</p>
+</div>
+<div class="paragraph">
+<p><strong>注意 <code>public import</code> 功能目前在 Java 中暂时还不支持</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>`import public` dependencies can be transitively relied upon by any code importing the proto containing the `import public` statement.
+// 这里是在不知道该怎么翻译（编）了</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>import public</code> 的依赖可以通过任何导入包含 <code>import public</code> 语句的 <code>proto</code> 的代码进行传递。
+例如：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="c1">// new.proto</span>
+<span class="c1">// All defintions are moved here</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="c1">// old.proto</span>
+<span class="c1">// This is the proto that all clients are importing.</span>
+<span class="k">import</span> <span class="n">public</span> <span class="s">"new.proto"</span><span class="p">;</span>
+<span class="k">import</span> <span class="s">"other.proto"</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="c1">// client.proto</span>
+<span class="k">import</span> <span class="s">"old.proto"</span><span class="p">;</span>
+<span class="c1">// You use defintions from old.proto and new.proto, but not other.proto</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Protocol 编译器使用在命令行中使用 <code>-I</code> / <code>--proto_path</code> 标志指定的目录集合中搜索导入的文件。
+如果没有指定此标志，编译器在被调用的目录下查找。
+通常你应该将 <code>--proto_path</code> 标志设置为项目根目录并在所有导入而地方使用全限定名。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用_proto2_消息类型">使用 proto2 消息类型</h3>
+<div class="paragraph">
+<p>可以导入 proto2 消息类型并用在 proto3 消息中，反过来也是这样。
+无论如何，proto2 枚举无法直接用在 proto3 语法中（如果导入的 proto2 消息使用那没有问题）。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_嵌套类型">嵌套类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>你可以定义并将消息类型用在其他消息类型中，如下所示 —— 这里 <code>Result</code> 消息定义在 <code>SearchResponse</code> 消息中：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">SearchResponse</span> <span class="p">{</span>
+  <span class="kd">message</span> <span class="nc">Result</span> <span class="p">{</span>
+    <span class="kt">string</span> <span class="na">url</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kt">string</span> <span class="na">title</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="k">repeated</span> <span class="kt">string</span> <span class="na">snippets</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">repeat</span> <span class="n">Result</span> <span class="na">results</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果你想在父消息类型外重用此消息类型，你可以像 <code><em>Parent</em>.<em>Type</em></code> 这样应用它：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">SomeOtherMessage</span> <span class="p">{</span>
+  <span class="n">SearchResponse.Result</span> <span class="na">result</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>你还可以按照你的需求对消息进行嵌套：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">Outer</span> <span class="p">{</span>      <span class="c1">// Level 0</span>
+  <span class="kd">message</span> <span class="nc">MiddleAA</span> <span class="p">{</span>   <span class="c1">// Level1</span>
+    <span class="kd">message</span> <span class="nc">Inner</span> <span class="p">{</span>      <span class="c1">// Level2</span>
+      <span class="kt">int64</span> <span class="na">ival</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="kt">bool</span> <span class="na">booly</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="kd">message</span> <span class="nc">MiddleBB</span> <span class="p">{</span>   <span class="c1">// Level1</span>
+    <span class="kd">message</span> <span class="nc">Inner</span> <span class="p">{</span>      <span class="c1">// Level2</span>
+      <span class="kt">int32</span> <span class="na">ival</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="kt">bool</span> <span class="na">booly</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_更新一个消息类型">更新一个消息类型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>如果现有而消息类型无法满足你所有的需求 —— 比如，
+你希望为消息格式添加一个附加字段 —— 但你还想使用旧格式创建的代码，别慌！
+要做到更新消息类型而不损坏任何之前已经存在的代码真的非常简单。
+只要记住下面这几个规则就可以：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>不要修改任何已有字段的字段编号</p>
+</li>
+<li>
+<p>如果你添加了一个新的字段，任何使用你的“旧”消息格式序列化的消息仍然可以被新生成的代码解析。
+你应该将这些元素的默认值铭记于心，从而保证新代码可以与旧代码生成的消息正确交互。
+同样，新代码创建的消息也可以被旧代码解析：旧的二进制文件只是在解析时简单的将新字段忽略掉。
+详情查看 <a href="https://developers.google.com/protocol-buffers/docs/proto3#unknowns">未知字段</a> 这一章。</p>
+</li>
+<li>
+<p>只要更新的消息类型中不再使用这个字段号，就可以删除这个字段。
+你可能想要重命名这个字段，也许是添加前缀 “OBSOLETE_” 或者让字段编号成为被 <a href="https://developers.google.com/protocol-buffers/docs/proto3#reserved">预留</a>的，这样将来的用户在你的 <code>.proto</code> 文件中就不会意外重用这些编号了。</p>
+</li>
+<li>
+<p><code>int32</code> ， <code>uint32</code> , <code>int64</code> , <code>uint64</code> 以及 <code>bool</code> 都是兼容的 ——
+这意味着你可以修改一个字段从这些类型中的一个类型到另一个，
+而不破坏向后或向前的兼容性。
+如果从线上解析出一个数字但其并不与对应的类型匹配，你将得到与你在 C++ 中手动强转为该类型相同的效果
+（比如，一个 64 位的数字被读取为 32 位，其将被截断为 32 位）。</p>
+</li>
+<li>
+<p><code>sint32</code> 和 <code>sint64</code> 之间是相互兼容的，但与其他整数类型不兼通。</p>
+</li>
+<li>
+<p>对于 <code>string</code> 和 <code>bytes</code> 来说，只要自己诶是有效的 UTF-8 彼此之间就是兼容的。</p>
+</li>
+<li>
+<p>如果字节包含消息的编码版本，那么潜入消息和字节兼容。</p>
+</li>
+<li>
+<p><code>fixed32</code> 与 <code>sfixed32</code> 兼容，<code>fixed64</code> 与 <code>sfixed64</code> 兼容。</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
