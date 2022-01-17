@@ -181,7 +181,7 @@ message Foo {
 * 对于字节，默认值是空字节。
 * 对于布尔值，默认值是 false。
 * 对于数值类型，默认值是零。
-* 对于 https://developers.google.com/protocol-buffers/docs/proto3#enum[枚举]类型，默认值是 *定义的首个枚举值* ，其编号必须为 0。
+* 对于 https://developers.google.com/protocol-buffers/docs/proto3#enum[枚举] 类型，默认值是 *定义的首个枚举值* ，其编号必须为 0。
 * 对一消息类型，该字段没有设置。确切的值于语言相关。详见 https://developers.google.com/protocol-buffers/docs/reference/overview[代码生成指南]。
 
 重复字段的默认值为空（通常是对应语言中的空值）
@@ -189,9 +189,13 @@ message Foo {
 对于消息中的标量字段需要注意，消息一经解析就再也无法得知一个字段是显式设置为默认值（例如对于布尔值将设置为 `false` ）还是直接没有设置：
 当你定义消息类型时这一点你应该铭记于心。
 所以，当你不希望某些行为默认发生时，不要使用布尔值来切换某些行为。
-同时注意如果标量消息字段设置为其默认值时，这个值将不会被序列化。 
+同时注意如果标量消息字段设置为其默认值时，这个值将不会被序列化到线上<<default_value_1, ^[1]^>>。 
 
-查看你选择语言的 https://developers.google.com/protocol-buffers/docs/reference/overview[代码生成指南]获得更多关于生成的代码中默认值的工作细节。
+查看你选择语言的 https://developers.google.com/protocol-buffers/docs/reference/overview[代码生成指南] 获得更多关于生成的代码中默认值的工作细节。
+
+[#default_value_1]
+^[1]^ “线上”格式是指一个可解析消息的物理表示，更多可参考 https://www.ibm.com/docs/en/developer-for-zos/9.1.1?topic=messages-xml-wire-format[XML wire format]。
+
 
 == 枚举
 
@@ -249,7 +253,7 @@ message MyMessage2 {
 ----
 
 枚举常量必须在 32 位整型的范围内。
-因为 `enum` 值处理时使用 [varint] 编码，因为对负数进行编码效率低下因此不推荐使用。
+因为 `enum` 值处理时使用 https://developers.google.com/protocol-buffers/docs/encoding[Varint 编码]，因为对负数进行编码效率低下因此不推荐使用。
 你可以将 `enum` 定义在消息定义内部（就像上面例子中展示的）或外部 —— 这种 `enum` 可以在整个 `.proto` 文件中的所有消息定义中使用。
 你也可以使用 `_MessageType_._EnumType_` 这种语法来将一个消息中定义的 `enum` 类型作为其它消息的字段类型。
 
@@ -417,7 +421,7 @@ message Outer {      // Level 0
 同样，新代码创建的消息也可以被旧代码解析：旧的二进制文件只是在解析时简单的将新字段忽略掉。
 详情查看 https://developers.google.com/protocol-buffers/docs/proto3#unknowns[未知字段] 这一章。
 * 只要更新的消息类型中不再使用这个字段号，就可以删除这个字段。
-你可能想要重命名这个字段，也许是添加前缀 “OBSOLETE_” 或者让字段编号成为被 https://developers.google.com/protocol-buffers/docs/proto3#reserved[预留]的，这样将来的用户在你的 `.proto` 文件中就不会意外重用这些编号了。
+你可能想要重命名这个字段，也许是添加前缀 “OBSOLETE_” 或者让字段编号成为被 https://developers.google.com/protocol-buffers/docs/proto3#reserved[预留] 的，这样将来的用户在你的 `.proto` 文件中就不会意外重用这些编号了。
 * `int32` ， `uint32` , `int64` , `uint64` 以及 `bool` 都是兼容的 —— 
 这意味着你可以修改一个字段从这些类型中的一个类型到另一个，
 而不破坏向后或向前的兼容性。
@@ -427,17 +431,151 @@ message Outer {      // Level 0
 * 对于 `string` 和 `bytes` 来说，只要自己诶是有效的 UTF-8 彼此之间就是兼容的。
 * 如果字节包含消息的编码版本，那么潜入消息和字节兼容。
 * `fixed32` 与 `sfixed32` 兼容，`fixed64` 与 `sfixed64` 兼容。
+* 对于 `string` ， `bytes` 及消息字段， `optional` 与 `repeated` 是兼容的。
+给出一个重复字段的序列化数据作为输入，如果对应字段是原始类型的，那么希望获取一个可选字段的客户端将会使用最后一个输入值，
+或者对应字段是一个消息类型字段，那么将会合并所有的输入。
+需要注意的是，这对于数字类型（包括布尔值和枚举）通常是 *不* 安全的。
+数字类型的重复字段将以 [packed] 格式进行打包，当期待获得一个 `optional` 字段时将会无法正确解析。
+* `enum` 与 `int32` ， `uint32` ， `int64` 及 `uint64` 在物理表示上是兼容的（切记， 如果类型不匹配，值将会被截断），
+但还是要注意，消息反序列化时客户端可能以不同的方式处理他们：
+例如，无法识别的枚举类型将被暴露在消息中，但是当消息被反序列化时如何表示则是特定于语言的。
+整型字段总是只保留他们的值。
+* TODO: 将单个值改为新 `oneof` 的成员是安全且二进制兼容的。Changing a single value into a member of a new oneof is safe and binary compatible. Moving multiple fields into a new oneof may be safe if you are sure that no code sets more than one at a time. Moving any fields into an existing oneof is not safe.
 
+== 未知字段
 
+未知字段是协议良好（well-formed）的 Protocol Buffer 序列化数据，表示解析器无法识别的字段。
+例如：当旧的二进制解析一个带有新字段的新二进制数据时，这些新的字段在就的二进制中就是未知字段。
 
+最初，proto3 消息在解析时总是丢弃未知字段，但在版本 3.5 中我们又重新引入了对未知字段的保留一次来匹配 proto2 的行为。
+在版本 3.5 及更高的版本中，未知字段在解析时保留并包含在序列化输出中。
 
+== Any
 
+`Any` 消息类型可以让你将消息作为嵌入类型而无需定义他们的 `.proto` 。
+`Any` 可以包含任意序列化为 `bytes` 的消息，并附加一个作为全局唯一标识符用来解析消息类型的 URL。
+要使用 `Any` 类型，你需要 https://developers.google.com/protocol-buffers/docs/proto3#other[导入] `google/protobuf/any.proto` 。
 
+[source, protobuf]
+----
+import "google/protobuf/any.proto";
 
+message ErrorStatus {
+  string message = 1;
+  repeated google.protobuf.Any details = 2;
+}
+----
 
+给定消息类型的默认 URL 是 `type.googleapis.com/_packagename_._messagename_` 。
 
+不同语言实现支持使用运行时库从而以类型安全的形式来辅助打包或拆包 Any 值 —— 例如：
+在 Java 中 Any 类型会有 `pack()` 和 `unpack()` 访问器，而在 C++ 中则有 `PackFrom()` 和 `UnpackTo()` 方法：
 
+[source, cpp]
+----
+// Storing an arbitrary message type in Any.
+NetworkErrorDetails details = ...;
+ErrorStatus status;
+status.add_details()->PackFrom(details);
 
+// Reading an arbitrary message from Any.
+ErrorStatus status = ...;
+for (const Any& detail : status.details()) {
+  if (detail.Is<NetworkErrorDetails>()) {
+    NetworkErrorDetails network_error;
+    detail.UnpackTo(&network_error);
+    ... processing network_error ...
+  }
+}
+----
+
+*现在与 Any 类型配合使用的运行时库仍在开发中。*
+
+如果你已经熟悉 https://developers.google.com/protocol-buffers/docs/proto[proto2 语法]，
+`Any` 可以保存任何 proto3 消息，这和 可以允许扩展的 proto2 消息类似。
+
+== Oneof
+
+如果你的消息有许多字段但同时只会设置一个字段，你可以使用 oneof 特性强制保证此行为来节省内存。
+
+除了在 oneof 中所有字段共享内存并且同时只能设置一个值之外，其他方面 oneof 字段与普通字段没有什么不同。
+设置任何 oneof 的成员都将会晴空其他成员的值。
+取决于你所选择的语言你可以使用 `case()` 或 `WhichOneof()` 等特殊方法来检查 oneof 中设置了那个值。
+
+=== 使用 Oneof
+
+要在你的 `.proto` 文件中定义一个 oneof 你可以像下列示例中 `test_oneof` 那样使用 `oneof` 关键字后跟 oneof 的名称：
+[source, protobuf]
+----
+message SampleMessage {
+  oneof test_oneof {
+    string name = 4;
+    SubMessage sub_message = 9;
+  }
+}
+----
+
+之后将你的 oneof 字段添加到定义中就可以了。
+你可以添加除 `map` 和 `repeated` 字段外的任何字段。
+
+在你生成的代码中，oneof 字段拥有和普通字段一样的 getters 和 setters。
+你也会获得一个用来检查那个值（if any）在 oneof 中被设置的特殊方法。
+你可以在你所选语言的相关 https://developers.google.com/protocol-buffers/docs/reference/overview[API 参考文献] 中获得更多 oneof API 相关信息。
+
+=== Oneof 特性
+
+* 在 oneof 中设置一个 oneof 字段将会自动清除其他成员的值。
+所以如果你设置了一些 oneof 字段，则只有 _最后_ 一个字段会有值。
++
+[source, cpp]
+----
+SampleMessage message;
+message.set_name("name");
+CHECK(message.has_name());
+message.mutable_sub_message(); //Will clear name field.
+CHECK(!message.has_name());
+----
+* 如果解析器在线上遇到了同一 oneof 的多个成员，仅在最终解析出的消息中使用最后一个成员。
+* oneof 不能是 `repeated`
+* 在 oneof 上可以使用反射接口
+* 如果你将一个 oneof 字段设置为默认值（比如将 int32 设置为 0），
+那么这个 oneof 字段的“case”将被设置，并且值将被序列化到线上。
+* 如果你使用 C++，请确保你的代码不会导致内存泄漏/崩溃。
+下边这个简单示例将会导致崩溃，因为 `sub_message` 已经在调用 `set_name()` 方法时被删除了。
++
+[source, protobuf]
+----
+SampleMessage message;
+SubMessage* sub_message = message.mutable_sub_message();
+message.set_name("name");  // Will delete sub_message
+sub_message->set...        // Crashes here
+----
+* 还是在 C++ 中，如果你使用 oneof 的 `Swap()` 方法交换两个消息，那么两个消息最终会变为另一个 oneof 用例：在下面的示例中， 最终 `msg1` 将会拥有 `sub_message` 而 `msg2` 会拥有 `name` 。
++
+[source, protobuf]
+----
+SampleMessage msg1;
+msg1.set_name("name");
+SampleMessage msg2;
+msg2.mutable_sub_message();
+msg1.swap(&msg2);
+CHECK(msg1.has_sub_message());
+CHECK(msg2.has_name());
+----
+
+=== 向后兼容性问题
+
+在移除 oneof 字段时一定要小心。
+如果检查一个 oneof 的值返回了 `None` / `NOT_SET` ，
+这可能意味着 oneof 没有被设置或者其已经被设置到不同本版中的 oneof 字段上了。
+因为这里没有办法知道线上的未知字段是不是 oneof 的成员，所以也就没法区分这两种情况。
+
+==== 标签重用问题
+
+* *将字段移入或移出 oneof*：你可能会在消息序列化和解析时丢失掉某些信息（某些字段将会被清空）。
+However, you can safely move a single field into a new oneof and may be able to move multiple fields if it is known that only one is ever set.
+* *删除一个 oneof 字段然后再添加回来*：这可能会在消息被序列化和解析后清除你当前设置的 oneof 字段。
+* *拆分或合并 oneof*：这和移动普通字段有类似的问题。
 
 
 
