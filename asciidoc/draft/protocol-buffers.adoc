@@ -577,8 +577,67 @@ However, you can safely move a single field into a new oneof and may be able to 
 * *删除一个 oneof 字段然后再添加回来*：这可能会在消息被序列化和解析后清除你当前设置的 oneof 字段。
 * *拆分或合并 oneof*：这和移动普通字段有类似的问题。
 
+== Map
 
+如果你想创建一个关联映射作为你数据定义的一部分，Protocol Buffers 提供了方便快捷的语法：
+[source, protobuf]
+----
+map<key_type, value_type> map_field = N;
+----
 
+这里 `key_type` 可以是任何整数或字符串类型（也就是说，可以是除了浮点类型和字节类型之外的任何类型）。
+要注意的是枚举并不是有效的 `key_value` 。
+而 `value_type` 可以是除了另一个映射之外的任何类型。
+
+所以，比如，当你想要创建一个项目映射其中每个 `Project` 消息都和一个字符串键相关联，那么你可以像下面这样进行定义：
+[source, protobuf]
+----
+map<string, Project> projects = 3;
+----
+* 映射字段不以是可重复的（ `repeated` ）。
+* 线上格式的顺序和映射的遍历顺序对于映射值来说都是不明确的，因此你不能依赖你的映射条目是有特定顺序的。
+* 当为 `.proto` 生成文本格式时，映射按键排序，数据键按数字排序。
+* 当从线上解析或合并时，如果有重复的映射键，那么使用最后的键。
+当从文本格式解析映射时，如果有重复的键解析可能会失败。
+* 如果你为一个映射提供了键但没有值，字段的序列化行为是特定于语言的。
+在 C++，Java，Kotlin 和 Python 中对应类型的默认值被序列化，而在其他语言中没有任何东西被序列化。
+
+当前生成的映射 API 已在所有支持 proto3 的语言中可用。
+你可以查看你所选语言的 https://developers.google.com/protocol-buffers/docs/reference/overview[API 参考文档] 查看更映射 API 的信息。
+
+== 向后兼容性
+
+映射的语法在线上等同于下列定义，所以不支持映射的 Protocl Buffer 实现仍然可以处理你的数据：
+[source, protobuf]
+----
+message MapFieldEntry {
+  key_type key = 1;
+  value_type value = 2;
+}
+
+repeated MapFieldEntry map_field = N;
+----
+
+任何支持映射的 Protocol Buffer 实现都必须可以生成和接受上述定义可接受的数据。
+
+== 包
+
+你可以在 `.proto` 文件中添加一个可选的 `package` 说明符来避免 Protocol 消息类型的命名冲突。
+[suorce, protobuf]
+----
+package foo.bar;
+message Open { ... }
+----
+
+同样你也可以在定义你的消息类型时使用包说明符：
+[source, protobuf]
+----
+message Foo {
+  ...
+  foo.bar.Open open = 1;
+  ...
+}
+----
 
 
 
