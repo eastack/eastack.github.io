@@ -52,6 +52,9 @@
 <li><a href="#_向后兼容性问题">向后兼容性问题</a></li>
 </ul>
 </li>
+<li><a href="#_map">Map</a></li>
+<li><a href="#_向后兼容性">向后兼容性</a></li>
+<li><a href="#_包">包</a></li>
 </ul>
 </div>
 </div>
@@ -1050,6 +1053,104 @@ However, you can safely move a single field into a new oneof and may be able to 
 </li>
 </ul>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_map">Map</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>如果你想创建一个关联映射作为你数据定义的一部分，Protocol Buffers 提供了方便快捷的语法：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="n">map</span><span class="o">&lt;</span><span class="n">key_type</span><span class="p">,</span> <span class="n">value_type</span><span class="err">&gt;</span> <span class="na">map_field</span> <span class="o">=</span> <span class="n">N</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这里 <code>key_type</code> 可以是任何整数或字符串类型（也就是说，可以是除了浮点类型和字节类型之外的任何类型）。
+要注意的是枚举并不是有效的 <code>key_value</code> 。
+而 <code>value_type</code> 可以是除了另一个映射之外的任何类型。</p>
+</div>
+<div class="paragraph">
+<p>所以，比如，当你想要创建一个项目映射其中每个 <code>Project</code> 消息都和一个字符串键相关联，那么你可以像下面这样进行定义：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="n">map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">Project</span><span class="err">&gt;</span> <span class="na">projects</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>映射字段不以是可重复的（ <code>repeated</code> ）。</p>
+</li>
+<li>
+<p>线上格式的顺序和映射的遍历顺序对于映射值来说都是不明确的，因此你不能依赖你的映射条目是有特定顺序的。</p>
+</li>
+<li>
+<p>当为 <code>.proto</code> 生成文本格式时，映射按键排序，数据键按数字排序。</p>
+</li>
+<li>
+<p>当从线上解析或合并时，如果有重复的映射键，那么使用最后的键。
+当从文本格式解析映射时，如果有重复的键解析可能会失败。</p>
+</li>
+<li>
+<p>如果你为一个映射提供了键但没有值，字段的序列化行为是特定于语言的。
+在 C++，Java，Kotlin 和 Python 中对应类型的默认值被序列化，而在其他语言中没有任何东西被序列化。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>当前生成的映射 API 已在所有支持 proto3 的语言中可用。
+你可以查看你所选语言的 <a href="https://developers.google.com/protocol-buffers/docs/reference/overview">API 参考文档</a> 查看更映射 API 的信息。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_向后兼容性">向后兼容性</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>映射的语法在线上等同于下列定义，所以不支持映射的 Protocl Buffer 实现仍然可以处理你的数据：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">MapFieldEntry</span> <span class="p">{</span>
+  <span class="n">key_type</span> <span class="na">key</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">value_type</span> <span class="na">value</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">repeated</span> <span class="n">MapFieldEntry</span> <span class="na">map_field</span> <span class="o">=</span> <span class="n">N</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>任何支持映射的 Protocol Buffer 实现都必须可以生成和接受上述定义可接受的数据。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_包">包</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>你可以在 <code>.proto</code> 文件中添加一个可选的 <code>package</code> 说明符来避免 Protocol 消息类型的命名冲突。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>package foo.bar;
+message Open { ... }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>同样你也可以在定义你的消息类型时使用包说明符：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="protobuf"><span class="kd">message</span> <span class="nc">Foo</span> <span class="p">{</span>
+  <span class="o">...</span>
+  <span class="n">foo.bar.Open</span> <span class="na">open</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="o">...</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 </div>
