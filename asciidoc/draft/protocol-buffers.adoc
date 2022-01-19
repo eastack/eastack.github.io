@@ -639,8 +639,47 @@ message Foo {
 }
 ----
 
+包说明符对生成代码的影响方式是特定于语言的：
 
+* 在 *C++* 中生成的类被包装在一个 C++ 明明空间中。
+例如， `Open` 将会在 `foo::bar` 命名空间下。
+* 在 *Java* 和 *Kotlin* 中，包说明符被用作 Java 的包，除非你在你的 `.proto` 文件中明确提供了 `option java_package` 选项。
+* 在 *Python* 中，包指令是被忽略的，因为 Python 是根据他们在文件系统中的位置组织的。
+* 在 *Go* 中，包被用于 Go 的包名，除非你在你的 `.proto` 文件中明确提供了 `option go_package` 选项。
+* 在 *Ruby* 中，生成的类包裹在嵌套的 Ruby 命名空间中，被转换为 Ruby 要求的大写风格（首字母大写；如果第一个字符不是字母， 将会使用 `PB_` 前缀修饰）。
+例如， `Open` 将会在命名空间 `Foo::Bar` 中。
+* 在 *C#* 中包名被转化为 PascalCase 后被用做命名空间，除非你在你的 `.proto` 文件中明确提供了 `option csharp_package` 选项。
+例如， `Open` 将会在命名空间 `Foo.Bar` 下。
 
+=== 包和名称解析
+
+类型名称解析在 Protocol Buffer 语言中以类似 C++ 的方式工作：首先在最内部的空间中搜寻，然后是次内部的，以此类推，每个包都被认为是其父包的“内部”。
+一个开头的“.”（例如， `.foo.bar.Baz` ）表示从最外部范围开始。
+
+== 定义服务
+
+如果你想将你的消息类型用于 RPC（Remote Procedure Call）系统，
+你可以在一个 `.proto` 文件中定义 RPC 服务接口，
+之后 Protocol Buffer 编译器将会为你所选的语言生成服务接口的代码和存根（stubs）。
+所以，比如，你想定义一个带有一个接收 `SearchRequest` 并返回一个 `SearchResponse` 方法的RPC服务，
+你可以在你的 `.proto` 文件中做如下定义：
+[source, protobuf]
+----
+service SearchServer {
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
+----
+
+与 Protocol Buffer 一起使用最直接的 RPC 系统是 gRPC：
+一个由谷歌开发的语言和平台中立的开源 RPC 系统。
+gRPC 对于 Protocol Bufer 非常合适，
+并且可以让你通过一个特殊的 Protocol Buffer 编译插件从你的 `.proto` 文件中直接生成相关的 RPC 代码。
+
+如果你不想使用 gRPC，也可以将 Protocol Buffer 和你自己的 RPC 实现一起使用。
+你可以在 https://developers.google.com/protocol-buffers/docs/proto#services[Proto2 语言指南] 中看到更多相关信息。
+
+还有许多发展中的第三方开元项目在为 Protocol Buffer 开发 RPC 实现。
+关于我们已知的项目链接列表，可以查看 https://github.com/protocolbuffers/protobuf/blob/master/docs/third_party.md[第三方插件 Wiki] 页面。
 
 
 
