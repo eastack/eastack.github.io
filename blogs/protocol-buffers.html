@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
-<title>Protocol Buffers</title>
+<title>Protocol Buffers 语言指南</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -13,7 +13,7 @@
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>Protocol Buffers</h1>
+<h1>Protocol Buffers 语言指南</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
@@ -60,6 +60,11 @@
 </ul>
 </li>
 <li><a href="#_定义服务">定义服务</a></li>
+<li><a href="#_json_映射">JSON 映射</a>
+<ul class="sectlevel2">
+<li><a href="#_json_选项">JSON 选项</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -1225,6 +1230,184 @@ gRPC 对于 Protocol Bufer 非常合适，
 <div class="paragraph">
 <p>还有许多发展中的第三方开元项目在为 Protocol Buffer 开发 RPC 实现。
 关于我们已知的项目链接列表，可以查看 <a href="https://github.com/protocolbuffers/protobuf/blob/master/docs/third_party.md">第三方插件 Wiki</a> 页面。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_json_映射">JSON 映射</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Proto3 支持 JSON 中的编码规范，从而让系统间的数据共享变得更加轻松。
+下标按类型分类对编码进行了描述：</p>
+</div>
+<div class="paragraph">
+<p>如果 JSON 编码中的数据缺少某个值或者其值为 null，那么在解析到 Protocol Buffer 时会被解析为适当的默认值。
+如果某个字段在 Protocol Buffer 中有默认值，那么在在 JSON 编码的数据中默认将其省略来节省空间。
+有的实现可能会提供选项一个选项用来 JSON 编码中输出有默认值的字段。</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">proto3</th>
+<th class="tableblock halign-left valign-top">JSON</th>
+<th class="tableblock halign-left valign-top">JSON example</th>
+<th class="tableblock halign-left valign-top">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">{"fooBar": v, "g": null, …}</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generates JSON objects. Message field names are mapped to lowerCamelCase and become JSON object keys. If the json_name field option is specified, the specified value will be used as the key instead. Parsers accept both the lowerCamelCase name (or the one specified by the json_name option) and the original proto field name. null is an accepted value for all field types and treated as the default value of the corresponding field type.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">enum</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"FOO_BAR"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the enum value as specified in proto is used. Parsers accept both enum names and integer values.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">map&lt;K,V&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">{"k": v, …}</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All keys are converted to strings.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">repeated V</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">array</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[v, …]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">null is accepted as the empty list [].</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">bool</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true, false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true, false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"Hello World!"</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">bytes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">base64 string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"YWJjMTIzIT8kKiYoKSctPUB+"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON value will be the data encoded as a string using standard base64 encoding with paddings. Either standard or URL-safe base64 encoding with/without paddings are accepted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int32, fixed32, uint32</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1, -10, 0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON value will be a decimal number. Either numbers or strings are accepted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int64, fixed64, uint64</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"1", "-10"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON value will be a decimal string. Either numbers or strings are accepted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">float, double</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.1, -10.0, 0, "NaN", "Infinity"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON value will be a number or one of the special string values "NaN", "Infinity", and "-Infinity". Either numbers or strings are accepted. Exponent notation is also accepted.  -0 is considered equivalent to 0.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">{"@type": "url", "f": v, … }</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If the Any contains a value that has a special JSON mapping, it will be converted as follows: {"@type": xxx, "value": yyy}. Otherwise, the value will be converted into a JSON object, and the "@type" field will be inserted to indicate the actual data type.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timestamp</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"1972-01-01T10:00:20.021Z"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Duration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"1.000340012s", "1s"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Struct</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">{ … }</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any JSON object. See struct.proto.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrapper types</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">various types</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2, "2", "foo", true, "true", null, 0, …</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wrappers use the same representation in JSON as the wrapped primitive type, except that null is allowed and preserved during data conversion and transfer.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FieldMask</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"f.fooBar,h"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">See field_mask.proto.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ListValue</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">array</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[foo, bar, …]</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">value</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any JSON value. Check google.protobuf.Value for details.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NullValue</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">null</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON null</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Empty</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">{}</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An empty JSON object</p></td>
+</tr>
+</tbody>
+</table>
+<div class="sect2">
+<h3 id="_json_选项">JSON 选项</h3>
+<div class="paragraph">
+<p>一个 proto3 JSON 实现可能会提供下列选项：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>发出带有默认值的字段</strong> ：为默认值的字段在 proto3 JSON 输出中默认被忽略。
+有的实现可能会提供一个配置项来覆盖这一行为并输出字段与其默认值。</p>
+</li>
+<li>
+<p><strong>忽略未知字段</strong> ：Proto3 JSON 解析器默认情况下应该拒绝未知字段，但许多都提供来配置项来忽略未知字段。</p>
+</li>
+<li>
+<p><strong>使用 proto 字段名而不是小驼峰命名</strong> ：默认情况下 proto3 JSON 打印器应该将字段名转换为小驼分并将其用作 JSON 字段名。
+有的实现可能会提供一个使用 proto 字段名作为 JSON 字段名的配置项。
+Proto3 解析器应该可以接受转换后的小驼分和 proto 字段名两种形式。</p>
+</li>
+<li>
+<p><strong>将枚举值作为整数而不是字符串输出</strong> ：枚举值的名称默认被用于 JSON 输出。
+可能会提供一个配置项从而使用数字作为枚举的值。</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>

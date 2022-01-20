@@ -51,7 +51,7 @@
 <div class="listingblock">
 <div class="title">解压下载的镜像压缩包</div>
 <div class="content">
-<pre class="rouge highlight"><code data-lang="bash">// unar &lt;下载后的镜像文件路径&gt;
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># unar &lt;下载后的镜像文件路径&gt;</span>
 unar 2021-10-30-raspios-bullseye-armhf-lite.zip</code></pre>
 </div>
 </div>
@@ -73,8 +73,8 @@ unar 2021-10-30-raspios-bullseye-armhf-lite.zip</code></pre>
 <div class="listingblock">
 <div class="title">之后插入内存卡将镜像写入</div>
 <div class="content">
-<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>&lt;解压后的镜像文件路径&gt; <span class="nv">of</span><span class="o">=</span>&lt;你的内存卡的设备路径&gt;
-// <span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>2021-10-30-raspios-bullseye-armhf-lite.img <span class="nv">of</span><span class="o">=</span>/dev/sdb</code></pre>
+<pre class="rouge highlight"><code data-lang="bash"><span class="c"># sudo dd if=&lt;解压后的镜像文件路径&gt; of=&lt;你的内存卡的设备路径&gt;</span>
+<span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>2021-10-30-raspios-bullseye-armhf-lite.img <span class="nv">of</span><span class="o">=</span>/dev/sdb</code></pre>
 </div>
 </div>
 </div>
@@ -153,11 +153,11 @@ unar 2021-10-30-raspios-bullseye-armhf-lite.zip</code></pre>
 <div class="listingblock">
 <div class="title">生成如下内容（记得把注释掉的原始密码删除）</div>
 <div class="content">
-<pre>network={
+<pre class="rouge highlight"><code data-lang="plaintext">network={
 	ssid="你的WIFI"
 	#psk="你的WIFI密码"
 	psk=07b00558311240a51c1caf3007ba4dc9c0140a5b1589e64c6361e9b2b0367eb5
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
