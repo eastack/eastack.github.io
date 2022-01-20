@@ -1,4 +1,4 @@
-= Protocol Buffers
+= Protocol Buffers 语言指南
 :toc: right
 
 [quote, https://developers.google.com/protocol-buffers]
@@ -681,47 +681,50 @@ gRPC 对于 Protocol Bufer 非常合适，
 还有许多发展中的第三方开元项目在为 Protocol Buffer 开发 RPC 实现。
 关于我们已知的项目链接列表，可以查看 https://github.com/protocolbuffers/protobuf/blob/master/docs/third_party.md[第三方插件 Wiki] 页面。
 
+== JSON 映射
 
+Proto3 支持 JSON 中的编码规范，从而让系统间的数据共享变得更加轻松。
+下标按类型分类对编码进行了描述：
 
+如果 JSON 编码中的数据缺少某个值或者其值为 null，那么在解析到 Protocol Buffer 时会被解析为适当的默认值。
+如果某个字段在 Protocol Buffer 中有默认值，那么在在 JSON 编码的数据中默认将其省略来节省空间。 
+有的实现可能会提供选项一个选项用来 JSON 编码中输出有默认值的字段。
 
+|===
+|proto3|JSON|JSON example|Notes
 
+|message|object|{"fooBar": v, "g": null, …}|Generates JSON objects. Message field names are mapped to lowerCamelCase and become JSON object keys. If the json_name field option is specified, the specified value will be used as the key instead. Parsers accept both the lowerCamelCase name (or the one specified by the json_name option) and the original proto field name. null is an accepted value for all field types and treated as the default value of the corresponding field type.
+|enum|string|"FOO_BAR"|The name of the enum value as specified in proto is used. Parsers accept both enum names and integer values.
+|map<K,V>|object|{"k": v, …}|All keys are converted to strings.
+|repeated V|array|[v, …]|null is accepted as the empty list [].
+|bool|true, false|true, false|
+|string|string|"Hello World!"|
+|bytes|base64 string|"YWJjMTIzIT8kKiYoKSctPUB+"|JSON value will be the data encoded as a string using standard base64 encoding with paddings. Either standard or URL-safe base64 encoding with/without paddings are accepted.
+|int32, fixed32, uint32|number|1, -10, 0|JSON value will be a decimal number. Either numbers or strings are accepted.
+|int64, fixed64, uint64|string|"1", "-10"|JSON value will be a decimal string. Either numbers or strings are accepted.
+|float, double|number|1.1, -10.0, 0, "NaN", "Infinity"|JSON value will be a number or one of the special string values "NaN", "Infinity", and "-Infinity". Either numbers or strings are accepted. Exponent notation is also accepted.  -0 is considered equivalent to 0.
+|Any|object|{"@type": "url", "f": v, … }|If the Any contains a value that has a special JSON mapping, it will be converted as follows: {"@type": xxx, "value": yyy}. Otherwise, the value will be converted into a JSON object, and the "@type" field will be inserted to indicate the actual data type.
+|Timestamp|string|"1972-01-01T10:00:20.021Z"|Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted.
+|Duration|string|"1.000340012s", "1s"|Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.
+|Struct|object|{ … }|Any JSON object. See struct.proto.
+|Wrapper types|various types|2, "2", "foo", true, "true", null, 0, …|Wrappers use the same representation in JSON as the wrapped primitive type, except that null is allowed and preserved during data conversion and transfer.
+|FieldMask|string|"f.fooBar,h"|See field_mask.proto.
+|ListValue|array|[foo, bar, …]|
+|Value|value||Any JSON value. Check google.protobuf.Value for details.
+|NullValue|null||JSON null
+|Empty|object|{}|An empty JSON object
+|===
 
+=== JSON 选项
 
+一个 proto3 JSON 实现可能会提供下列选项：
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* *发出带有默认值的字段* ：为默认值的字段在 proto3 JSON 输出中默认被忽略。
+有的实现可能会提供一个配置项来覆盖这一行为并输出字段与其默认值。
+* *忽略未知字段* ：Proto3 JSON 解析器默认情况下应该拒绝未知字段，但许多都提供来配置项来忽略未知字段。 
+* *使用 proto 字段名而不是小驼峰命名* ：默认情况下 proto3 JSON 打印器应该将字段名转换为小驼分并将其用作 JSON 字段名。
+有的实现可能会提供一个使用 proto 字段名作为 JSON 字段名的配置项。
+Proto3 解析器应该可以接受转换后的小驼分和 proto 字段名两种形式。
+* *将枚举值作为整数而不是字符串输出* ：枚举值的名称默认被用于 JSON 输出。
+可能会提供一个配置项从而使用数字作为枚举的值。
 
