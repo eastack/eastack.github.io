@@ -295,7 +295,7 @@ _Meta_ 是一个前缀通常表示 _大约或超过_ 。
 .*Dog* 是一个类对象，表示Dog类的元对象。对象 *fido* 是应用中一个Dog操作的一个实例。图中用依赖关系表示的 `instanceof` 关系将基本级别的对象连接到表示元级别类的对象。
 [.text-center]
 [caption="Figure 1: "]
-[plantuml]
+[plantuml, format=svg]
 ----
 @startuml
 namespace baselevel {
@@ -607,7 +607,32 @@ int code = (Integer method.invoke(obj, null)).intValue();
 .使用时序图来说明 `getMethod` 方法调用。返回的箭头标记有返回值的类型。`invoke` 调用将返回的 `int` 值包装在包装在 `Integer` 对象中。
 [.text-center]
 [caption="Figure 1.2: "]
-image::{images}/java/reflection/java-reflection-in-action/figure-1.2.svg[Object Level]
+[plantuml, format=svg]
+----
+@startuml
+hide footbox
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":Class" as Class
+participant "__obj__" as Object
+participant "__:Method__" as Method
+
+activate User
+User -> Class: getMethod("hashCode", null)
+activate Class
+Class -> Method **
+Class --> User: Method
+deactivate Class
+User -> Method: invoke(obj, null)
+activate Method
+Method -> Object: hashCode()
+activate Object
+Object --> Method: int
+deactivate Object
+Method --> User: Integer
+@enduml
+----
 
 ==== 避免调用陷阱
 
@@ -626,7 +651,32 @@ image::{images}/java/reflection/java-reflection-in-action/figure-1.2.svg[Object 
 .一幅UML类图。Dog是Animal的子类。Animal类和Shape类各声明了一个拥有相同签名的 `setColor` 方法。Java语言认为所示的两个方法是不同的方法。但是Dog的setColor方法和Animal的是相同的。
 [.text-center]
 [caption="Figure 1.3: "]
-image::{images}/java/reflection/java-reflection-in-action/figure-1.3.svg[Object Level]
+[plantuml, format=svg]
+----
+@startuml
+note "two different\nsetColor\nmethods" as NO
+
+class Animal {
+    +setColor(c:Color)
+}
+class Shape {
+    +setColor(c:Color)
+}
+class "           Dog           " as Dog {
+}
+
+hide Animal fields
+
+hide Shape fields
+
+hide Dog fields
+hide Dog methods
+
+Animal <|-- Dog
+Shape .. NO
+Animal .. NO 
+@enduml
+----
 
 另一个类Dog扩展了Animal并继承了其setColor方法。
 Dog的setColor方法和Animal的setColor方法相同，因为Dog的此方法是从Animal继承而来的。
@@ -663,7 +713,39 @@ UML定义了instanceOf依赖项，其意义与Java的instanceOf操作符相同�
 .这是描述克隆羊Dolly的UML图。此图显示了一个对象dolly，它是Sheep类的实例。其将Sheep描述为实现了Cloneable的Mammal。关于此图最重要的是其同时包含对象和类，这对于描述反射系统是必须的。
 [.text-center]
 [caption="Figure 1.4: "]
-image::{images}/java/reflection/java-reflection-in-action/figure-1.4.svg[]
+[plantuml, format=svg]
+----
+@startuml
+namespace metalevel {
+        interface Cloneable
+        class Mammal
+        class Sheep
+        note "class object" as co
+        Cloneable <|.. Sheep
+        Mammal <|-- Sheep
+        Sheep .. co
+        Mammal .. co
+        Cloneable .. co
+}
+
+namespace baselevel {
+        class "    __dolly__    " as dolly
+        note "base level object" as blo
+        dolly .. blo
+        dolly ...|> metalevel.Sheep : instanceof
+}
+
+hide baselevel.dolly fields
+hide baselevel.dolly methods
+hide baselevel.dolly circle
+hide metalevel.Mammal fields
+hide metalevel.Mammal methods
+hide metalevel.Sheep fields
+hide metalevel.Sheep methods
+hide metalevel.Cloneable fields
+hide metalevel.Cloneable methods
+@enduml
+----
 
 === 浏览继承层次结构
 
@@ -830,7 +912,30 @@ Java使用循环来解决这个问题。
 .对象fido是Dog类的实例。Dog是Class类的实例。Class同样是Class的实例。Class是元类因为它是一个类其实例也是类。
 [.text-center]
 [caption="Figure 1.5: "]
-image::{images}/java/reflection/java-reflection-in-action/figure-1.5.svg[Object Level]
+[plantuml, format=svg]
+----
+@startuml
+namespace metalevel {
+        class "java.lang.Class" as Class << metaclass >>
+        class Dog
+        Class <|.. Dog : instanceof
+        Class <|.. Class : instanceof
+}
+
+namespace baselevel {
+        class "    __fido__    " as fido
+        fido ...|> metalevel.Dog : instanceof
+}
+
+hide metalevel.Class fields
+hide metalevel.Class methods
+hide metalevel.Dog fields
+hide metalevel.Dog methods
+hide baselevel.fido fields
+hide baselevel.fido methods
+hide baselevel.fido circle
+@enduml
+----
 
 表1.5中呈现的循环性让人们感到不舒服，因为我们本能的不信任循环定义。
 但是作为程序员我们熟悉其他类型的循环定义。
@@ -852,7 +957,36 @@ image::{images}/java/reflection/java-reflection-in-action/figure-1.5.svg[Object 
 .Object处于Java继承层次顶端，因此元对象类，包括Class，都是Object的子类。这意味着Object的方法是反射API的一部分。所有Java类都是其唯一的元类Class的实例。这两个条件在图中创建了一个循环。
 [.text-center]
 [caption="Figure 1.6: "]
-image::{images}/java/reflection/java-reflection-in-action/figure-1.6.svg[Object Level]
+[plantuml, format=svg]
+----
+@startuml
+namespace metalevel {
+        class "java.lang.Class" as Class << metaclass >>
+        class "java.lang.Object" as Object
+        class Dog
+        Class <|.. Dog : instanceof
+        Class <|.. Class : instanceof
+        Class --|> Object
+        Object ..|> Class : instanceof
+        Dog --|> Object
+}
+
+namespace baselevel {
+        class "    __fido__    " as fido
+        fido ...|> metalevel.Dog : instanceof
+}
+
+hide metalevel.Class fields
+hide metalevel.Class methods
+hide metalevel.Object fields
+hide metalevel.Object methods
+hide metalevel.Dog fields
+hide metalevel.Dog methods
+hide baselevel.fido fields
+hide baselevel.fido methods
+hide baselevel.fido circle
+@enduml
+----
 
 [source, java]
 ----
