@@ -1,5 +1,4 @@
 = EaStack
-:toc!:
 :title: EaStack
 :author: Wang Heng
 :email: admin@eastack.me
