@@ -24,6 +24,7 @@ A a = b;
 ----
 List<B> lb = new ArrayList<>();
 List<A> la = lb; // compile-time error
+----
 
 鉴于 Integer 是 Number 的子类型，List<Integer> 和 List<Number> 之间的关系是什么？ 
 虽然 Integer 是 Number 的子类型，但 List<Integer> 不是 List<Number> 的子类型，实际上这两种类型没有关系。 List<Number> 和 List<Integer> 的共同父项是 List<?>。

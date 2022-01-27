@@ -1,5 +1,4 @@
 = Redis 流水线
-:toc: right
 :description: Redis 流水线。 \ 
 :keywords: redis, pipeline, 流水线, 系统调用, 上下文切换
 

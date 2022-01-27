@@ -295,7 +295,28 @@ _Meta_ 是一个前缀通常表示 _大约或超过_ 。
 .*Dog* 是一个类对象，表示Dog类的元对象。对象 *fido* 是应用中一个Dog操作的一个实例。图中用依赖关系表示的 `instanceof` 关系将基本级别的对象连接到表示元级别类的对象。
 [.text-center]
 [caption="Figure 1: "]
-image::{images}/java/reflection/java-reflection-in-action/figure-1.svg[Object Level]
+[plantuml]
+----
+@startuml
+namespace baselevel {
+        class "    __fido__    " as fido
+        note "base level object" as blo
+        fido .. blo
+        fido ..|> metalevel.Dog : instanceof
+}
+namespace metalevel {
+        class Dog
+        note "class object" as co
+        Dog .. co 
+}
+
+hide baselevel.fido fields
+hide baselevel.fido circle
+hide baselevel.fido method
+hide metalevel.Dog fields
+hide metalevel.Dog method
+@enduml
+----
 
 === 在运行时获得方法
 

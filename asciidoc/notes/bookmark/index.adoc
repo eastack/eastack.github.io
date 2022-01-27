@@ -151,4 +151,6 @@ https://gitlab.com/tijsg/swagger-template[Swagger Template - GitLab]
 
 * https://mermaid-js.github.io/[Mermaid]
 
+* https://developers.google.com/web/tools[Web dev tools]
+
 include::rust.adoc[]
