@@ -45,11 +45,12 @@ A a = b;</pre>
 <div class="listingblock">
 <div class="content">
 <pre>List&lt;B&gt; lb = new ArrayList&lt;&gt;();
-List&lt;A&gt; la = lb; // compile-time error
-
-鉴于 Integer 是 Number 的子类型，List&lt;Integer&gt; 和 List&lt;Number&gt; 之间的关系是什么？
-虽然 Integer 是 Number 的子类型，但 List&lt;Integer&gt; 不是 List&lt;Number&gt; 的子类型，实际上这两种类型没有关系。 List&lt;Number&gt; 和 List&lt;Integer&gt; 的共同父项是 List&lt;?&gt;。</pre>
+List&lt;A&gt; la = lb; // compile-time error</pre>
 </div>
+</div>
+<div class="paragraph">
+<p>鉴于 Integer 是 Number 的子类型，List&lt;Integer&gt; 和 List&lt;Number&gt; 之间的关系是什么？
+虽然 Integer 是 Number 的子类型，但 List&lt;Integer&gt; 不是 List&lt;Number&gt; 的子类型，实际上这两种类型没有关系。 List&lt;Number&gt; 和 List&lt;Integer&gt; 的共同父项是 List&lt;?&gt;。</p>
 </div>
 </div>
 </body>
