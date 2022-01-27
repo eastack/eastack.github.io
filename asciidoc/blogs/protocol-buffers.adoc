@@ -1,6 +1,7 @@
 = Protocol Buffers 语言指南
-:toc: right
 :origin: https://developers.google.com/protocol-buffers/docs/proto3#json_options
+:description: Protocol Buffers 语言指南翻译。
+:keywords: Protocol Buffers, guidet, ranslate
 
 [quote, https://developers.google.com/protocol-buffers]
 Protocol buffers are a language-neutral, platform-neutral extensible mechanism for serializing structured data.

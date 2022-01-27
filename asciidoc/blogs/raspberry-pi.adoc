@@ -1,5 +1,4 @@
 = 配置树莓派
-:toc: right
 :description: 配置树莓派WIFI连接和开启SSH。
 :keywords: raspberrypi, 配置, ssh, wifi
 
