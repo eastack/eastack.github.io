@@ -1,0 +1,5 @@
+= 记账
+
+https://plaintextaccounting.org/[plain text accounting]
+https://en.wikipedia.org/wiki/Double-entry_bookkeeping[Double-entry bookkeeping]
+https://hledger.org/[hledger]
