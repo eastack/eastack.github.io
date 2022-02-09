@@ -11,7 +11,7 @@ build:
 	    --destination-dir=public \
 	    --attribute=source-highlighter=rouge \
 	    --attribute=icons=font \
-	    --attribute=toc=right@ \
+	    --attribute=toc=left@ \
 	    --attribute=toc-title=目录 \
 	    --attribute=nofooter \
 	    --attribute=linkcss \
