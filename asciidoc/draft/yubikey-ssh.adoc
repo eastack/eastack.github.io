@@ -1,0 +1,196 @@
+= YubiKey SSH 配置教程
+:createdate: 2022-02-09
+
+== 准备
+
+安装 YubiKey Manager
+
+[source, bash]
+----
+sudo pacman -S yubikey-manager
+----
+
+== 重置
+
+YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，需要单独进行重置。
+
+可以通过以下命令查看 Key 的相关信息。
+
+[source, bash]
+----
+ykman info
+----
+
+[source, plaintext]
+----
+Device type: YubiKey 5 NFC
+Serial number: ********
+Firmware version: 5.*.*
+Form factor: Keychain (USB-A)
+Enabled USB interfaces: OTP, FIDO, CCID
+NFC transport is enabled.
+
+Applications	USB          	NFC
+FIDO2       	Enabled      	Enabled      	
+OTP         	Enabled      	Enabled      	
+FIDO U2F    	Enabled      	Enabled      	
+OATH        	Enabled      	Enabled      	
+YubiHSM Auth	Not available	Not available	
+OpenPGP     	Enabled      	Enabled      	
+PIV         	Enabled      	Enabled
+----
+
+* FIDO2
++
+.使用以下命令对 FIDO2 应用进行重置 
+[source, bash]
+----
+ykman fido reset
+----
++
+NOTE: 重置 FIDO 应用时 FIDO U2F 应用也会被重置。
++
+.然后输入 `y` 确认重置
+[source, plaintext]
+----
+WARNING! This will delete all FIDO credentials, including FIDO U2F credentials, and restore factory settings. Proceed? [y/N]: y
+----
++
+.最后根据提示重新插拔 YubiKey 后轻触 YubiKey 完成重置
+[source, plaintext]
+----
+Remove and re-insert your YubiKey to perform the reset...
+  Touch your YubiKey...
+----
+
+* OATH
++
+.使用以下命令对 OATH 应用进行重置 
+[source, bash]
+----
+ykman oath reset
+----
++
+.然后输入 `y` 确认即可完成重置
+[source, plaintext]
+----
+WARNING! This will delete all stored OATH accounts and restore factory settings. Proceed? [y/N]: y
+Resetting OATH data...
+Success! All OATH accounts have been deleted from the YubiKey.
+----
+* OpenPGP
++
+.使用以下命令对 OpenPGP 应用进行重置 
+[source, bash]
+----
+ykman openpgp reset
+----
++
+.然后输入 `y` 确认即可完成重置
+[source, plaintext]
+----
+WARNING! This will delete all stored OpenPGP keys and data and restore factory settings? [y/N]: y
+Resetting OpenPGP data, don't remove the YubiKey...
+Success! All data has been cleared and default PINs are set.
+PIN:         123456
+Reset code:  NOT SET
+Admin PIN:   12345678
+----
+* OTP
++
+NOTE: 我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
++
+.使用以下命令删除相应槽中的盐
+[source, bash]
+----
+ykman otp delete 1
+----
++
+.然后输入 `y` 确认即可完成删除
+[source, plaintext]
+----
+Do you really want to delete the configuration of slot 1? [y/N]: y
+Deleting the configuration in slot 1...
+----
+* PIV
++
+.使用以下命令对 PIV 应用进行重置 
+[source, bash]
+----
+ykman piv reset
+----
++
+.然后输入 `y` 确认即可完成重置
+[source, plaintext]
+----
+WARNING! This will delete all stored PIV data and restore factory settings. Proceed? [y/N]: y
+Resetting PIV data...
+Success! All PIV data have been cleared from the YubiKey.
+Your YubiKey now has the default PIN, PUK and Management Key:
+	PIN:	123456
+	PUK:	12345678
+	Management Key:	************************************************
+----
+
+== 生成 GNUPG 密钥
+
+=== 准备工作
+
+创建临时工作目录
+[source, bash]
+----
+export GNUPGHOME=$(mktemp -d -t gnupg_$(date +%Y%m%d%H%M)_XXX)
+----
+
+下载增强的 GPG 配置
+[source, bash]
+----
+wget -O $GNUPGHOME/gpg.conf https://raw.githubusercontent.com/drduh/config/master/gpg.conf
+----
+
+之后的步骤中你将会被多次要求输入并验证密码 —— 请保持它触手可得。
+
+生成一个强密码你可以把它写下来或者记住。
+
+[source, bash]
+----
+gpg --gen-random --armor 0 24
+----
+
+=== 创建主密钥
+
+首先我们来创建主密钥。
+主密钥只用来进行证书签发：其签发的子密钥被用来加密，签名及认证。
+
+NOTE: 注意任何时刻主密钥都应该保持离线，并且只在用来撤销或签发新的子密钥时进行访问。
+密钥也可以由 YubiKey 自身生成从而保证不会有任何其它副本存在。
+
+WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。
+
+=== 创建子证书
+
+下面我们通过编辑主证书来为其添加子证书：
+[source, bash]
+----
+gpg --export --edit-key $KEYID
+----
+
+[source, plaintext]
+----
+Secret key is available.
+
+sec  rsa4096/0xEA5DE91459B80592
+    created: 2017-10-09  expires: never       usage: C
+    trust: ultimate      validity: ultimate
+[ultimate] (1). Dr Duh <doc@duh.to>
+----
+
+==== 创建签名证书
+
+== 参考链接
+
+https://www.yubico.com/blog/github-now-supports-ssh-security-keys/[GitHub now supports ssh security keys]
+
+https://flyhigher.top/develop/2160.html[谈谈 WebAuthn]
+
+https://2fa.directory/[2FA directory]
