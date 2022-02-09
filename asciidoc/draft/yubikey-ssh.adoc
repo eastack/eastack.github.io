@@ -196,3 +196,5 @@ https://flyhigher.top/develop/2160.html[谈谈 WebAuthn]
 https://2fa.directory/[2FA directory]
 
 https://github.com/drduh/YubiKey-Guide[YubiKey Guide]
+
+https://bitbili.net/yubikey_5_nfc_functions.html[详解 Yubikey 5 NFC 的工作原理]
