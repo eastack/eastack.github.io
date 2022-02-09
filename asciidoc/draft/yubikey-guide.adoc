@@ -1,13 +1,19 @@
-= YubiKey SSH 配置教程
+= YubiKey OpenPGP & SSH 使用指南
 :createdate: 2022-02-09
+
+已经入手 YubiKey 5 NFC 约有一年了期间折腾过几次，也真正用过一段时间。
+但最终还是因为不如本地密钥文件方便，最终被搁置吃灰，一直想再捣腾一下使用起来。
+前几天因为想要使用 hledger 和 git-crypt 记账记日记需要用到 GPG，Git 提交签名也需要用到 GPG，
+而平时提交代码和服务器登录需要用到 SSH。
+准备使用 YubiKey 存储对应的密钥。
+所以做了这篇记录，方便日后参考。
 
 == 准备
 
-安装 YubiKey Manager
-
+首先安装稍后我们需要用到的 https://github.com/Yubico/yubikey-manager[YubiKey Manager]、https://gnupg.org/[GnuPG]等软件。
 [source, bash]
 ----
-sudo pacman -S yubikey-manager
+sudo pacman -S yubikey-manager gnupg pcsclite ccid
 ----
 
 == 重置
@@ -132,9 +138,11 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 	Management Key:	************************************************
 ----
 
-== 生成 GNUPG 密钥
+== OpenPGP
 
-=== 准备工作
+=== 生成 GPG 密钥
+
+==== 准备工作
 
 创建临时工作目录
 [source, bash]
@@ -142,22 +150,22 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 export GNUPGHOME=$(mktemp -d -t gnupg_$(date +%Y%m%d%H%M)_XXX)
 ----
 
-下载增强的 GPG 配置
+下载加固后的 GPG 配置
 [source, bash]
 ----
 wget -O $GNUPGHOME/gpg.conf https://raw.githubusercontent.com/drduh/config/master/gpg.conf
 ----
 
-之后的步骤中你将会被多次要求输入并验证密码 —— 请保持它触手可得。
+之后的步骤中你将会被多次要求输入密码进行认证 —— 请保持它触手可得。
 
-生成一个强密码你可以把它写下来或者记住。
+首先生成一个强密码然后你可以把它记住或者写下来。
 
 [source, bash]
 ----
 gpg --gen-random --armor 0 24
 ----
 
-=== 创建主密钥
+==== 创建主密钥
 
 首先我们来创建主密钥。
 主密钥只用来进行证书签发：其签发的子密钥被用来加密，签名及认证。
@@ -165,9 +173,20 @@ gpg --gen-random --armor 0 24
 NOTE: 注意任何时刻主密钥都应该保持离线，并且只在用来撤销或签发新的子密钥时进行访问。
 密钥也可以由 YubiKey 自身生成从而保证不会有任何其它副本存在。
 
+生成主密钥
+[source, bash]
+----
+gpg --expert --full-generate-key
+----
+
+[source, plaintext]
+----
+
+----
+
 WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。
 
-=== 创建子证书
+==== 创建子证书
 
 下面我们通过编辑主证书来为其添加子证书：
 [source, bash]
@@ -185,7 +204,7 @@ sec  rsa4096/0xEA5DE91459B80592
 [ultimate] (1). Dr Duh <doc@duh.to>
 ----
 
-==== 创建签名证书
+===== 创建签名证书
 
 == 参考链接
 

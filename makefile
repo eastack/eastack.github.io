@@ -1,7 +1,7 @@
 all: build
 
 build:
-	@cp -rT static public
+	@cp -rT assets public
 	@docker run --rm \
 	  --user $(shell id -u):$(shell id -g) \
 	  --volume $(shell pwd):/documents \
