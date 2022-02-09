@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
-<title>YubiKey SSH 配置教程</title>
+<title>YubiKey OpenPGP &amp; SSH 使用指南</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -13,17 +13,15 @@
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>YubiKey SSH 配置教程</h1>
+<h1>YubiKey OpenPGP &amp; SSH 使用指南</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
 <li><a href="#_准备">准备</a></li>
 <li><a href="#_重置">重置</a></li>
-<li><a href="#_生成_gnupg_密钥">生成 GNUPG 密钥</a>
+<li><a href="#_openpgp">OpenPGP</a>
 <ul class="sectlevel2">
-<li><a href="#_准备工作">准备工作</a></li>
-<li><a href="#_创建主密钥">创建主密钥</a></li>
-<li><a href="#_创建子证书">创建子证书</a></li>
+<li><a href="#_生成_gpg_密钥">生成 GPG 密钥</a></li>
 </ul>
 </li>
 <li><a href="#_参考链接">参考链接</a></li>
@@ -31,15 +29,27 @@
 </div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>已经入手 YubiKey 5 NFC 约有一年了期间折腾过几次，也真正用过一段时间。
+但最终还是因为不如本地密钥文件方便，最终被搁置吃灰，一直想再捣腾一下使用起来。
+前几天因为想要使用 hledger 和 git-crypt 记账记日记需要用到 GPG，Git 提交签名也需要用到 GPG，
+而平时提交代码和服务器登录需要用到 SSH。
+准备使用 YubiKey 存储对应的密钥。
+所以做了这篇记录，方便日后参考。</p>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="_准备">准备</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>安装 YubiKey Manager</p>
+<p>首先安装稍后我们需要用到的 <a href="https://github.com/Yubico/yubikey-manager">YubiKey Manager</a>、https://gnupg.org/[GnuPG]等软件。</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>pacman <span class="nt">-S</span> yubikey-manager</code></pre>
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>pacman <span class="nt">-S</span> yubikey-manager gnupg pcsclite ccid</code></pre>
 </div>
 </div>
 </div>
@@ -204,10 +214,12 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 </div>
 <div class="sect1">
-<h2 id="_生成_gnupg_密钥">生成 GNUPG 密钥</h2>
+<h2 id="_openpgp">OpenPGP</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_准备工作">准备工作</h3>
+<h3 id="_生成_gpg_密钥">生成 GPG 密钥</h3>
+<div class="sect3">
+<h4 id="_准备工作">准备工作</h4>
 <div class="paragraph">
 <p>创建临时工作目录</p>
 </div>
@@ -217,7 +229,7 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 </div>
 <div class="paragraph">
-<p>下载增强的 GPG 配置</p>
+<p>下载加固后的 GPG 配置</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -225,10 +237,10 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 </div>
 <div class="paragraph">
-<p>之后的步骤中你将会被多次要求输入并验证密码 —— 请保持它触手可得。</p>
+<p>之后的步骤中你将会被多次要求输入密码进行认证 —— 请保持它触手可得。</p>
 </div>
 <div class="paragraph">
-<p>生成一个强密码你可以把它写下来或者记住。</p>
+<p>首先生成一个强密码然后你可以把它记住或者写下来。</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -236,8 +248,8 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_创建主密钥">创建主密钥</h3>
+<div class="sect3">
+<h4 id="_创建主密钥">创建主密钥</h4>
 <div class="paragraph">
 <p>首先我们来创建主密钥。
 主密钥只用来进行证书签发：其签发的子密钥被用来加密，签名及认证。</p>
@@ -256,11 +268,24 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </table>
 </div>
 <div class="paragraph">
+<p>生成主密钥</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gpg <span class="nt">--expert</span> <span class="nt">--full-generate-key</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext"></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_创建子证书">创建子证书</h3>
+<div class="sect3">
+<h4 id="_创建子证书">创建子证书</h4>
 <div class="paragraph">
 <p>下面我们通过编辑主证书来为其添加子证书：</p>
 </div>
@@ -279,9 +304,10 @@ sec  rsa4096/0xEA5DE91459B80592
 [ultimate] (1). Dr Duh &lt;doc@duh.to&gt;</code></pre>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_创建签名证书">创建签名证书</h4>
+<div class="sect4">
+<h5 id="_创建签名证书">创建签名证书</h5>
 
+</div>
 </div>
 </div>
 </div>
