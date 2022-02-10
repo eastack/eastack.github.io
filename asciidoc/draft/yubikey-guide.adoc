@@ -1,5 +1,6 @@
-= YubiKey OpenPGP & SSH 使用指南
+= YubiKey 使用指南
 :createdate: 2022-02-09
+:toclevels: 4
 
 已经入手 YubiKey 5 NFC 约有一年了期间折腾过几次，也真正用过一段时间。
 但最终还是因为不如本地密钥文件方便，最终被搁置吃灰，一直想再捣腾一下使用起来。
@@ -8,15 +9,15 @@
 准备使用 YubiKey 存储对应的密钥。
 所以做了这篇记录，方便日后参考。
 
-== 准备
+== 准备工作
 
-首先安装稍后我们需要用到的 https://github.com/Yubico/yubikey-manager[YubiKey Manager]、https://gnupg.org/[GnuPG]等软件。
+首先安装稍后我们需要用到的 https://github.com/Yubico/yubikey-manager[YubiKey Manager]、 https://gnupg.org/[GnuPG]等软件。
 [source, bash]
 ----
 sudo pacman -S yubikey-manager gnupg pcsclite ccid
 ----
 
-== 重置
+== 重置 YubiKey
 
 YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，需要单独进行重置。
 
@@ -69,6 +70,23 @@ Remove and re-insert your YubiKey to perform the reset...
   Touch your YubiKey...
 ----
 
+* OTP
++
+NOTE: 我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
++
+.使用以下命令删除相应槽中的盐
+[source, bash]
+----
+ykman otp delete 1
+----
++
+.然后输入 `y` 确认即可完成删除
+[source, plaintext]
+----
+Do you really want to delete the configuration of slot 1? [y/N]: y
+Deleting the configuration in slot 1...
+----
+
 * OATH
 +
 .使用以下命令对 OATH 应用进行重置 
@@ -84,6 +102,7 @@ WARNING! This will delete all stored OATH accounts and restore factory settings.
 Resetting OATH data...
 Success! All OATH accounts have been deleted from the YubiKey.
 ----
+
 * OpenPGP
 +
 .使用以下命令对 OpenPGP 应用进行重置 
@@ -102,22 +121,7 @@ PIN:         123456
 Reset code:  NOT SET
 Admin PIN:   12345678
 ----
-* OTP
-+
-NOTE: 我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
-+
-.使用以下命令删除相应槽中的盐
-[source, bash]
-----
-ykman otp delete 1
-----
-+
-.然后输入 `y` 确认即可完成删除
-[source, plaintext]
-----
-Do you really want to delete the configuration of slot 1? [y/N]: y
-Deleting the configuration in slot 1...
-----
+
 * PIV
 +
 .使用以下命令对 PIV 应用进行重置 
@@ -138,7 +142,7 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 	Management Key:	************************************************
 ----
 
-== OpenPGP
+== 配置 OpenPGP
 
 === 生成 GPG 密钥
 
@@ -181,30 +185,572 @@ gpg --expert --full-generate-key
 
 [source, plaintext]
 ----
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+   (9) ECC and ECC
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 8 <1>
 
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate
+Current allowed actions: Sign Certify Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? S <2>
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate
+Current allowed actions: Certify Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? E <3>
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate
+Current allowed actions: Certify
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? Q <4>
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096 <5>
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 0 <6>
+Key does not expire at all
+Is this correct? (y/N) y <7>
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: WangHeng <8>
+Email address: admin@eastack.me <9>
+Comment:
+You selected this USER-ID:
+    "WangHeng <admin@eastack.me>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O <10>
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: /tmp/gnupg_202202101443_BI8/trustdb.gpg: trustdb created
+gpg: key 0xB23B3BF3A6CB4BC5 marked as ultimately trusted
+gpg: directory '/tmp/gnupg_202202101443_BI8/openpgp-revocs.d' created
+gpg: revocation certificate stored as '/tmp/gnupg_202202101443_BI8/openpgp-revocs.d/46ACAD1C5FF241EA70F251CFB23B3BF3A6CB4BC5.rev'
+public and secret key created and signed.
+
+pub   rsa4096/0xB23B3BF3A6CB4BC5 2022-02-10 [C]
+      Key fingerprint = 46AC AD1C 5FF2 41EA 70F2  51CF B23B 3BF3 A6CB 4BC5
+uid                              WangHeng <admin@eastack.me>
 ----
+<1> 这里输入 `8` 使用 RSA（自定义所需功能）
+<2> 这里输入 `S` 关闭签名功能
+<3> 这里输入 `E` 关闭加密功能
+<4> 这里输入 `Q` 完成功能配置
+<5> 这里输入 `4096` 我们使用 4096 位的密钥长度
+<6> 这里输入 `0` 让主证书永不过期
+<7> 这里输入 `y` 确认证书过期配置
+<8> 这里输入真实姓名 `WangHeng` 
+<9> 这里输入邮件地址 `admin@eastack.me` 
+<10> 最后输入 `O` 确认用户 ID
 
 WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。
+
+将密钥ID暴露为一个变量方便之后使用
+[source, bash]
+----
+export KEYID=0xB23B3BF3A6CB4BC5
+----
 
 ==== 创建子证书
 
 下面我们通过编辑主证书来为其添加子证书：
 [source, bash]
 ----
-gpg --export --edit-key $KEYID
+gpg --expert --edit-key $KEYID
 ----
 
 [source, plaintext]
 ----
 Secret key is available.
 
-sec  rsa4096/0xEA5DE91459B80592
-    created: 2017-10-09  expires: never       usage: C
-    trust: ultimate      validity: ultimate
-[ultimate] (1). Dr Duh <doc@duh.to>
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
 ----
 
 ===== 创建签名证书
+
+[source, plaintext]
+----
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 4
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at 2023年02月10日 星期五 15时15分18秒 CST
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x1F273CFBE45BF998
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+
+===== 创建加密证书
+
+[source, plaintext]
+----
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 6
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at 2023年02月10日 星期五 15时16分17秒 CST
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x1F273CFBE45BF998
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0x0151A283A717FE5B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+
+===== 创建认证证书
+
+[source, plaintext]
+----
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 8
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Sign Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? S
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? E
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions:
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? A
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Authenticate
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? Q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at 2023年02月10日 星期五 15时17分47秒 CST
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+
+最后保存对密钥的修改
+[source, plaintext]
+----
+gpg> save
+----
+
+=== 备份 GPG 密钥
+
+TODO
+
+=== 转移 GPG 密钥
+
+IMPORTANT: 使用 `keytocard` 转移密钥到 YubiKey 中是毁灭性的单向操作。
+确保你在操作前进行了备份： `keytocard` 将本地磁盘上的密钥转换为存根，
+这意味这磁盘上的副本不能再传输到之后的安全密钥设备中或生成新的证书。
+
+当前选中的密钥使用 `*` 标识标记，在移动时一次只能选中一个密钥。
+
+[source, bash]
+----
+gpg --edit-key $KEYID
+----
+
+[source, plaintext]
+----
+Secret key is available.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+
+==== 转移签名密钥
+
+[source, plaintext]
+----
+gpg> key 1 <1>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb* rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg> keytocard <2>
+Please select where to store the key:
+   (1) Signature key
+   (3) Authentication key
+Your selection? 1 <3>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb* rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+<1> 输入 `key 1` 选中签名密钥
+<2> 输入 `keytocard` 将密钥转移到 YubiKey 中
+<3> 这里提示我们输入要将密钥存储在什么位置，我们输入 `1` 将密钥存储在签名密钥中。
+
+之后根据提示输入 GPG 密钥密码然后输入 YubiKey 的 Admin PIN 即可完成密钥转移。
+
+==== 转移加密密钥
+
+[source, plaintext]
+----
+gpg> key 1 <1>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg> key 2 <2>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb* rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg> keytocard <3>
+Please select where to store the key:
+   (2) Encryption key
+Your selection? 2 <4>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb* rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+
+==== 转移认证密钥
+
+[source, plaintext]
+----
+gpg> key 2
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg> key 3
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb* rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg> keytocard
+Please select where to store the key:
+   (3) Authentication key
+Your selection? 3
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb* rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng <admin@eastack.me>
+
+gpg>
+----
+
+保存并退出
+[source, bash]
+----
+gpg> save
+----
+
+=== 验证 GPG 密钥
+
+我们可以通过 `ssb>` 标识来验证子密钥是否已成功转移到 YubiKey 中
+
+[source, bash]
+----
+gpg -K
+----
+
+[source, plaintext]
+----
+/tmp/gnupg_202202101443_BI8/pubring.kbx
+---------------------------------------
+sec   rsa4096/0xB23B3BF3A6CB4BC5 2022-02-10 [C]
+      Key fingerprint = 46AC AD1C 5FF2 41EA 70F2  51CF B23B 3BF3 A6CB 4BC5
+uid                   [ultimate] WangHeng <admin@eastack.me>
+ssb>  rsa4096/0x83641F51609171F7 2022-02-10 [S] [expires: 2023-02-10]
+ssb>  rsa4096/0xCAE6AFDCEC685C3B 2022-02-10 [E] [expires: 2023-02-10]
+ssb>  rsa4096/0x7A4D04F73FD5999C 2022-02-10 [A] [expires: 2023-02-10]
+----
+
+== 配置 SSH
+
+在写这篇文章的时候 GitHub 已经于 2021年5月10日 宣布支持将使用 U2F 及 FIDO2 的安全密钥用于 SSH。
+这让你使用 YubiKey 保护你的所有 GitHub 请求变得前所未有的简单，
+这让你的 SSH 密钥可以在更安全的同时仍旧拥有极佳的用户体验。
+
+=== 快速开始
+
+首先你需要已经安装了 https://github.com/Yubico/libfido2[libfido2] 和 https://www.openssh.com/[OpenSSH] 8.2 及之后的版本。
+
+首先我们需要生成一个密钥对。
+插入你的安全密钥然后执行下面的命令：
+[source, bash]
+----
+ssh-keygen -t ecdsa-sk
+----
+
+`-t ecdsa-sk` 选项使 OpenSSH 在 FIDO 安全密钥中创建 ECDSA 密钥，而不是传统的私钥文件。
+你也可以使用 `-t ed25519-sk` 来创建一个 EdDSA 密钥，但并不是所有安全密钥都支持。
+
+NOTE: 推荐使用 Ed25519 加密算法，因为 ECDSA 的椭圆曲线参数是 NIST 给的，一直被怀疑有后门。
+
+这会在你的 SSH 目录中创建两个文件。
+一个是 `id_ecdsa_sk.pub` ，这是一个普通的 OpenSSH 公钥文件。
+另一个是 `id_ecdsa_sk` 通常其包含对应的私钥，但现在这种情况下它包含一个 https://www.yubico.com/blog/yubicos-u2f-key-wrapping/[key handle] 其引用到安全密钥。
+当要使用 SSH 密钥时你需要将 id_ecdsa_sk 复制到每个电脑上。
+或者如果你的安全密钥支持的话，你可以使用 FIDO2 驻留密钥。
+
+=== 使用驻留密钥
+
+如果你的安全密钥支持 FIDO2 驻留密钥，比如 https://www.yubico.com/product/yubikey-5-nfc/[YubiKey 5 Series], https://www.yubico.com/products/yubikey-fips/[YubiKey 5 FIPS Series] 或者 https://www.yubico.com/product/security-key-nfc-by-yubico/[Security Key NFC by Yubico] 你可以在创建 SSH 密钥的时候开启这个功能：
+[source, bash]
+----
+ssh-keygen -t ecdsa-sk -O resident
+----
+
+这与之前所作的相同，除了常驻密钥可以更方便的导入到新电脑里，因为可以直接在安全密钥中加载密钥。
+要在新电脑上使用 SSH 密钥，确保你已经启动了 ssh-agent 然后执行以下命令：
+
+[source, bash]
+----
+ssh-add -K
+----
+
+这将加载一个 “key handle” 到 SSH 代理中并使此密钥可以在这台电脑上使用。
+这对临时使用很合适，但这不是持久化的 —— 如果你重启了电脑你需要重新运行 ssh-add。
+为了永久导入密钥，可以执行：
+
+[source, bash]
+----
+ssh-keygen -K
+----
+
+这会向当前目录下写入两个文件： __id_ecdsa_sk_rk__ 和 __id_ecdsa_sk_rk.pub__ 。
+现在你只需要重命名私钥文件为 __id_ecdsa_sk__ 并移动到你的 SSH 目录下就可以了：
+
+[source, bash]
+----
+mv id_ecdsa_sk_rk ~/.ssh/id_ecdsa_sk
+----
 
 == 参考链接
 
@@ -219,3 +765,5 @@ https://github.com/drduh/YubiKey-Guide[YubiKey Guide]
 https://bitbili.net/yubikey_5_nfc_functions.html[详解 Yubikey 5 NFC 的工作原理]
 
 https://developers.yubico.com/[Yubico Developers]
+
+https://paper.seebug.org/1366/[椭圆曲线加密与 NSA 后门考古]
