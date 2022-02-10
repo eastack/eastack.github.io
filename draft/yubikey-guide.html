@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
-<title>YubiKey OpenPGP &amp; SSH 使用指南</title>
+<title>YubiKey 使用指南</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -13,15 +13,42 @@
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>YubiKey OpenPGP &amp; SSH 使用指南</h1>
+<h1>YubiKey 使用指南</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
-<li><a href="#_准备">准备</a></li>
-<li><a href="#_重置">重置</a></li>
-<li><a href="#_openpgp">OpenPGP</a>
+<li><a href="#_准备工作">准备工作</a></li>
+<li><a href="#_重置_yubikey">重置 YubiKey</a></li>
+<li><a href="#_配置_openpgp">配置 OpenPGP</a>
 <ul class="sectlevel2">
-<li><a href="#_生成_gpg_密钥">生成 GPG 密钥</a></li>
+<li><a href="#_生成_gpg_密钥">生成 GPG 密钥</a>
+<ul class="sectlevel3">
+<li><a href="#_准备工作_2">准备工作</a></li>
+<li><a href="#_创建主密钥">创建主密钥</a></li>
+<li><a href="#_创建子证书">创建子证书</a>
+<ul class="sectlevel4">
+<li><a href="#_创建签名证书">创建签名证书</a></li>
+<li><a href="#_创建加密证书">创建加密证书</a></li>
+<li><a href="#_创建认证证书">创建认证证书</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_备份_gpg_密钥">备份 GPG 密钥</a></li>
+<li><a href="#_转移_gpg_密钥">转移 GPG 密钥</a>
+<ul class="sectlevel3">
+<li><a href="#_转移签名密钥">转移签名密钥</a></li>
+<li><a href="#_转移加密密钥">转移加密密钥</a></li>
+<li><a href="#_转移认证密钥">转移认证密钥</a></li>
+</ul>
+</li>
+<li><a href="#_验证_gpg_密钥">验证 GPG 密钥</a></li>
+</ul>
+</li>
+<li><a href="#_配置_ssh">配置 SSH</a>
+<ul class="sectlevel2">
+<li><a href="#_快速开始">快速开始</a></li>
+<li><a href="#_使用驻留密钥">使用驻留密钥</a></li>
 </ul>
 </li>
 <li><a href="#_参考链接">参考链接</a></li>
@@ -42,10 +69,10 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_准备">准备</h2>
+<h2 id="_准备工作">准备工作</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>首先安装稍后我们需要用到的 <a href="https://github.com/Yubico/yubikey-manager">YubiKey Manager</a>、https://gnupg.org/[GnuPG]等软件。</p>
+<p>首先安装稍后我们需要用到的 <a href="https://github.com/Yubico/yubikey-manager">YubiKey Manager</a>、 <a href="https://gnupg.org/">GnuPG</a>等软件。</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -55,7 +82,7 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_重置">重置</h2>
+<h2 id="_重置_yubikey">重置 YubiKey</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，需要单独进行重置。</p>
@@ -124,6 +151,34 @@ PIV         	Enabled      	Enabled</code></pre>
 </div>
 </li>
 <li>
+<p>OTP</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">使用以下命令删除相应槽中的盐</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman otp delete 1</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">然后输入 <code>y</code> 确认即可完成删除</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">Do you really want to delete the configuration of slot 1? [y/N]: y
+Deleting the configuration in slot 1...</code></pre>
+</div>
+</div>
+</li>
+<li>
 <p>OATH</p>
 <div class="listingblock">
 <div class="title">使用以下命令对 OATH 应用进行重置</div>
@@ -161,34 +216,6 @@ Admin PIN:   12345678</code></pre>
 </div>
 </li>
 <li>
-<p>OTP</p>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
-</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">使用以下命令删除相应槽中的盐</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman otp delete 1</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">然后输入 <code>y</code> 确认即可完成删除</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">Do you really want to delete the configuration of slot 1? [y/N]: y
-Deleting the configuration in slot 1...</code></pre>
-</div>
-</div>
-</li>
-<li>
 <p>PIV</p>
 <div class="listingblock">
 <div class="title">使用以下命令对 PIV 应用进行重置</div>
@@ -214,12 +241,12 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 </div>
 <div class="sect1">
-<h2 id="_openpgp">OpenPGP</h2>
+<h2 id="_配置_openpgp">配置 OpenPGP</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_生成_gpg_密钥">生成 GPG 密钥</h3>
 <div class="sect3">
-<h4 id="_准备工作">准备工作</h4>
+<h4 id="_准备工作_2">准备工作</h4>
 <div class="paragraph">
 <p>创建临时工作目录</p>
 </div>
@@ -277,11 +304,140 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext"></code></pre>
+<pre class="rouge highlight"><code data-lang="plaintext">Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+   (9) ECC and ECC
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 8 <i class="conum" data-value="1"></i><b>(1)</b>
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate
+Current allowed actions: Sign Certify Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? S <i class="conum" data-value="2"></i><b>(2)</b>
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate
+Current allowed actions: Certify Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? E <i class="conum" data-value="3"></i><b>(3)</b>
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate
+Current allowed actions: Certify
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? Q <i class="conum" data-value="4"></i><b>(4)</b>
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096 <i class="conum" data-value="5"></i><b>(5)</b>
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 0 <i class="conum" data-value="6"></i><b>(6)</b>
+Key does not expire at all
+Is this correct? (y/N) y <i class="conum" data-value="7"></i><b>(7)</b>
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: WangHeng <i class="conum" data-value="8"></i><b>(8)</b>
+Email address: admin@eastack.me <i class="conum" data-value="9"></i><b>(9)</b>
+Comment:
+You selected this USER-ID:
+    "WangHeng &lt;admin@eastack.me&gt;"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O <i class="conum" data-value="10"></i><b>(10)</b>
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: /tmp/gnupg_202202101443_BI8/trustdb.gpg: trustdb created
+gpg: key 0xB23B3BF3A6CB4BC5 marked as ultimately trusted
+gpg: directory '/tmp/gnupg_202202101443_BI8/openpgp-revocs.d' created
+gpg: revocation certificate stored as '/tmp/gnupg_202202101443_BI8/openpgp-revocs.d/46ACAD1C5FF241EA70F251CFB23B3BF3A6CB4BC5.rev'
+public and secret key created and signed.
+
+pub   rsa4096/0xB23B3BF3A6CB4BC5 2022-02-10 [C]
+      Key fingerprint = 46AC AD1C 5FF2 41EA 70F2  51CF B23B 3BF3 A6CB 4BC5
+uid                              WangHeng &lt;admin@eastack.me&gt;</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>这里输入 <code>8</code> 使用 RSA（自定义所需功能）</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>这里输入 <code>S</code> 关闭签名功能</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>这里输入 <code>E</code> 关闭加密功能</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>这里输入 <code>Q</code> 完成功能配置</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>这里输入 <code>4096</code> 我们使用 4096 位的密钥长度</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>这里输入 <code>0</code> 让主证书永不过期</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>这里输入 <code>y</code> 确认证书过期配置</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>这里输入真实姓名 <code>WangHeng</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>这里输入邮件地址 <code>admin@eastack.me</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>最后输入 <code>O</code> 确认用户 ID</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。</p>
+</div>
+<div class="paragraph">
+<p>将密钥ID暴露为一个变量方便之后使用</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">export </span><span class="nv">KEYID</span><span class="o">=</span>0xB23B3BF3A6CB4BC5</code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -291,22 +447,535 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="bash">gpg <span class="nt">--export</span> <span class="nt">--edit-key</span> <span class="nv">$KEYID</span></code></pre>
+<pre class="rouge highlight"><code data-lang="bash">gpg <span class="nt">--expert</span> <span class="nt">--edit-key</span> <span class="nv">$KEYID</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="plaintext">Secret key is available.
 
-sec  rsa4096/0xEA5DE91459B80592
-    created: 2017-10-09  expires: never       usage: C
-    trust: ultimate      validity: ultimate
-[ultimate] (1). Dr Duh &lt;doc@duh.to&gt;</code></pre>
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
 </div>
 </div>
 <div class="sect4">
 <h5 id="_创建签名证书">创建签名证书</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 4
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at 2023年02月10日 星期五 15时15分18秒 CST
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
 
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x1F273CFBE45BF998
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_创建加密证书">创建加密证书</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 6
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at 2023年02月10日 星期五 15时16分17秒 CST
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x1F273CFBE45BF998
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0x0151A283A717FE5B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_创建认证证书">创建认证证书</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+  (14) Existing key from card
+Your selection? 8
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Sign Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? S
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Encrypt
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? E
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions:
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? A
+
+Possible actions for a RSA key: Sign Encrypt Authenticate
+Current allowed actions: Authenticate
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? Q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0) 1y
+Key expires at 2023年02月10日 星期五 15时17分47秒 CST
+Is this correct? (y/N) y
+Really create? (y/N) y
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>最后保存对密钥的修改</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; save</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_备份_gpg_密钥">备份 GPG 密钥</h3>
+<div class="paragraph">
+<p>TODO</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_转移_gpg_密钥">转移 GPG 密钥</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+使用 <code>keytocard</code> 转移密钥到 YubiKey 中是毁灭性的单向操作。
+确保你在操作前进行了备份： <code>keytocard</code> 将本地磁盘上的密钥转换为存根，
+这意味这磁盘上的副本不能再传输到之后的安全密钥设备中或生成新的证书。
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>当前选中的密钥使用 <code>*</code> 标识标记，在移动时一次只能选中一个密钥。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gpg <span class="nt">--edit-key</span> <span class="nv">$KEYID</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">Secret key is available.
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_转移签名密钥">转移签名密钥</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; key 1 <i class="conum" data-value="1"></i><b>(1)</b>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb* rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt; keytocard <i class="conum" data-value="2"></i><b>(2)</b>
+Please select where to store the key:
+   (1) Signature key
+   (3) Authentication key
+Your selection? 1 <i class="conum" data-value="3"></i><b>(3)</b>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb* rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>输入 <code>key 1</code> 选中签名密钥</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>输入 <code>keytocard</code> 将密钥转移到 YubiKey 中</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>这里提示我们输入要将密钥存储在什么位置，我们输入 <code>1</code> 将密钥存储在签名密钥中。</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>之后根据提示输入 GPG 密钥密码然后输入 YubiKey 的 Admin PIN 即可完成密钥转移。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_转移加密密钥">转移加密密钥</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; key 1 <i class="conum" data-value="1"></i><b>(1)</b>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt; key 2 <i class="conum" data-value="2"></i><b>(2)</b>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb* rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt; keytocard <i class="conum" data-value="3"></i><b>(3)</b>
+Please select where to store the key:
+   (2) Encryption key
+Your selection? 2 <i class="conum" data-value="4"></i><b>(4)</b>
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb* rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_转移认证密钥">转移认证密钥</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">gpg&gt; key 2
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb  rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt; key 3
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb* rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt; keytocard
+Please select where to store the key:
+   (3) Authentication key
+Your selection? 3
+
+sec  rsa4096/0xB23B3BF3A6CB4BC5
+     created: 2022-02-10  expires: never       usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x83641F51609171F7
+     created: 2022-02-10  expires: 2023-02-10  usage: S
+ssb  rsa4096/0xCAE6AFDCEC685C3B
+     created: 2022-02-10  expires: 2023-02-10  usage: E
+ssb* rsa4096/0x7A4D04F73FD5999C
+     created: 2022-02-10  expires: 2023-02-10  usage: A
+[ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
+
+gpg&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>保存并退出</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gpg&gt; save</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_验证_gpg_密钥">验证 GPG 密钥</h3>
+<div class="paragraph">
+<p>我们可以通过 <code>ssb&gt;</code> 标识来验证子密钥是否已成功转移到 YubiKey 中</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">gpg <span class="nt">-K</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">/tmp/gnupg_202202101443_BI8/pubring.kbx
+---------------------------------------
+sec   rsa4096/0xB23B3BF3A6CB4BC5 2022-02-10 [C]
+      Key fingerprint = 46AC AD1C 5FF2 41EA 70F2  51CF B23B 3BF3 A6CB 4BC5
+uid                   [ultimate] WangHeng &lt;admin@eastack.me&gt;
+ssb&gt;  rsa4096/0x83641F51609171F7 2022-02-10 [S] [expires: 2023-02-10]
+ssb&gt;  rsa4096/0xCAE6AFDCEC685C3B 2022-02-10 [E] [expires: 2023-02-10]
+ssb&gt;  rsa4096/0x7A4D04F73FD5999C 2022-02-10 [A] [expires: 2023-02-10]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_配置_ssh">配置 SSH</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>在写这篇文章的时候 GitHub 已经于 2021年5月10日 宣布支持将使用 U2F 及 FIDO2 的安全密钥用于 SSH。
+这让你使用 YubiKey 保护你的所有 GitHub 请求变得前所未有的简单，
+这让你的 SSH 密钥可以在更安全的同时仍旧拥有极佳的用户体验。</p>
+</div>
+<div class="sect2">
+<h3 id="_快速开始">快速开始</h3>
+<div class="paragraph">
+<p>首先你需要已经安装了 <a href="https://github.com/Yubico/libfido2">libfido2</a> 和 <a href="https://www.openssh.com/">OpenSSH</a> 8.2 及之后的版本。</p>
+</div>
+<div class="paragraph">
+<p>首先我们需要生成一个密钥对。
+插入你的安全密钥然后执行下面的命令：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ssh-keygen <span class="nt">-t</span> ecdsa-sk</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>-t ecdsa-sk</code> 选项使 OpenSSH 在 FIDO 安全密钥中创建 ECDSA 密钥，而不是传统的私钥文件。
+你也可以使用 <code>-t ed25519-sk</code> 来创建一个 EdDSA 密钥，但并不是所有安全密钥都支持。</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+推荐使用 Ed25519 加密算法，因为 ECDSA 的椭圆曲线参数是 NIST 给的，一直被怀疑有后门。
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>这会在你的 SSH 目录中创建两个文件。
+一个是 <code>id_ecdsa_sk.pub</code> ，这是一个普通的 OpenSSH 公钥文件。
+另一个是 <code>id_ecdsa_sk</code> 通常其包含对应的私钥，但现在这种情况下它包含一个 <a href="https://www.yubico.com/blog/yubicos-u2f-key-wrapping/">key handle</a> 其引用到安全密钥。
+当要使用 SSH 密钥时你需要将 id_ecdsa_sk 复制到每个电脑上。
+或者如果你的安全密钥支持的话，你可以使用 FIDO2 驻留密钥。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用驻留密钥">使用驻留密钥</h3>
+<div class="paragraph">
+<p>如果你的安全密钥支持 FIDO2 驻留密钥，比如 <a href="https://www.yubico.com/product/yubikey-5-nfc/">YubiKey 5 Series</a>, <a href="https://www.yubico.com/products/yubikey-fips/">YubiKey 5 FIPS Series</a> 或者 <a href="https://www.yubico.com/product/security-key-nfc-by-yubico/">Security Key NFC by Yubico</a> 你可以在创建 SSH 密钥的时候开启这个功能：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ssh-keygen <span class="nt">-t</span> ecdsa-sk <span class="nt">-O</span> resident</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这与之前所作的相同，除了常驻密钥可以更方便的导入到新电脑里，因为可以直接在安全密钥中加载密钥。
+要在新电脑上使用 SSH 密钥，确保你已经启动了 ssh-agent 然后执行以下命令：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ssh-add <span class="nt">-K</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这将加载一个 “key handle” 到 SSH 代理中并使此密钥可以在这台电脑上使用。
+这对临时使用很合适，但这不是持久化的 —— 如果你重启了电脑你需要重新运行 ssh-add。
+为了永久导入密钥，可以执行：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ssh-keygen <span class="nt">-K</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这会向当前目录下写入两个文件： <em>id_ecdsa_sk_rk</em> 和 <em>id_ecdsa_sk_rk.pub</em> 。
+现在你只需要重命名私钥文件为 <em>id_ecdsa_sk</em> 并移动到你的 SSH 目录下就可以了：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">mv </span>id_ecdsa_sk_rk ~/.ssh/id_ecdsa_sk</code></pre>
 </div>
 </div>
 </div>
@@ -332,6 +1001,9 @@ sec  rsa4096/0xEA5DE91459B80592
 </div>
 <div class="paragraph">
 <p><a href="https://developers.yubico.com/">Yubico Developers</a></p>
+</div>
+<div class="paragraph">
+<p><a href="https://paper.seebug.org/1366/">椭圆曲线加密与 NSA 后门考古</a></p>
 </div>
 </div>
 </div>
