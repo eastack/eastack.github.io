@@ -13,7 +13,7 @@ Stay Hungry. Stay Foolish.
 
 '''
 
-* 2022/02/11 link:blogs/yibikey-guide.html[[YubiKey 使用指南]
+* 2022/02/11 link:blogs/yibikey-guide.html[YubiKey 使用指南]
 * 2022/01/20 link:blogs/protocol-buffers.html[[译\] Protocol Buffers 语言指南]
 
 == 2021
