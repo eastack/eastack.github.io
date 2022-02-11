@@ -18,30 +18,11 @@
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
 <li><a href="#_准备工作">准备工作</a></li>
-<li><a href="#_重置_yubikey">重置 YubiKey</a></li>
 <li><a href="#_配置_openpgp">配置 OpenPGP</a>
 <ul class="sectlevel2">
-<li><a href="#_生成_gpg_密钥">生成 GPG 密钥</a>
-<ul class="sectlevel3">
-<li><a href="#_准备工作_2">准备工作</a></li>
-<li><a href="#_创建主密钥">创建主密钥</a></li>
-<li><a href="#_创建子证书">创建子证书</a>
-<ul class="sectlevel4">
-<li><a href="#_创建签名证书">创建签名证书</a></li>
-<li><a href="#_创建加密证书">创建加密证书</a></li>
-<li><a href="#_创建认证证书">创建认证证书</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a href="#_生成_gpg_密钥">生成 GPG 密钥</a></li>
 <li><a href="#_备份_gpg_密钥">备份 GPG 密钥</a></li>
-<li><a href="#_转移_gpg_密钥">转移 GPG 密钥</a>
-<ul class="sectlevel3">
-<li><a href="#_转移签名密钥">转移签名密钥</a></li>
-<li><a href="#_转移加密密钥">转移加密密钥</a></li>
-<li><a href="#_转移认证密钥">转移认证密钥</a></li>
-</ul>
-</li>
+<li><a href="#_转移_gpg_密钥">转移 GPG 密钥</a></li>
 <li><a href="#_验证_gpg_密钥">验证 GPG 密钥</a></li>
 </ul>
 </li>
@@ -51,6 +32,7 @@
 <li><a href="#_使用驻留密钥">使用驻留密钥</a></li>
 </ul>
 </li>
+<li><a href="#_重置_yubikey">重置 YubiKey</a></li>
 <li><a href="#_参考链接">参考链接</a></li>
 </ul>
 </div>
@@ -58,13 +40,28 @@
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="https://www.yubico.com/wp-content/uploads/2021/10/OneHandBanner4-green-bg-sizing-1-scaled.jpg" alt="Yubikey Pointer">
+</div>
+</div>
 <div class="paragraph">
-<p>已经入手 YubiKey 5 NFC 约有一年了期间折腾过几次，也真正用过一段时间。
-但最终还是因为不如本地密钥文件方便，最终被搁置吃灰，一直想再捣腾一下使用起来。
-前几天因为想要使用 hledger 和 git-crypt 记账记日记需要用到 GPG，Git 提交签名也需要用到 GPG，
-而平时提交代码和服务器登录需要用到 SSH。
-准备使用 YubiKey 存储对应的密钥。
-所以做了这篇记录，方便日后参考。</p>
+<p>YubiKey 是由 Yubico 生产的身份认证设备，支持一次性密码（OTP）、公钥加密和身份认证，以及由FIDO联盟（FIDO U2F）开发的通用第二因素（U2F）等协议。</p>
+</div>
+<div class="paragraph">
+<p>本文记录了自己在使用 YubiKey 时的一些操作，仅供参考。</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+因涉及到密钥等相关操作，且多为不可逆操作，数据无价，三思后行。
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -72,171 +69,32 @@
 <h2 id="_准备工作">准备工作</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>首先安装稍后我们需要用到的 <a href="https://github.com/Yubico/yubikey-manager">YubiKey Manager</a>、 <a href="https://gnupg.org/">GnuPG</a>等软件。</p>
+<p>首先需要安装以下软件：</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="https://github.com/Yubico/yubikey-manager">YubiKey Manager</a></dt>
+<dd>
+<p>是 Yubico 官方出品的 YubiKey Python 库及基于 CLI 的配置管理软件。</p>
+</dd>
+<dt class="hdlist1"><a href="https://gnupg.org/">GnuPG</a></dt>
+<dd>
+<p>是 <a href="https://www.ietf.org/rfc/rfc4880.txt">RFC4880</a>（也称为PGP）定义的 OpenPGP 标准的免费完整实现。</p>
+</dd>
+<dt class="hdlist1"><a href="https://pcsclite.apdu.fr/">PCSClite</a></dt>
+<dd>
+<p>使用 SCard API（PC/SC）访问智能卡的中间库。</p>
+</dd>
+<dt class="hdlist1"><a href="https://pcsclite.apdu.fr/">CCID</a></dt>
+<dd>
+<p>通用 USB 芯片/智能卡接口设备驱动程序。</p>
+</dd>
+</dl>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>pacman <span class="nt">-S</span> yubikey-manager gnupg pcsclite ccid</code></pre>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_重置_yubikey">重置 YubiKey</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，需要单独进行重置。</p>
-</div>
-<div class="paragraph">
-<p>可以通过以下命令查看 Key 的相关信息。</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman info</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">Device type: YubiKey 5 NFC
-Serial number: ********
-Firmware version: 5.*.*
-Form factor: Keychain (USB-A)
-Enabled USB interfaces: OTP, FIDO, CCID
-NFC transport is enabled.
-
-Applications	USB          	NFC
-FIDO2       	Enabled      	Enabled
-OTP         	Enabled      	Enabled
-FIDO U2F    	Enabled      	Enabled
-OATH        	Enabled      	Enabled
-YubiHSM Auth	Not available	Not available
-OpenPGP     	Enabled      	Enabled
-PIV         	Enabled      	Enabled</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>FIDO2</p>
-<div class="listingblock">
-<div class="title">使用以下命令对 FIDO2 应用进行重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman fido reset</code></pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-重置 FIDO 应用时 FIDO U2F 应用也会被重置。
-</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">然后输入 <code>y</code> 确认重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all FIDO credentials, including FIDO U2F credentials, and restore factory settings. Proceed? [y/N]: y</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">最后根据提示重新插拔 YubiKey 后轻触 YubiKey 完成重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">Remove and re-insert your YubiKey to perform the reset...
-  Touch your YubiKey...</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>OTP</p>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
-</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">使用以下命令删除相应槽中的盐</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman otp delete 1</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">然后输入 <code>y</code> 确认即可完成删除</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">Do you really want to delete the configuration of slot 1? [y/N]: y
-Deleting the configuration in slot 1...</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>OATH</p>
-<div class="listingblock">
-<div class="title">使用以下命令对 OATH 应用进行重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman oath reset</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">然后输入 <code>y</code> 确认即可完成重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all stored OATH accounts and restore factory settings. Proceed? [y/N]: y
-Resetting OATH data...
-Success! All OATH accounts have been deleted from the YubiKey.</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>OpenPGP</p>
-<div class="listingblock">
-<div class="title">使用以下命令对 OpenPGP 应用进行重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman openpgp reset</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">然后输入 <code>y</code> 确认即可完成重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all stored OpenPGP keys and data and restore factory settings? [y/N]: y
-Resetting OpenPGP data, don't remove the YubiKey...
-Success! All data has been cleared and default PINs are set.
-PIN:         123456
-Reset code:  NOT SET
-Admin PIN:   12345678</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>PIV</p>
-<div class="listingblock">
-<div class="title">使用以下命令对 PIV 应用进行重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="bash">ykman piv reset</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">然后输入 <code>y</code> 确认即可完成重置</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all stored PIV data and restore factory settings. Proceed? [y/N]: y
-Resetting PIV data...
-Success! All PIV data have been cleared from the YubiKey.
-Your YubiKey now has the default PIN, PUK and Management Key:
-	PIN:	123456
-	PUK:	12345678
-	Management Key:	************************************************</code></pre>
-</div>
-</div>
-</li>
-</ul>
 </div>
 </div>
 </div>
@@ -264,15 +122,24 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </div>
 </div>
 <div class="paragraph">
-<p>之后的步骤中你将会被多次要求输入密码进行认证 —— 请保持它触手可得。</p>
-</div>
-<div class="paragraph">
-<p>首先生成一个强密码然后你可以把它记住或者写下来。</p>
+<p>之后生成一个用来保护 GPG 密钥的强密码然后你可以把它记住或者写下来。</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="bash">gpg <span class="nt">--gen-random</span> <span class="nt">--armor</span> 0 24</code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+之后的步骤中我们将会被多次要求输入密码进行认证，请保持它可以被方便的访问到。
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -295,7 +162,7 @@ Your YubiKey now has the default PIN, PUK and Management Key:
 </table>
 </div>
 <div class="paragraph">
-<p>生成主密钥</p>
+<p>首先生成主密钥</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -428,11 +295,20 @@ uid                              WangHeng &lt;admin@eastack.me&gt;</code></pre>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。</p>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+将证书保存在持久且安全的地方，因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>将密钥ID暴露为一个变量方便之后使用</p>
+<p>将密钥 ID 暴露为一个变量方便之后使用</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -645,7 +521,7 @@ gpg&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>最后保存对密钥的修改</p>
+<p>最后保存对密钥的修改并退出</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -670,7 +546,7 @@ gpg&gt;</code></pre>
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-使用 <code>keytocard</code> 转移密钥到 YubiKey 中是毁灭性的单向操作。
+使用 <code>keytocard</code> 转移密钥到 YubiKey 中是不可逆的单向操作。
 确保你在操作前进行了备份： <code>keytocard</code> 将本地磁盘上的密钥转换为存根，
 这意味这磁盘上的副本不能再传输到之后的安全密钥设备中或生成新的证书。
 </td>
@@ -790,10 +666,10 @@ ssb  rsa4096/0x7A4D04F73FD5999C
      created: 2022-02-10  expires: 2023-02-10  usage: A
 [ultimate] (1). WangHeng &lt;admin@eastack.me&gt;
 
-gpg&gt; keytocard <i class="conum" data-value="3"></i><b>(3)</b>
+gpg&gt; keytocard
 Please select where to store the key:
    (2) Encryption key
-Your selection? 2 <i class="conum" data-value="4"></i><b>(4)</b>
+Your selection? 2
 
 sec  rsa4096/0xB23B3BF3A6CB4BC5
      created: 2022-02-10  expires: never       usage: C
@@ -808,6 +684,18 @@ ssb  rsa4096/0x7A4D04F73FD5999C
 
 gpg&gt;</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>再次输入 <code>key 1</code> 取消选中签名密钥</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>输入 <code>key 2</code> 选中加密密钥</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -860,7 +748,7 @@ gpg&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>保存并退出</p>
+<p>最后保存对密钥的修改并退出</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -872,7 +760,7 @@ gpg&gt;</code></pre>
 <div class="sect2">
 <h3 id="_验证_gpg_密钥">验证 GPG 密钥</h3>
 <div class="paragraph">
-<p>我们可以通过 <code>ssb&gt;</code> 标识来验证子密钥是否已成功转移到 YubiKey 中</p>
+<p>我们可以通过是否有 <code>ssb&gt;</code> 标识来验证子密钥是否已成功转移到 YubiKey 中</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -978,6 +866,180 @@ ssb&gt;  rsa4096/0x7A4D04F73FD5999C 2022-02-10 [A] [expires: 2023-02-10]</code><
 <pre class="rouge highlight"><code data-lang="bash"><span class="nb">mv </span>id_ecdsa_sk_rk ~/.ssh/id_ecdsa_sk</code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_重置_yubikey">重置 YubiKey</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>在进行操作前为防止未知意外发生，可以对操作应用先进行重置操作。</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+如果你没有相应的备份重置后你将会永久丢失你的密钥。
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>可以通过以下命令查看安全密钥的相关信息。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman info</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">Device type: YubiKey 5 NFC
+Serial number: ********
+Firmware version: 5.*.*
+Form factor: Keychain (USB-A)
+Enabled USB interfaces: OTP, FIDO, CCID
+NFC transport is enabled.
+
+Applications	USB          	NFC
+FIDO2       	Enabled      	Enabled
+OTP         	Enabled      	Enabled
+FIDO U2F    	Enabled      	Enabled
+OATH        	Enabled      	Enabled
+YubiHSM Auth	Not available	Not available
+OpenPGP     	Enabled      	Enabled
+PIV         	Enabled      	Enabled</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，因此需要单独进行重置。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>FIDO2</p>
+<div class="listingblock">
+<div class="title">使用以下命令对 FIDO2 应用进行重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman fido reset</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+重置 FIDO 应用时 FIDO U2F 应用也会被重置。
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">然后输入 <code>y</code> 确认重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all FIDO credentials, including FIDO U2F credentials, and restore factory settings. Proceed? [y/N]: y</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">最后根据提示重新插拔 YubiKey 后轻触 YubiKey 完成重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">Remove and re-insert your YubiKey to perform the reset...
+  Touch your YubiKey...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>OTP</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">使用以下命令删除相应槽中的盐</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman otp delete 1</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">然后输入 <code>y</code> 确认即可完成删除</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">Do you really want to delete the configuration of slot 1? [y/N]: y
+Deleting the configuration in slot 1...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>OATH</p>
+<div class="listingblock">
+<div class="title">使用以下命令对 OATH 应用进行重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman oath reset</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">然后输入 <code>y</code> 确认即可完成重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all stored OATH accounts and restore factory settings. Proceed? [y/N]: y
+Resetting OATH data...
+Success! All OATH accounts have been deleted from the YubiKey.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>OpenPGP</p>
+<div class="listingblock">
+<div class="title">使用以下命令对 OpenPGP 应用进行重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman openpgp reset</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">然后输入 <code>y</code> 确认即可完成重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all stored OpenPGP keys and data and restore factory settings? [y/N]: y
+Resetting OpenPGP data, don't remove the YubiKey...
+Success! All data has been cleared and default PINs are set.
+PIN:         123456
+Reset code:  NOT SET
+Admin PIN:   12345678</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>PIV</p>
+<div class="listingblock">
+<div class="title">使用以下命令对 PIV 应用进行重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">ykman piv reset</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">然后输入 <code>y</code> 确认即可完成重置</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="plaintext">WARNING! This will delete all stored PIV data and restore factory settings. Proceed? [y/N]: y
+Resetting PIV data...
+Success! All PIV data have been cleared from the YubiKey.
+Your YubiKey now has the default PIN, PUK and Management Key:
+	PIN:	123456
+	PUK:	12345678
+	Management Key:	************************************************</code></pre>
+</div>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>
