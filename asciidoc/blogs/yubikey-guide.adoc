@@ -1,145 +1,28 @@
 = YubiKey 使用指南
 :createdate: 2022-02-09
-:toclevels: 4
 
-已经入手 YubiKey 5 NFC 约有一年了期间折腾过几次，也真正用过一段时间。
-但最终还是因为不如本地密钥文件方便，最终被搁置吃灰，一直想再捣腾一下使用起来。
-前几天因为想要使用 hledger 和 git-crypt 记账记日记需要用到 GPG，Git 提交签名也需要用到 GPG，
-而平时提交代码和服务器登录需要用到 SSH。
-准备使用 YubiKey 存储对应的密钥。
-所以做了这篇记录，方便日后参考。
+image::https://www.yubico.com/wp-content/uploads/2021/10/OneHandBanner4-green-bg-sizing-1-scaled.jpg[Yubikey Pointer]
+YubiKey 是由 Yubico 生产的身份认证设备，支持一次性密码（OTP）、公钥加密和身份认证，以及由FIDO联盟（FIDO U2F）开发的通用第二因素（U2F）等协议。
+
+本文记录了自己在使用 YubiKey 时的一些操作，仅供参考。
+
+NOTE: 因涉及到密钥等相关操作，且多为不可逆操作，数据无价，三思后行。
 
 == 准备工作
 
-首先安装稍后我们需要用到的 https://github.com/Yubico/yubikey-manager[YubiKey Manager]、 https://gnupg.org/[GnuPG]等软件。
+首先需要安装以下软件：
+
+https://github.com/Yubico/yubikey-manager[YubiKey Manager]:: 是 Yubico 官方出品的 YubiKey Python 库及基于 CLI 的配置管理软件。
+
+https://gnupg.org/[GnuPG]:: 是 https://www.ietf.org/rfc/rfc4880.txt[RFC4880]（也称为PGP）定义的 OpenPGP 标准的免费完整实现。
+
+https://pcsclite.apdu.fr/[PCSClite]:: 使用 SCard API（PC/SC）访问智能卡的中间库。
+
+https://pcsclite.apdu.fr/[CCID]:: 通用 USB 芯片/智能卡接口设备驱动程序。
+
 [source, bash]
 ----
 sudo pacman -S yubikey-manager gnupg pcsclite ccid
-----
-
-== 重置 YubiKey
-
-YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，需要单独进行重置。
-
-可以通过以下命令查看 Key 的相关信息。
-
-[source, bash]
-----
-ykman info
-----
-
-[source, plaintext]
-----
-Device type: YubiKey 5 NFC
-Serial number: ********
-Firmware version: 5.*.*
-Form factor: Keychain (USB-A)
-Enabled USB interfaces: OTP, FIDO, CCID
-NFC transport is enabled.
-
-Applications	USB          	NFC
-FIDO2       	Enabled      	Enabled      	
-OTP         	Enabled      	Enabled      	
-FIDO U2F    	Enabled      	Enabled      	
-OATH        	Enabled      	Enabled      	
-YubiHSM Auth	Not available	Not available	
-OpenPGP     	Enabled      	Enabled      	
-PIV         	Enabled      	Enabled
-----
-
-* FIDO2
-+
-.使用以下命令对 FIDO2 应用进行重置 
-[source, bash]
-----
-ykman fido reset
-----
-+
-NOTE: 重置 FIDO 应用时 FIDO U2F 应用也会被重置。
-+
-.然后输入 `y` 确认重置
-[source, plaintext]
-----
-WARNING! This will delete all FIDO credentials, including FIDO U2F credentials, and restore factory settings. Proceed? [y/N]: y
-----
-+
-.最后根据提示重新插拔 YubiKey 后轻触 YubiKey 完成重置
-[source, plaintext]
-----
-Remove and re-insert your YubiKey to perform the reset...
-  Touch your YubiKey...
-----
-
-* OTP
-+
-NOTE: 我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
-+
-.使用以下命令删除相应槽中的盐
-[source, bash]
-----
-ykman otp delete 1
-----
-+
-.然后输入 `y` 确认即可完成删除
-[source, plaintext]
-----
-Do you really want to delete the configuration of slot 1? [y/N]: y
-Deleting the configuration in slot 1...
-----
-
-* OATH
-+
-.使用以下命令对 OATH 应用进行重置 
-[source, bash]
-----
-ykman oath reset
-----
-+
-.然后输入 `y` 确认即可完成重置
-[source, plaintext]
-----
-WARNING! This will delete all stored OATH accounts and restore factory settings. Proceed? [y/N]: y
-Resetting OATH data...
-Success! All OATH accounts have been deleted from the YubiKey.
-----
-
-* OpenPGP
-+
-.使用以下命令对 OpenPGP 应用进行重置 
-[source, bash]
-----
-ykman openpgp reset
-----
-+
-.然后输入 `y` 确认即可完成重置
-[source, plaintext]
-----
-WARNING! This will delete all stored OpenPGP keys and data and restore factory settings? [y/N]: y
-Resetting OpenPGP data, don't remove the YubiKey...
-Success! All data has been cleared and default PINs are set.
-PIN:         123456
-Reset code:  NOT SET
-Admin PIN:   12345678
-----
-
-* PIV
-+
-.使用以下命令对 PIV 应用进行重置 
-[source, bash]
-----
-ykman piv reset
-----
-+
-.然后输入 `y` 确认即可完成重置
-[source, plaintext]
-----
-WARNING! This will delete all stored PIV data and restore factory settings. Proceed? [y/N]: y
-Resetting PIV data...
-Success! All PIV data have been cleared from the YubiKey.
-Your YubiKey now has the default PIN, PUK and Management Key:
-	PIN:	123456
-	PUK:	12345678
-	Management Key:	************************************************
 ----
 
 == 配置 OpenPGP
@@ -160,14 +43,14 @@ export GNUPGHOME=$(mktemp -d -t gnupg_$(date +%Y%m%d%H%M)_XXX)
 wget -O $GNUPGHOME/gpg.conf https://raw.githubusercontent.com/drduh/config/master/gpg.conf
 ----
 
-之后的步骤中你将会被多次要求输入密码进行认证 —— 请保持它触手可得。
-
-首先生成一个强密码然后你可以把它记住或者写下来。
+之后生成一个用来保护 GPG 密钥的强密码然后你可以把它记住或者写下来。
 
 [source, bash]
 ----
 gpg --gen-random --armor 0 24
 ----
+
+TIP: 之后的步骤中我们将会被多次要求输入密码进行认证，请保持它可以被方便的访问到。
 
 ==== 创建主密钥
 
@@ -177,7 +60,7 @@ gpg --gen-random --armor 0 24
 NOTE: 注意任何时刻主密钥都应该保持离线，并且只在用来撤销或签发新的子密钥时进行访问。
 密钥也可以由 YubiKey 自身生成从而保证不会有任何其它副本存在。
 
-生成主密钥
+首先生成主密钥
 [source, bash]
 ----
 gpg --expert --full-generate-key
@@ -275,9 +158,9 @@ uid                              WangHeng <admin@eastack.me>
 <9> 这里输入邮件地址 `admin@eastack.me` 
 <10> 最后输入 `O` 确认用户 ID
 
-WARN: 将证书保存在持久，且安全的地方因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。
+WARNING: 将证书保存在持久且安全的地方，因为它会在证书过期后用来签发新的子证书和为其他 YubiKey 提供密钥。
 
-将密钥ID暴露为一个变量方便之后使用
+将密钥 ID 暴露为一个变量方便之后使用
 [source, bash]
 ----
 export KEYID=0xB23B3BF3A6CB4BC5
@@ -483,7 +366,7 @@ ssb  rsa4096/0x7A4D04F73FD5999C
 gpg>
 ----
 
-最后保存对密钥的修改
+最后保存对密钥的修改并退出
 [source, plaintext]
 ----
 gpg> save
@@ -495,7 +378,7 @@ TODO
 
 === 转移 GPG 密钥
 
-IMPORTANT: 使用 `keytocard` 转移密钥到 YubiKey 中是毁灭性的单向操作。
+IMPORTANT: 使用 `keytocard` 转移密钥到 YubiKey 中是不可逆的单向操作。
 确保你在操作前进行了备份： `keytocard` 将本地磁盘上的密钥转换为存根，
 这意味这磁盘上的副本不能再传输到之后的安全密钥设备中或生成新的证书。
 
@@ -596,10 +479,10 @@ ssb  rsa4096/0x7A4D04F73FD5999C
      created: 2022-02-10  expires: 2023-02-10  usage: A
 [ultimate] (1). WangHeng <admin@eastack.me>
 
-gpg> keytocard <3>
+gpg> keytocard
 Please select where to store the key:
    (2) Encryption key
-Your selection? 2 <4>
+Your selection? 2
 
 sec  rsa4096/0xB23B3BF3A6CB4BC5
      created: 2022-02-10  expires: never       usage: C
@@ -614,6 +497,8 @@ ssb  rsa4096/0x7A4D04F73FD5999C
 
 gpg>
 ----
+<1> 再次输入 `key 1` 取消选中签名密钥
+<2> 输入 `key 2` 选中加密密钥
 
 ==== 转移认证密钥
 
@@ -664,7 +549,7 @@ ssb* rsa4096/0x7A4D04F73FD5999C
 gpg>
 ----
 
-保存并退出
+最后保存对密钥的修改并退出
 [source, bash]
 ----
 gpg> save
@@ -672,7 +557,7 @@ gpg> save
 
 === 验证 GPG 密钥
 
-我们可以通过 `ssb>` 标识来验证子密钥是否已成功转移到 YubiKey 中
+我们可以通过是否有 `ssb>` 标识来验证子密钥是否已成功转移到 YubiKey 中
 
 [source, bash]
 ----
@@ -750,6 +635,135 @@ ssh-keygen -K
 [source, bash]
 ----
 mv id_ecdsa_sk_rk ~/.ssh/id_ecdsa_sk
+----
+
+== 重置 YubiKey
+
+在进行操作前为防止未知意外发生，可以对操作应用先进行重置操作。
+
+WARNING: 如果你没有相应的备份重置后你将会永久丢失你的密钥。
+
+可以通过以下命令查看安全密钥的相关信息。
+
+[source, bash]
+----
+ykman info
+----
+
+[source, plaintext]
+----
+Device type: YubiKey 5 NFC
+Serial number: ********
+Firmware version: 5.*.*
+Form factor: Keychain (USB-A)
+Enabled USB interfaces: OTP, FIDO, CCID
+NFC transport is enabled.
+
+Applications	USB          	NFC
+FIDO2       	Enabled      	Enabled      	
+OTP         	Enabled      	Enabled      	
+FIDO U2F    	Enabled      	Enabled      	
+OATH        	Enabled      	Enabled      	
+YubiHSM Auth	Not available	Not available	
+OpenPGP     	Enabled      	Enabled      	
+PIV         	Enabled      	Enabled
+----
+
+YubiKey 5 系列和 YubiKey 5 FIPS 系列的各种应用是相互隔离的，因此需要单独进行重置。
+
+* FIDO2
++
+.使用以下命令对 FIDO2 应用进行重置 
+[source, bash]
+----
+ykman fido reset
+----
++
+NOTE: 重置 FIDO 应用时 FIDO U2F 应用也会被重置。
++
+.然后输入 `y` 确认重置
+[source, plaintext]
+----
+WARNING! This will delete all FIDO credentials, including FIDO U2F credentials, and restore factory settings. Proceed? [y/N]: y
+----
++
+.最后根据提示重新插拔 YubiKey 后轻触 YubiKey 完成重置
+[source, plaintext]
+----
+Remove and re-insert your YubiKey to perform the reset...
+  Touch your YubiKey...
+----
+
+* OTP
++
+NOTE: 我使用的是YubiKey 5 NFC 所以我需要清除两个槽（1 和 2）中的盐。
++
+.使用以下命令删除相应槽中的盐
+[source, bash]
+----
+ykman otp delete 1
+----
++
+.然后输入 `y` 确认即可完成删除
+[source, plaintext]
+----
+Do you really want to delete the configuration of slot 1? [y/N]: y
+Deleting the configuration in slot 1...
+----
+
+* OATH
++
+.使用以下命令对 OATH 应用进行重置 
+[source, bash]
+----
+ykman oath reset
+----
++
+.然后输入 `y` 确认即可完成重置
+[source, plaintext]
+----
+WARNING! This will delete all stored OATH accounts and restore factory settings. Proceed? [y/N]: y
+Resetting OATH data...
+Success! All OATH accounts have been deleted from the YubiKey.
+----
+
+* OpenPGP
++
+.使用以下命令对 OpenPGP 应用进行重置 
+[source, bash]
+----
+ykman openpgp reset
+----
++
+.然后输入 `y` 确认即可完成重置
+[source, plaintext]
+----
+WARNING! This will delete all stored OpenPGP keys and data and restore factory settings? [y/N]: y
+Resetting OpenPGP data, don't remove the YubiKey...
+Success! All data has been cleared and default PINs are set.
+PIN:         123456
+Reset code:  NOT SET
+Admin PIN:   12345678
+----
+
+* PIV
++
+.使用以下命令对 PIV 应用进行重置 
+[source, bash]
+----
+ykman piv reset
+----
++
+.然后输入 `y` 确认即可完成重置
+[source, plaintext]
+----
+WARNING! This will delete all stored PIV data and restore factory settings. Proceed? [y/N]: y
+Resetting PIV data...
+Success! All PIV data have been cleared from the YubiKey.
+Your YubiKey now has the default PIN, PUK and Management Key:
+	PIN:	123456
+	PUK:	12345678
+	Management Key:	************************************************
 ----
 
 == 参考链接
