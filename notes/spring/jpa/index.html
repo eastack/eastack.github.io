@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Spring Data JPA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Spring Data JPA</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_实体映射">实体映射</a></li>
+<li><a href="#_概念">概念</a>
+<ul class="sectlevel2">
+<li><a href="#_cascade">Cascade</a></li>
+<li><a href="#_joincolumn">JoinColumn</a></li>
+<li><a href="#_多对多">多对多</a></li>
+<li><a href="#_一对多">一对多</a></li>
+<li><a href="#_一对一">一对一</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_实体映射">实体映射</h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_概念">概念</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_cascade">Cascade</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">CascadeType</span><span class="o">[]</span> <span class="nf">cascade</span><span class="o">()</span> <span class="k">default</span> <span class="o">{};</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_joincolumn">JoinColumn</h3>
+<div class="paragraph">
+<p>与其他关联关系主键配合使用，用来表示外键字段。</p>
+</div>
+<div class="paragraph">
+<p>如果把当前实体类看作一张表的DDL的话，那么以下代码等同于声明一个外键字段。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Child</span> <span class="o">{</span>
+  <span class="nd">@ManyToOne</span>
+  <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">"xxx_id"</span><span class="o">)</span>
+  <span class="nc">Parent</span> <span class="n">parent</span><span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>与此同时另一个实体（表DDL）中需要声明（@OneToMany(mappedBy="parent")）</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Parent</span> <span class="o">{</span>
+  <span class="nd">@ManyToOne</span><span class="o">(</span><span class="n">mappedBy</span><span class="o">=</span><span class="s">"parent"</span><span class="o">)</span>
+  <span class="nc">Child</span> <span class="n">child</span><span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_多对多">多对多</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_一对多">一对多</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_一对一">一对一</h3>
+
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

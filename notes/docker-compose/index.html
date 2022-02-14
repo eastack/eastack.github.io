@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Docker Compose</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Docker Compose</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_操作">操作</a></li>
+<li><a href="#_语法">语法</a>
+<ul class="sectlevel2">
+<li><a href="#_端口映射">端口映射</a></li>
+<li><a href="#_镜像来源">镜像来源</a></li>
+<li><a href="#_磁盘挂载卷">磁盘挂载卷</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_操作">操作</h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_语法">语法</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_端口映射">端口映射</h3>
+<div class="listingblock">
+<div class="content">
+<pre>services:
+  user-service:
+    ports:
+      - "8080:5050" <i class="conum" data-value="1"></i><b>(1)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>8080为本地端口，5050为容器内端口</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_镜像来源">镜像来源</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="na">services</span><span class="pi">:</span>
+  <span class="na">user-service</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span> <span class="s">.</span>
+  <span class="na">redis</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">redis:latest</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_磁盘挂载卷">磁盘挂载卷</h3>
+
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

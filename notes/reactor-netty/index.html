@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Netty</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_netty">Netty</a>
+<ul class="sectlevel2">
+<li><a href="#_channelhandler">ChannelHandler</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="paragraph">
+<p>HttpServerRequest 表示一个 http 请求
+HttpServerResponse 表示一个 http 响应</p>
+</div>
+<div class="paragraph">
+<p>HttpRouteHandler 内部封装了 HttpPredicate 和请求处理器（req, resp) &#8594; Mono&lt;Void&gt;</p>
+</div>
+<div class="paragraph">
+<p>HttpServerRoutes是服务器的路由定义DefaultHttpServerRoutes是HttpServerRoutes的默认实现</p>
+</div>
+<div class="paragraph">
+<p>HttpRouteHandler包含了请求判断用的条件和要调用的请求处理器</p>
+</div>
+<div class="paragraph">
+<p>HttpServerRoutes包含多个HttpRouteHandler，在请求到来时循环便利调用首个匹配的handler</p>
+</div>
+<div class="paragraph">
+<p>HttpServerOperations 实现了 HttpServerResponse 接口</p>
+</div>
+<div class="paragraph">
+<p>ConnectionObserver 接口观察状态变化</p>
+</div>
+<div class="paragraph">
+<p>HttpServerConfig 保存 HttpServer 的配置</p>
+</div>
+<div class="sect1">
+<h2 id="_netty">Netty</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_channelhandler">ChannelHandler</h3>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Handles an I/O event or intercepts an I/O operation, and forwards it to its next handler in its ChannelPipeline.
+Sub-types</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>处理 I/O 事件或拦截 I/O 操作，并将其转发到其 ChinnelPipeline 中的下一个处理程序。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>ChannelHandler itself does not provide many methods, but you usually have to implement one of its subtypes:
+ChannelInboundHandler to handle inbound I/O events, and
+ChannelOutboundHandler to handle outbound I/O operations.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>ChannelHandler 本身并没有提供很多方法，但是您通常必须实现其子类型之一：
+ChannelInboundHandler 处理入站 I/O 事件， 和
+ChannelOutboundHandler 处理出站 I/O 事件。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Alternatively, the following adapter classes are provided for your convenience:
+ChannelInboundHandlerAdapter to handle inbound I/O events,
+ChannelOutboundHandlerAdapter to handle outbound I/O operations, and
+ChannelDuplexHandler to handle both inbound and outbound events</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>或者，为了你使用方便提供了以下适配器类：
+ChannelInboundHandlerAdapter 处理入站 I/O 事件,
+ChannelOutboundHandlerAdapter 处理出站 I/O 事件
+ChannelDuplexHandler 处理出站和出站 I/O 事件</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>For more information, please refer to the documentation of each subtype.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>更多信息，请参阅每个子类的文档。</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>The context object</p>
+</div>
+<div class="paragraph">
+<p>A ChannelHandler is provided with a ChannelHandlerContext object. A ChannelHandler is supposed to interact with the ChannelPipeline it belongs to via a context object. Using the context object, the ChannelHandler can pass events upstream or downstream, modify the pipeline dynamically, or store the information (using AttributeKeys) which is specific to the handler.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>上下文对象</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

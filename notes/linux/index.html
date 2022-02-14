@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>文件分割</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_文件分割">文件分割</a></li>
+<li><a href="#_kvm虚拟机与宿主及共享粘贴板">KVM虚拟机与宿主及共享粘贴板</a></li>
+<li><a href="#_调节mic音量">调节Mic音量</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="paragraph">
+<p>linux list port and pid</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>ss <span class="nt">-lptn</span> <span class="s1">'sport = :80'</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>netstat <span class="nt">-nlp</span> | <span class="nb">grep</span> :80</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>lsof <span class="nt">-n</span> <span class="nt">-i</span> :80 | <span class="nb">grep </span>LISTEN</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>set proxy</p>
+</div>
+<div class="paragraph">
+<p>注意https_proxy后边连接哪里就是 <code>http</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">export </span><span class="nv">http_proxy</span><span class="o">=</span><span class="s2">"http://192.168.50.54:1080"</span>
+<span class="nb">export </span><span class="nv">https_proxy</span><span class="o">=</span><span class="s2">"http://192.168.50.54:1080"</span></code></pre>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_文件分割">文件分割</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">指定分割后文件大小</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">split</span> <span class="nt">-b</span> 10m server.log waynelog</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">list connection by pid</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">lsof <span class="nt">-p</span> <span class="nv">$PID</span> <span class="nt">-nP</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_kvm虚拟机与宿主及共享粘贴板">KVM虚拟机与宿主及共享粘贴板</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>apt <span class="nb">install </span>spice-vdagent</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_调节mic音量">调节Mic音量</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">amixer <span class="nb">set </span>Capture 5%+
+amixer <span class="nb">set </span>Capture 5%-</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\e</span><span class="s2">[1mbold</span><span class="se">\e</span><span class="s2">[0m"</span>
+<span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\e</span><span class="s2">[3mitalic</span><span class="se">\e</span><span class="s2">[0m"</span>
+<span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\e</span><span class="s2">[3m</span><span class="se">\e</span><span class="s2">[1mbold italic</span><span class="se">\e</span><span class="s2">[0m"</span>
+<span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\e</span><span class="s2">[4munderline</span><span class="se">\e</span><span class="s2">[0m"</span>
+<span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\e</span><span class="s2">[9mstrikethrough</span><span class="se">\e</span><span class="s2">[0m"</span>
+<span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\e</span><span class="s2">[31mHello World</span><span class="se">\e</span><span class="s2">[0m"</span>
+<span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"</span><span class="se">\x</span><span class="s2">1B[31mHello World</span><span class="se">\e</span><span class="s2">[0m"</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

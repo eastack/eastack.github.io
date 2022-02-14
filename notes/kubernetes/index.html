@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Kubernetes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Kubernetes</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_常用操作">常用操作</a>
+<ul class="sectlevel2">
+<li><a href="#_配置镜像拉取_secret">配置镜像拉取 secret</a></li>
+<li><a href="#_kubeadm_生成_join_命令">Kubeadm 生成 join 命令</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_常用操作">常用操作</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_配置镜像拉取_secret">配置镜像拉取 secret</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>配置镜像中心 Secret</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="title">生成 Secret</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">kubectl create secret docker-registry <span class="se">\</span><i class="conum" data-value="1"></i><b>(1)</b>
+	aliyun-docker-registry <span class="se">\</span><i class="conum" data-value="2"></i><b>(2)</b>
+	<span class="nt">--docker-server</span><span class="o">=</span>registry.aliyuncs.com <span class="se">\</span><i class="conum" data-value="3"></i><b>(3)</b>
+	<span class="nt">--docker-username</span><span class="o">=</span>username <span class="se">\</span><i class="conum" data-value="4"></i><b>(4)</b>
+	<span class="nt">--docker-password</span><span class="o">=</span>password <span class="se">\</span><i class="conum" data-value="5"></i><b>(5)</b>
+	<span class="nt">--docker-email</span><span class="o">=</span><span class="s1">'admin@eastack.me'</span> <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>指定 Secret 类型</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>设置 Secret 名称</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>指定镜像中心地址</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>用户名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>密码</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>邮箱</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">在 Deployment 中配置 Secret</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="s">spec.template.spec.imagePullSecrets[0].name = aliyun-docker-registry</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<div class="title">参考链接</div>
+<p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account">Add ImagePullSecrets To a ServiceAccount</a></p>
+</div>
+<div class="paragraph">
+<p><a href="https://help.aliyun.com/document_detail/86562.html">在Kubernetes集群如何支持私有镜像</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kubeadm_生成_join_命令">Kubeadm 生成 join 命令</h3>
+<div class="paragraph">
+<p>kubeadm token create --print-join-command</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

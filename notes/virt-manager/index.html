@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>virt-manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>virt-manager</h1>
+</div>
+<div id="content">
+<div class="listingblock">
+<div class="title">set root password</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>virt-customize <span class="nt">-a</span> CentOS2.qcow2 <span class="nt">--root-password</span> password:12345</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">backing</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">qemu-img create <span class="nt">-f</span> qcow2 <span class="nt">-F</span> qcow2 <span class="nt">-b</span> ./CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2 CentOS2.qcow2</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">provision new virtual machine</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nb">sudo </span>virt-install <span class="se">\</span>
+	<span class="nt">--virt-type</span> kvm
+	<span class="nt">--name</span> centos-test2 <span class="se">\</span>
+	<span class="nt">-ram-</span> 1024 <span class="se">\</span>
+	<span class="nt">--disk</span> CentOS2.qcow2 <span class="se">\</span>
+	<span class="nt">--network</span> <span class="nb">type</span><span class="o">=</span>direct,source<span class="o">=</span>enp0s25,source_mode<span class="o">=</span>bridge,model<span class="o">=</span>virtio <span class="se">\</span>
+	<span class="nt">--os-type</span><span class="o">=</span>linux <span class="se">\</span>
+	<span class="nt">--os-variant</span><span class="o">=</span>centos8 <span class="se">\</span>
+	<span class="nt">--import</span> <span class="se">\</span>
+	<span class="nt">--noautoconsole</span>
+
+<span class="nb">sudo </span>virt-install <span class="nt">--virt-type</span> kvm <span class="nt">--name</span> centos-test2 <span class="nt">--ram</span> 1024 <span class="nt">--disk</span> CentOS2.qcow2 <span class="nt">--network</span> <span class="nb">type</span><span class="o">=</span>direct,source<span class="o">=</span>enp0s25,source_mode<span class="o">=</span>bridge,model<span class="o">=</span>virtio <span class="nt">--os-type</span><span class="o">=</span>linux <span class="nt">--os-variant</span><span class="o">=</span>centos8 <span class="nt">--import</span> <span class="nt">--noautoconsole</span></code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

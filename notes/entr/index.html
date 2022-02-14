@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Entr</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Entr</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_简介">简介</a></li>
+<li><a href="#_命令">命令</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_简介">简介</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>通过标准输入提供一个文件列表，如果有任何文件发生改变，则此工具根据提供的参数执行相应的命令。
+<strong>entr</strong> 在等待子进程结束后才会响应后继的文件系统事件。
+在进入监视循环之前终端会保持开启，以支持交互式命令。</p>
+</div>
+<div class="paragraph">
+<p>其参数如下：</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">-a</dt>
+<dd>
+<p>响应工具运行期间的所有事件。
+没有此选项， <strong>entr</strong> 会对事件进行合并以避免死循环发生。
+此选项与 <strong>-r</strong> 一起使用时无效。</p>
+</dd>
+<dt class="hdlist1">-c</dt>
+<dd>
+<p>在调用命令行上指定的命令前，执行 <code>/usr/bin/clear</code></p>
+</dd>
+<dt class="hdlist1">-d</dt>
+<dd>
+<p>监视作为输入参数的普通文件所在的文件夹，并且如果有新文件添加则退出。
+此选项也支持明确指定目录。
+<code>.</code> 开头的文件将被乎略</p>
+</dd>
+<dt class="hdlist1">-n</dt>
+<dd>
+<p>以无交互模式运行下。
+在此模式下entr不会尝试读取终端，或更改自身属性。</p>
+</dd>
+<dt class="hdlist1">-p</dt>
+<dd>
+<p>推迟指定指令的首次执行，直到文件被修改。</p>
+</dd>
+<dt class="hdlist1">-r</dt>
+<dd>
+<p>重载一个持久子进程。
+就像标准操作模式一样，直到一个文件系统或键盘时间处理完之前，终止的命令不会再次执行。
+<code>SIGTERM</code> 用来在命令重启前终止该命令。
+创建了一个进程组以防止 <code>shell</code> 脚本屏蔽信号。
+<strong>entr</strong> 等待执行的命令退出，来确保如sockets例等资源已被关闭。
+TTY的控制权不会转移到子进程。</p>
+</dd>
+<dt class="hdlist1">-s</dt>
+<dd>
+<p>使用 <code>SHELL</code> 环境变量执行第一个参数
+如果标准输出是终端，shell的名称及退出状态码将在每次调用后输出。</p>
+</dd>
+<dt class="hdlist1">-z</dt>
+<dd>
+<p>当命令执行完毕时退出。
+当与 <code>-r</code> 选项一起使用时命令仅在响应命令或文件系统时重启。</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>第一个命名为 <code>/_</code> 的参数将被触发时间的第一个文件的绝对路径替换。
+默认使用观测到的第一个文件。
+如果使用了 <code>-s</code> 选项，触发事件的第一个文件的文件名可以通过 <code>$0</code> 读取。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_命令">命令</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>entr</strong> 监听键盘输入并响应以下命令：</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">⟨space⟩</dt>
+<dd>
+<p>立即执行命令。
+如果设置了 <code>-r</code> 选项那么 <strong>entr</strong> 将会象文件发生改变一样终止并重启子进程。</p>
+</dd>
+<dt class="hdlist1">q</dt>
+<dd>
+<p>退出; 相当于按下 ⟨control-C⟩.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

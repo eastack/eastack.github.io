@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>深入了解 Iptables 和 Netfilter 架构</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>深入了解 Iptables 和 Netfilter 架构</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_简介">简介</a></li>
+<li><a href="#_什么是_iptables_和_netfilter">什么是 IPTables 和 Netfilter ？</a></li>
+<li><a href="#_netfilter_钩子">Netfilter 钩子</a></li>
+<li><a href="#_iptables_表和链">IPTables 表和链</a></li>
+<li><a href="#_都有那些表可以用">都有那些表可以用？</a>
+<ul class="sectlevel2">
+<li><a href="#_filter_表">Filter 表</a></li>
+<li><a href="#_nat_表">NAT 表</a></li>
+<li><a href="#_mangle_表">Mangle 表</a></li>
+<li><a href="#_raw_表">Raw 表</a></li>
+<li><a href="#_security_表">Security 表</a></li>
+</ul>
+</li>
+<li><a href="#_每个表中实现了那些链">每个表中实现了那些链？</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_简介">简介</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://www.digitalocean.com/community/tutorials/what-is-a-firewall-and-how-does-it-work">防火墙</a>  是一个非常重要的工具，它可以被配置用来保护你的服务和基础设施。
+在Linux生态系统中， <code>iptables</code> 是一个被广泛使用的防火墙工具，它与内核中的 <code>netfilter</code> 包过滤框架相配合。
+对于不理解此系统体系的用户和管理员来说，创建可靠的防火墙策略可能非常有挑战性，不只是语法有挑战性，也和框架中的数个关联部分有关。</p>
+</div>
+<div class="paragraph">
+<p>在本指南中，我们将深入了解 <code>iptables</code> 架构，目的是让需要构建自己防火墙策略的用户更容易理解它。
+我们将会讨论 <code>iptables</code> 怎样与 <code>netfilter</code> 交互，以及各种组件如何组合在一起来提供全面的过滤和处理系统。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_什么是_iptables_和_netfilter">什么是 IPTables 和 Netfilter ？</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Linux 中最常用的基础防火墙软件是 <code>iptables</code> 。
+<code>iptables</code> 防火墙通过和 Linux 内核网络栈中的包过滤钩子交互来工作。
+这些内核钩子称为 <code>netfilter</code> 框架。</p>
+</div>
+<div class="paragraph">
+<p>每一个进入网络系统（入站或出站）的数据包在通过网络栈时都会触发这些钩子。
+允许使用这些钩子注册的程序在关键节点与流量交互。
+与 <code>iptables</code> 有关的内核模块注册在这些钩子上，以确保通过流量符合防火墙限定的规则。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_netfilter_钩子">Netfilter 钩子</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>有五个 <code>netfilter</code> 钩子可供程序进行注册。
+当数据包通过网络栈时，它们将触发这些注册在钩子上的内核模块。
+包将触发的钩子取决于包是入站还是出站，包的目的地，以及包在前一节点被丢弃还是被拒绝。</p>
+</div>
+<div class="paragraph">
+<p>以下钩子表示网络堆栈中几个明确定义的节点：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>NF_IP_PRE_ROUTING</code> ：任意入站流量在进入网络栈后将会立即触发此钩子。
+在作出将包发送到那里的路由决定之前，将处理此钩子。</p>
+</li>
+<li>
+<p><code>NF_IP_LOCAL_IN</code> ：如果一个数据包其目的地是本地系统，则在路由该入站数据包之后触发此钩子。</p>
+</li>
+<li>
+<p><code>NF_IP_FORWARD</code> ：如果数据包被转发到其他主机，则在路由该入站数据包之后触发此钩子。</p>
+</li>
+<li>
+<p><code>NF_IP_LOCAL_OUT</code> ：任何本地创建的出站流量，一旦到达网络栈就会触发此钩子。</p>
+</li>
+<li>
+<p><code>NF_IP_POST_ROUTING</code> ：任何出站或转发流量路由之后，即将被发送到线路上之前，将会触发此钩子。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>想要在这些钩子上注册的内核模块必须提供一个优先级编号，以帮助确定钩子被触发时调用它们的顺序。
+这提供了将多个模块（或者同一模块的多个实例）以确定的顺序连接到每个钩子的方法。
+每个模块将被依次调用，并在处理后向 <code>netfilter</code> 框架返回一个决议，用来表示应该对数据包做什么。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_iptables_表和链">IPTables 表和链</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>iptables</code> 防火墙使用表来组织其规则。
+这些表根据规则的决定类型来对其进行分来。
+例如，一个规则处理网络地址转换（NAT），其将被放到 <code>nat</code> 表中。
+如果此规则用来决定是否允许包到达其目的地，那么它可能会被添加到 <code>filter</code> 表中。</p>
+</div>
+<div class="paragraph">
+<p>在每个 <code>iptables</code> 表中，规则被进一步管理为一条条独立的链中。
+虽然表是由它所持有规则的共同目标所定义，但其内置链用来表示触发它们的钩子。
+链本质上决定了合适应用规则。</p>
+</div>
+<div class="paragraph">
+<p>如你所见，内置链的名称反映了与其关联的 <code>netfilter</code> 钩子的名称：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>PREROUTING</code> 由 <code>NF_IP_PRE_ROUTING</code> 钩子触发。</p>
+</li>
+<li>
+<p><code>INPUT</code> 由 <code>NF_IP_LOCAL_IN</code> 钩子触发。</p>
+</li>
+<li>
+<p><code>FORWARD</code> 由 <code>NF_IP_FORWARD</code> 钩子触发。</p>
+</li>
+<li>
+<p><code>OUTPUT</code> 由 <code>NF_IP_LOCAL_OUT</code> 钩子触发。</p>
+</li>
+<li>
+<p><code>POSTROUTING</code> 由 <code>NF_IP_POST_ROUTING</code> 钩子触发。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>链允许管理员控制在数据包传递路径中的何处评估规则。
+因为一个表有多个链，所以一个表可以在处理过程中的多个节点进行干预。
+因为在网络栈中一些类型的决议仅在某些节点上有意义，所以每个表不会包含在每个内核钩子上注册的链。</p>
+</div>
+<div class="paragraph">
+<p>因为只有五个 <code>netfilter</code> 钩子，所以来自多个表的链会在每个钩子上注册。
+例如，三个表有 <code>PREROUTING</code> 链。
+当这些链注册在关联的 <code>NF_IP_PRE_ROUTING</code> 钩子上时，它们指定一个优先级其表示了每个表的 <code>PREROUTING</code> 链被调用的顺序。
+在移动到下一个 <code>PREROUTING</code> 链前，将对优先级最高的 <code>PREROUTING</code> 链中的每个规则依次进行评估。
+我们将在后面看一下每个链的具体顺序。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_都有那些表可以用">都有那些表可以用？</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>下面让我们先退一步，来看看 <code>iptables</code> 提供的几个表。
+这些表代表了按照关注的领域进行划分，用来评估数据包的不同规则集合。</p>
+</div>
+<div class="sect2">
+<h3 id="_filter_表">Filter 表</h3>
+<div class="paragraph">
+<p><code>filter</code> 表是 <code>iptables</code> 中应用最广泛的一个表。
+<code>filter</code> 表用来决定是让一个数据包继续到达它所期望的目的地还是拒绝这个请求。
+按照防火墙的说法，这就是所谓的包 “过滤” 。
+这个表提供了人们在讨论防火墙时会想到的大量功能。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_nat_表">NAT 表</h3>
+<div class="paragraph">
+<p><code>nat</code> 表用来实现网络地址转换规则。
+当包进入网络栈时，规则将会确定是否以及如何修改包的源或目的地址，从而影响数据包和任何响应流量的路由方式。
+通常用来当无法直接访问时，将数据包路由到网络。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mangle_表">Mangle 表</h3>
+<div class="paragraph">
+<p><code>mangle</code> 表用于通过多种方式更改数据包的 IP 头。
+例如，你可以更改包的 TTL （Time to Live）值，延长或缩短数据包可以维持的有效网络跳数。
+其他 IP 头也可以按照同样的方式进行更改。</p>
+</div>
+<div class="paragraph">
+<p><code>mangle</code> 表还可以在数据包上做一个内核内部 “标记”，以便其他表及其他网络工具进行进一步处理。
+这个标记并不会接触到实际的包，但是会在内核的数据包表示中添加标记。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_raw_表">Raw 表</h3>
+<div class="paragraph">
+<p><code>iptables</code> 防火墙是有状态的，意味着可以根据与之前数据包的关系来评估数据包。
+建立在 <code>netfilter</code> 框架上的连接追踪功能允许 <code>iptables</code> 将数据包看作正在进行的连接或会话的一部分，而不是离散的部相关的数据流的一部分。
+通常在数据包到达网络接口后很快就开始应用连接跟踪逻辑。</p>
+</div>
+<div class="paragraph">
+<p><code>raw</code> 表的功能非常单一。
+其唯一的目的是提供一种标记数据包的机制，以（opt-out）选择退出连接跟踪。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_security_表">Security 表</h3>
+<div class="paragraph">
+<p><code>security</code> 表用来在包上设置内部 SELinux 安全上下文标记，这会影响 SELinux 或其他可以解释 SELinux 安全上下文的系统对数据包的处理。
+这些标记可以在每个包或每个连接的基础上使用。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_每个表中实现了那些链">每个表中实现了那些链？</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>前面我们分别讨论了表和链。
+下面我们看看每个表中都有那些链。
+本次讨论暗含了有关注册到同一钩子上链的评估顺序的进一步讨论。
+如果三个表中有 <code>PREROUTING</code> 链，那么他们的评估顺序是怎样的？</p>
+</div>
+<div class="paragraph">
+<p>下面的表格从左到右读展示了 <code>iptables</code> 每个表中可用的链。
+例如，当我们可以看出 <code>raw</code> 有 <code>PREROUTING</code> 和 <code>OUTPUT</code> 链。
+当从上到下读时，又展示了 <code>netfilter</code> 钩子调用时关联的链的评估顺序。</p>
+</div>
+<div class="paragraph">
+<p>有一点需要注意。
+下面的表中展示的 <code>net</code> 表，为了更清晰的展示其顺序被分割为 <code>DNAT</code> （改变包的目的地址）操作和 <code>SNAT</code> （改变包的源地址）操作。
+我们还添加了一些行，这些行代表进行路由决策和连接跟踪的节点，以便我们可以更加全面的了解正在发生的操作：</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.667%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tables↓/Chains→</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PRETOURING</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INPUT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FORWARD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">OUTPUT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">POSTROUTING</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(routing decision)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">raw</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(connection tracking enabled)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">mangel</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">nat(DNAT)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(routing decision)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">filter</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">security</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">nat(SNAT)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">✓</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</body>
+</html>

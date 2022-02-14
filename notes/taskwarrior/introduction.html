@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>Taskwarrior</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Taskwarrior</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_什么是taskwarrior">什么是Taskwarrior？</a></li>
+<li><a href="#_为什么选择taskwarrior">为什么选择Taskwarrior？</a></li>
+<li><a href="#_快速演示">快速演示</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_什么是taskwarrior">什么是Taskwarrior？</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Taskwarrior在你的终端下管理你的待办列表。
+它灵活、快速、高效、和谐，的完成其工作。</p>
+</div>
+<div class="paragraph">
+<p>Taskwarrior可以扩展适合你的工作流。
+将其用作一个掌管你任务，显示其列表，及从中移除任务的简单应用。
+但是利用其功能，可以让其成为一种复杂的数据查询工具，这可以帮助你保持秩序，并顺利完成你的任务。</p>
+</div>
+<div class="paragraph">
+<p>Taskwarrior是一个活跃的项目，我们每天都为其修复其Bug，改进和添加新特性。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_为什么选择taskwarrior">为什么选择Taskwarrior？</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>五个选择Taskwarrior的好理由</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>作为一个命令行用户你是否在寻找一种和谐、灵活、快速、高效的工具来轻松管理你的任务列表？
+Taskwarrior被设计为低摩擦度，允许你来捕获细节，并重新返回你的工作。</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nv">$ </span>task add Prepare the first draft of the proposal due:friday</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Taskwarrior使用自然而有表现力的命令行语法。</p>
+</div>
+</li>
+<li>
+<p>Taskwarrior是方法论中立的。
+无论你遵循 <a href="http://gettingthingsdone.com/">GTD</a>，还是使用 <a href="http://pomodorotechnique.com/">番茄工作法</a>，或者做任何对你有用的事，Taskwarrior提供能力来帮助你，而不限制你。</p>
+</li>
+<li>
+<p>Taskwarrior有一个活跃且友好的社区，提供对新老用户的各式帮助。
+<a href="https://taskwarrior.org/support">从这里</a>获取支持选项列表。
+需要立即得到答案 - 查看man或者 <a href="https://taskwarrior.org/docs">在线文档</a>
+要提一些问题？
+试试freenode上的#taskwarrior IRC。</p>
+</li>
+<li>
+<p>Taskwarrior以尽可能多的方式保持开放：</p>
+<div class="ulist">
+<ul>
+<li>
+<p>它免费，并以MIT协议开放源代码。</p>
+</li>
+<li>
+<p>它使用人类可读的文本文件储存数据，它导入和导出JSON，因此您的数据永远不会被俘虏。</p>
+</li>
+<li>
+<p>拥有DOM访问和Hook脚本API。</p>
+</li>
+<li>
+<p>有许多可用的免费和开放扩展脚本。</p>
+</li>
+<li>
+<p>Vit，一个基于curses的UI。</p>
+</li>
+<li>
+<p>FreeCinc，一个在线免费同步服务。</p>
+</li>
+<li>
+<p>Inthe.AM，一个免费的在线同步服务，Web界面和iOS客户端。</p>
+</li>
+<li>
+<p>BugWarrior，因此你可以从众多不同的Bug管理系统中导入你的漏洞issue。</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Taskwarrior活跃且充满活力的项目。
+在过去的一年，我们每天合并5.58个修改。
+Taskwarrior得到了许多贡献者的热烈参与，目前有60人提供代码补丁。
+但还有更多贡献者(其中252位)在文档、Bug、支持、主意、请求和扩展方面提供了帮助。
+它只会变得越来越好。</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_快速演示">快速演示</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>让我们看一看Taskwarrior的实际使用。
+首先我们添加一些任务到我们的列表中。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nv">$ </span>task add Buy milk
+Created task 1.
+
+<span class="nv">$ </span>task add Buy eggs
+Created task 2.
+
+<span class="nv">$ </span>task add Bake cake
+Created task 3.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>现在让我们来看一下任务列表。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nv">$ </span>task list
+
+ID Description
+<span class="nt">--</span> <span class="nt">-----------</span>
+1  Buy milk
+2  Buy eggs
+3  Bake cake
+
+3 tasks.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>假设我们购买了食材并希望标记前两个任务为完成。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash"><span class="nv">$ </span>task 1 <span class="k">done</span>
+<span class="nv">$ </span>task 2 <span class="k">done</span>
+<span class="nv">$ </span>task list
+
+ID Description
+<span class="nt">--</span> <span class="nt">-----------</span>
+1  Bake cake
+
+1 task.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>这些是其前三个功能， 既 <code>add</code> 、 <code>list</code> 、 <code>done</code> 这三个命令，但这就是你可以开始使用Taskwarrior所需要知道的所有知识了。</p>
+</div>
+<div class="paragraph">
+<p>但还有数百种其他功能，因此你了解更多就可以做的更多。
+这完全取决你如何使用Taskwarrior：遵循上述的三个简单命令，或者了解复杂的筛选或者了解复杂的过滤器、自定义报告、用户定义元数据、颜色规则、Hook脚本、同步等。</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
