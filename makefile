@@ -6,7 +6,7 @@ build:
 	  --user $(shell id -u):$(shell id -g) \
 	  --volume $(shell pwd):/documents \
 	  asciidoctor/docker-asciidoctor \
-	  asciidoctor asciidoc/**/*.adoc \
+	  asciidoctor 'asciidoc/**/*.adoc' \
 	    --source-dir=asciidoc \
 	    --destination-dir=public \
 	    --attribute=source-highlighter=rouge \
