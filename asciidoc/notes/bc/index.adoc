@@ -1,0 +1,13 @@
+= bc
+
+NOTE: 通常先指定 `obase` 后指定 `ibase` ，因为如果 `ibase` 先指定其执行完后之后的数字就是 `ibase` 指定的进制格式了。
+
+[source, bash]
+----
+echo 'obase=16;ibase=2;1111+1011' | bc
+----
+
+[source, plaintext]
+----
+1A
+----

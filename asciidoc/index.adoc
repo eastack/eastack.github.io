@@ -20,10 +20,10 @@ Stay Hungry. Stay Foolish.
 
 '''
 
+* 2021/11/28 link:blogs/raspberry-pi.html[配置树莓派]
 * 2021/09/04 link:blogs/redis-pipeline.html[[译\] Redis 流水线]
 * 2021/08/30 link:blogs/redis-transactions.html[[译\] Redis 事务]
 * 2021/08/17 link:blogs/data-structure-alignment.html[[译\] 数据结构对齐]
-* 2021/11/28 link:blogs/raspberry-pi.html[配置树莓派]
 
 == 2020
 

@@ -1,0 +1,12 @@
+= Mathematics
+
+== Symbol
+
+=== Sigma( `Σ` )
+
+In general mathematics, uppercase `Σ` is used as an operator for summation.
+在数学中大写的 `Σ` 一般用做求和操作符。
+
+== References
+
+https://en.wikipedia.org/wiki/Greek_alphabet[Greek alphabet]
