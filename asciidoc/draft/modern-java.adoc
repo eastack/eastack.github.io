@@ -1,0 +1,195 @@
+= 迈向现代化的 Java
+
+== Record/记录
+
+=== 创建与使用
+
+[source, java]
+----
+public record Rectangle(double length, double width) { }
+Rectangle r = new Rectangle(4.0, 5.0);
+System.out.println(r.length());
+System.out.println(r.width());
+----
+
+[source, java]
+----
+public final class Rectangle {
+    private final double length;
+    private final double width;
+
+    public Rectangle(double length, double width) {
+        this.length = length;
+        this.width = width;
+    }
+
+    double length() { return this.length; }
+    double width()  { return this.width; }
+
+    public boolean equals...
+    public int hashCode...
+    public String toString() {...}
+}
+----
+
+=== 构造器
+
+[source, java]
+----
+record Rectangle(double length, double width) {
+    public Rectangle {
+        if (length <= 0 || width <= 0) {
+            throw new java.lang.IllegalArgumentException(
+                String.format("Invalid dimensions: %f, %f", length, width));
+        }
+    }
+}
+----
+
+== `instanceof` 中的模式匹配
+
+[source, java]
+----
+public interface Shape { }
+
+final class Rectangle implements Shape {
+    final double length;
+    final double width;
+    
+    public Rectangle(double length, double width) {
+        this.length = length;
+        this.width = width;
+    }
+    
+    double length() { return length; }
+    double width() { return width; }
+}
+
+public class Circle implements Shape {
+    final double radius;
+    
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+    
+    double radius() { return radius; }
+}
+
+public static double getPerimeter(Shape shape) throws IllegalArgumentException {
+    if (shape instanceof Rectangle) {
+        Rectangle s = (Rectangle) shape;
+        return 2 * s.length() + 2 * s.width();
+    } else if (shape instanceof Circle) {
+        Circle s = (Circle) shape;
+        return 2 * s.radius() * Math.PI;
+    } else {
+        throw new IllegalArgumentException("Unrecognized shape");
+    }
+}
+----
+
+== Sealed Classes/密封类
+
+密封类和密封接口限制了那些其他类或接口可以继承或实现它们。
+
+////
+继承的主要目的是代码重用。
+无法对一些领域知识进行很好的建模。
+////
+
+=== 定义密封类
+
+[source, java]
+----
+sealed class Shape permits Circle, Rectangle, Square {}
+
+private final class Circle extends Shape {...} // <1>
+
+private sealed class Rectangle extends Shape // <2>
+    permits TransparentRectangle, FilledRectangle {...}
+
+private non-sealed class Square extends Shape {...} // <3>
+----
+<1> 许可类可以声明为终极类（final），从而关闭扩展性；
+<2> 许可类可以声明为封闭类（sealed），从而延续受限制的扩展性（必须是直接扩展，不具备传递性）；
+<3> 许可类可以声明为解封类（non-sealed）, 从而支持不受限制的扩展性。
+
+密封类和密封接口会限制其它类或接口对其进行扩展和实现。
+
+==== 目标
+
+允许类或接口作者以一种更加声明式的方式来来限制超类的使用。
+允许类或接口的作者控制那些代码负责提供实现。
+通过为模式的可穷尽分析提供基础为未来的模式匹配提供支持。
+
+==== 非目标
+
+* 并不是提供一种类似 “friends” 的新访问控制形式
+* 也不是一种改变
+
+==== 动机
+
+类的继承层次某些方面过于灵活不受限制。
+而 Java 中可以被约束的枚举功能又非常单一。
+
+使用枚举可以对固定数量的实例进行建模
+
+[source, java]
+----
+enum 行星 { 水星, 金星, 地球 }
+
+行星 p = ...
+switch (p) {
+  case 水星: ...
+  case 金星: ...
+  case 地球: ...
+}
+----
+
+而有时我们希望对固定值的集合进行建模，
+我们可以通过 **类的层次结构** 来做到这一点，
+而不是作为**代码继承和重用**的机制。
+
+但这种情况下这种层次结构并不能反应只有三种天体这一重要领域知识。
+
+[source, java]
+----
+interface 天体 { ... }
+final class 行星 implements 天体 { ... }
+final class 恒星   implements 天体 { ... }
+final class 彗星  implements 天体 { ... }
+----
+
+[source, java]
+----
+public sealed class 天体 
+    permits 行星, 恒星, 彗星 implements 天体 { ... }
+----
+
+== 本地变量类型推断
+
+.用在本地变量声明中
+[source, java]
+----
+var url = new URL("http://www.oracle.com/"); 
+var conn = url.openConnection(); 
+var reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+----
+
+.用在增强 `for` 循环中
+[source, java]
+----
+List<String> myList = Arrays.asList("a", "b", "c");
+for (var element : myList) {...}  // 推断为 String
+----
+
+.用在 try-with-resources 的变量上
+[source, java]
+----
+try (var input = new FileInputStream("validation.txt")) {...} 
+----
+NOTE: `var` 是一个保留的类型名，不是一个关键字，所以可以使用 `var` 作为变量名。
+
+== 模式匹配
+
+
