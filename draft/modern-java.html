@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<title>迈向现代化的 Java</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href=".asciidoctor/rouge-github.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>迈向现代化的 Java</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_record记录">Record/记录</a>
+<ul class="sectlevel2">
+<li><a href="#_创建与使用">创建与使用</a></li>
+<li><a href="#_构造器">构造器</a></li>
+</ul>
+</li>
+<li><a href="#_instanceof_中的模式匹配"><code>instanceof</code> 中的模式匹配</a></li>
+<li><a href="#_sealed_classes密封类">Sealed Classes/密封类</a>
+<ul class="sectlevel2">
+<li><a href="#_定义密封类">定义密封类</a></li>
+</ul>
+</li>
+<li><a href="#_本地变量类型推断">本地变量类型推断</a></li>
+<li><a href="#_模式匹配">模式匹配</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_record记录">Record/记录</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_创建与使用">创建与使用</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="n">record</span> <span class="nf">Rectangle</span><span class="o">(</span><span class="kt">double</span> <span class="n">length</span><span class="o">,</span> <span class="kt">double</span> <span class="n">width</span><span class="o">)</span> <span class="o">{</span> <span class="o">}</span>
+<span class="nc">Rectangle</span> <span class="n">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Rectangle</span><span class="o">(</span><span class="mf">4.0</span><span class="o">,</span> <span class="mf">5.0</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">length</span><span class="o">());</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">width</span><span class="o">());</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Rectangle</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">double</span> <span class="n">length</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">double</span> <span class="n">width</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Rectangle</span><span class="o">(</span><span class="kt">double</span> <span class="n">length</span><span class="o">,</span> <span class="kt">double</span> <span class="n">width</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">length</span> <span class="o">=</span> <span class="n">length</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">width</span> <span class="o">=</span> <span class="n">width</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kt">double</span> <span class="nf">length</span><span class="o">()</span> <span class="o">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="o">}</span>
+    <span class="kt">double</span> <span class="nf">width</span><span class="o">()</span>  <span class="o">{</span> <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">width</span><span class="o">;</span> <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="n">equals</span><span class="o">...</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="n">hashCode</span><span class="o">...</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{...}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_构造器">构造器</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="n">record</span> <span class="nf">Rectangle</span><span class="o">(</span><span class="kt">double</span> <span class="n">length</span><span class="o">,</span> <span class="kt">double</span> <span class="n">width</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">Rectangle</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">IllegalArgumentException</span><span class="o">(</span>
+                <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"Invalid dimensions: %f, %f"</span><span class="o">,</span> <span class="n">length</span><span class="o">,</span> <span class="n">width</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_instanceof_中的模式匹配"><code>instanceof</code> 中的模式匹配</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Shape</span> <span class="o">{</span> <span class="o">}</span>
+
+<span class="kd">final</span> <span class="kd">class</span> <span class="nc">Rectangle</span> <span class="kd">implements</span> <span class="nc">Shape</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="kt">double</span> <span class="n">length</span><span class="o">;</span>
+    <span class="kd">final</span> <span class="kt">double</span> <span class="n">width</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Rectangle</span><span class="o">(</span><span class="kt">double</span> <span class="n">length</span><span class="o">,</span> <span class="kt">double</span> <span class="n">width</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">length</span> <span class="o">=</span> <span class="n">length</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">width</span> <span class="o">=</span> <span class="n">width</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kt">double</span> <span class="nf">length</span><span class="o">()</span> <span class="o">{</span> <span class="k">return</span> <span class="n">length</span><span class="o">;</span> <span class="o">}</span>
+    <span class="kt">double</span> <span class="nf">width</span><span class="o">()</span> <span class="o">{</span> <span class="k">return</span> <span class="n">width</span><span class="o">;</span> <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Circle</span> <span class="kd">implements</span> <span class="nc">Shape</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="kt">double</span> <span class="n">radius</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Circle</span><span class="o">(</span><span class="kt">double</span> <span class="n">radius</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">radius</span> <span class="o">=</span> <span class="n">radius</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kt">double</span> <span class="nf">radius</span><span class="o">()</span> <span class="o">{</span> <span class="k">return</span> <span class="n">radius</span><span class="o">;</span> <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">double</span> <span class="nf">getPerimeter</span><span class="o">(</span><span class="nc">Shape</span> <span class="n">shape</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IllegalArgumentException</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">shape</span> <span class="k">instanceof</span> <span class="nc">Rectangle</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Rectangle</span> <span class="n">s</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Rectangle</span><span class="o">)</span> <span class="n">shape</span><span class="o">;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="na">width</span><span class="o">();</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">shape</span> <span class="k">instanceof</span> <span class="nc">Circle</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Circle</span> <span class="n">s</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Circle</span><span class="o">)</span> <span class="n">shape</span><span class="o">;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="na">radius</span><span class="o">()</span> <span class="o">*</span> <span class="nc">Math</span><span class="o">.</span><span class="na">PI</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">"Unrecognized shape"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sealed_classes密封类">Sealed Classes/密封类</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>密封类和密封接口限制了那些其他类或接口可以继承或实现它们。</p>
+</div>
+<div class="sect2">
+<h3 id="_定义密封类">定义密封类</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="n">sealed</span> <span class="kd">class</span> <span class="nc">Shape</span> <span class="n">permits</span> <span class="nc">Circle</span><span class="o">,</span> <span class="nc">Rectangle</span><span class="o">,</span> <span class="nc">Square</span> <span class="o">{}</span>
+
+<span class="kd">private</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Circle</span> <span class="kd">extends</span> <span class="nc">Shape</span> <span class="o">{...}</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="kd">private</span> <span class="n">sealed</span> <span class="kd">class</span> <span class="nc">Rectangle</span> <span class="kd">extends</span> <span class="nc">Shape</span> <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="n">permits</span> <span class="nc">TransparentRectangle</span><span class="o">,</span> <span class="nc">FilledRectangle</span> <span class="o">{...}</span>
+
+<span class="kd">private</span> <span class="n">non</span><span class="o">-</span><span class="n">sealed</span> <span class="kd">class</span> <span class="nc">Square</span> <span class="kd">extends</span> <span class="nc">Shape</span> <span class="o">{...}</span> <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>许可类可以声明为终极类（final），从而关闭扩展性；</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>许可类可以声明为封闭类（sealed），从而延续受限制的扩展性（必须是直接扩展，不具备传递性）；</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>许可类可以声明为解封类（non-sealed）, 从而支持不受限制的扩展性。</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>密封类和密封接口会限制其它类或接口对其进行扩展和实现。</p>
+</div>
+<div class="sect3">
+<h4 id="_目标">目标</h4>
+<div class="paragraph">
+<p>允许类或接口作者以一种更加声明式的方式来来限制超类的使用。
+允许类或接口的作者控制那些代码负责提供实现。
+通过为模式的可穷尽分析提供基础为未来的模式匹配提供支持。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_非目标">非目标</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>并不是提供一种类似 “friends” 的新访问控制形式</p>
+</li>
+<li>
+<p>也不是一种改变</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_动机">动机</h4>
+<div class="paragraph">
+<p>类的继承层次某些方面过于灵活不受限制。
+而 Java 中可以被约束的枚举功能又非常单一。</p>
+</div>
+<div class="paragraph">
+<p>使用枚举可以对固定数量的实例进行建模</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">enum</span> <span class="n">行星</span> <span class="o">{</span> <span class="n">水星</span><span class="o">,</span> <span class="n">金星</span><span class="o">,</span> <span class="n">地球</span> <span class="o">}</span>
+
+<span class="n">行星</span> <span class="n">p</span> <span class="o">=</span> <span class="o">...</span>
+<span class="k">switch</span> <span class="o">(</span><span class="n">p</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="nl">水星:</span> <span class="o">...</span>
+  <span class="k">case</span> <span class="nl">金星:</span> <span class="o">...</span>
+  <span class="k">case</span> <span class="nl">地球:</span> <span class="o">...</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>而有时我们希望对固定值的集合进行建模，
+我们可以通过 <strong>类的层次结构</strong> 来做到这一点，
+而不是作为<strong>代码继承和重用</strong>的机制。</p>
+</div>
+<div class="paragraph">
+<p>但这种情况下这种层次结构并不能反应只有三种天体这一重要领域知识。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">interface</span> <span class="nc">天体</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+<span class="kd">final</span> <span class="kd">class</span> <span class="nc">行星</span> <span class="kd">implements</span> <span class="n">天体</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+<span class="kd">final</span> <span class="kd">class</span> <span class="nc">恒星</span>   <span class="kd">implements</span> <span class="n">天体</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+<span class="kd">final</span> <span class="kd">class</span> <span class="nc">彗星</span>  <span class="kd">implements</span> <span class="n">天体</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="n">sealed</span> <span class="kd">class</span> <span class="nc">天体</span>
+    <span class="n">permits</span> <span class="n">行星</span><span class="o">,</span> <span class="n">恒星</span><span class="o">,</span> <span class="n">彗星</span> <span class="kd">implements</span> <span class="n">天体</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_本地变量类型推断">本地变量类型推断</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">用在本地变量声明中</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kt">var</span> <span class="n">url</span> <span class="o">=</span> <span class="k">new</span> <span class="no">URL</span><span class="o">(</span><span class="s">"http://www.oracle.com/"</span><span class="o">);</span>
+<span class="kt">var</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="na">openConnection</span><span class="o">();</span>
+<span class="kt">var</span> <span class="n">reader</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="n">conn</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">()));</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">用在增强 <code>for</code> 循环中</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">myList</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">);</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">var</span> <span class="n">element</span> <span class="o">:</span> <span class="n">myList</span><span class="o">)</span> <span class="o">{...}</span>  <span class="c1">// 推断为 String</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">用在 try-with-resources 的变量上</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">try</span> <span class="o">(</span><span class="kt">var</span> <span class="n">input</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">FileInputStream</span><span class="o">(</span><span class="s">"validation.txt"</span><span class="o">))</span> <span class="o">{...}</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>var</code> 是一个保留的类型名，不是一个关键字，所以可以使用 <code>var</code> 作为变量名。
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_模式匹配">模式匹配</h2>
+<div class="sectionbody">
+
+</div>
+</div>
+</div>
+</body>
+</html>
