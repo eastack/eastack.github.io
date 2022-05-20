@@ -11,6 +11,57 @@ Spring主要通过DI实现的IOC和AOP配合以下四个原则来助力Java开�
 依赖注入（DI:Dependency Injection）
 面向切面编程（AOP:Aspect-Oriented Programming）
 
+== 请求处理
+
+HttpHandler 会在 HttpHandlerAutoConfiguration 中被创建，
+之后被org.springframework.boot.web.reactive.context.WebServerManager.DelayedInitializationHttpHandler
+包裹后，传入 ReactorHttpHandlerAdapter 使用
+
+
+在 `org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration.AnnotationConfig#httpHandler` 中完成了
+
+使用 reactor.netty.http.server.HttpServer 将 
+Spring 中的入口 Handler(org.springframework.http.server.reactive.ReactorHttpHandlerAdapter)
+与 Reactor Netty 结合，从而与 Netty 结合
+
+Reactor Netty 的 Http Server 中用到的 handler 类型是 
+BiFunction<? super HttpServerRequest, ? super HttpServerResponse, ? extends Publisher<Void>> handler;
+
+
+请求到来触发了 Reactory Netty 的 reactor.netty.http.server.HttpServer.HttpServerHandle#onStateChange
+紧接着在内部调用了
+BiFunction<? super HttpServerRequest, ? super HttpServerResponse, ? extends Publisher<Void>> Handler
+的 apply
+
+而此处使用的 handler 是 Spring 中的 ReactorHttpHandlerAdapter 它实现了这一函数接口。
+然后在内部调用了 org.springframework.boot.web.reactive.context.WebServerManager.DelayedInitializationHttpHandler
+的 Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response)
+
+// 其控制逻辑见 org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration
+如果配置了basePath的话 然后又代理给了 org.springframework.http.server.reactive.ContextPathCompositeHandler，
+否则直接到了 org.springframework.web.server.adapter.HttpWebHandlerAdapter#handle
+最终 ServerHttpRequest 和 ServerHttpResponse 在这里变为了 ServerWebExchange, 
+然后所有Handler 也都由 HttpHandler 变为了 WebHandler
+
+随后代理给了 org.springframework.web.server.handler.ExceptionHandlingWebHandler
+随后通过其实现的 WebHandlerDecorator 代理给了 org.springframework.web.server.handler.FilteringWebHandler
+FilteringWebHandler 中又包含了 一个WebFilter的列表和其装饰的 WebHandler，并通过两者创建了 
+org.springframework.web.server.handler.DefaultWebFilterChain
+并开始
+
+Spring 通过
+org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryConfiguration.EmbeddedNetty#nettyReactiveWebServerFactory
+建立的 Factory 来建立 Reactory Netty 的 WebServer
+
+之后又通过 org.springframework.boot.web.reactive.context.WebServerManager#WebServerManager
+结合其参数中的 HttpHandler 建立了 WebServer
+
+请求从 Reactor Netty 来到 org.springframework.http.server.reactive.ReactorHttpHandlerAdapter#apply
+
+== 参数转换
+
+org.springframework.web.reactive.result.method.InvocableHandlerMethod#invoke
+
 == Bean的注册和装配（wiring）
 
 1. 通过 `@Component` 注解及包含 `@Component` 注解的注解对要注册的 `bean` 进行标记。

@@ -1,0 +1,13 @@
+= RabbitMQ
+
+开启 Management Plugin
+
+[source, bash]
+----
+rabbitmq-plugins enable rabbitmq_management
+----
+
+访问地址：http://{node-hostname}:15672/
+
+https://www.rabbitmq.com/management.html[Management Plugin]
+https://hub.docker.com/_/rabbitmq[Docker RabbitMQ]
