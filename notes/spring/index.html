@@ -16,6 +16,8 @@
 <div id="toc" class="toc2">
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
+<li><a href="#_请求处理">请求处理</a></li>
+<li><a href="#_参数转换">参数转换</a></li>
 <li><a href="#_bean的注册和装配wiring">Bean的注册和装配（wiring）</a></li>
 </ul>
 </div>
@@ -46,6 +48,72 @@
 <p>控制反转（IOC:Inversion Of Control）
 依赖注入（DI:Dependency Injection）
 面向切面编程（AOP:Aspect-Oriented Programming）</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_请求处理">请求处理</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>HttpHandler 会在 HttpHandlerAutoConfiguration 中被创建，
+之后被org.springframework.boot.web.reactive.context.WebServerManager.DelayedInitializationHttpHandler
+包裹后，传入 ReactorHttpHandlerAdapter 使用</p>
+</div>
+<div class="paragraph">
+<p>在 <code>org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration.AnnotationConfig#httpHandler</code> 中完成了</p>
+</div>
+<div class="paragraph">
+<p>使用 reactor.netty.http.server.HttpServer 将
+Spring 中的入口 Handler(org.springframework.http.server.reactive.ReactorHttpHandlerAdapter)
+与 Reactor Netty 结合，从而与 Netty 结合</p>
+</div>
+<div class="paragraph">
+<p>Reactor Netty 的 Http Server 中用到的 handler 类型是
+BiFunction&lt;? super HttpServerRequest, ? super HttpServerResponse, ? extends Publisher&lt;Void&gt;&gt; handler;</p>
+</div>
+<div class="paragraph">
+<p>请求到来触发了 Reactory Netty 的 reactor.netty.http.server.HttpServer.HttpServerHandle#onStateChange
+紧接着在内部调用了
+BiFunction&lt;? super HttpServerRequest, ? super HttpServerResponse, ? extends Publisher&lt;Void&gt;&gt; Handler
+的 apply</p>
+</div>
+<div class="paragraph">
+<p>而此处使用的 handler 是 Spring 中的 ReactorHttpHandlerAdapter 它实现了这一函数接口。
+然后在内部调用了 org.springframework.boot.web.reactive.context.WebServerManager.DelayedInitializationHttpHandler
+的 Mono&lt;Void&gt; handle(ServerHttpRequest request, ServerHttpResponse response)</p>
+</div>
+<div class="paragraph">
+<p>如果配置了basePath的话 然后又代理给了 org.springframework.http.server.reactive.ContextPathCompositeHandler，
+否则直接到了 org.springframework.web.server.adapter.HttpWebHandlerAdapter#handle
+最终 ServerHttpRequest 和 ServerHttpResponse 在这里变为了 ServerWebExchange,
+然后所有Handler 也都由 HttpHandler 变为了 WebHandler</p>
+</div>
+<div class="paragraph">
+<p>随后代理给了 org.springframework.web.server.handler.ExceptionHandlingWebHandler
+随后通过其实现的 WebHandlerDecorator 代理给了 org.springframework.web.server.handler.FilteringWebHandler
+FilteringWebHandler 中又包含了 一个WebFilter的列表和其装饰的 WebHandler，并通过两者创建了
+org.springframework.web.server.handler.DefaultWebFilterChain
+并开始</p>
+</div>
+<div class="paragraph">
+<p>Spring 通过
+org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryConfiguration.EmbeddedNetty#nettyReactiveWebServerFactory
+建立的 Factory 来建立 Reactory Netty 的 WebServer</p>
+</div>
+<div class="paragraph">
+<p>之后又通过 org.springframework.boot.web.reactive.context.WebServerManager#WebServerManager
+结合其参数中的 HttpHandler 建立了 WebServer</p>
+</div>
+<div class="paragraph">
+<p>请求从 Reactor Netty 来到 org.springframework.http.server.reactive.ReactorHttpHandlerAdapter#apply</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参数转换">参数转换</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>org.springframework.web.reactive.result.method.InvocableHandlerMethod#invoke</p>
 </div>
 </div>
 </div>
