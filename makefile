@@ -9,6 +9,7 @@ build:
 	  asciidoctor 'asciidoc/**/*.adoc' \
 	    --source-dir=asciidoc \
 	    --destination-dir=public \
+	    --attribute=lang=zh-CN \
 	    --attribute=source-highlighter=rouge \
 	    --attribute=icons=font \
 	    --attribute=toc=left@ \
