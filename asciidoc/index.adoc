@@ -1,6 +1,6 @@
-= EaStack
+= EaStack 的网络日志
 :toc!:
-:title: EaStack
+:title: EaStack 的网络日志
 :author: Wang Heng
 :email: admin@eastack.me
 :description: EaStack 的博客使用 Asciidoctor 和 Make 构建。

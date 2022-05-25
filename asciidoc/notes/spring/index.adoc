@@ -58,6 +58,9 @@ org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryConf
 
 请求从 Reactor Netty 来到 org.springframework.http.server.reactive.ReactorHttpHandlerAdapter#apply
 
+SQL执行
+dev.miku.r2dbc.mysql.TextParametrizedStatement#execute 
+
 == 参数转换
 
 org.springframework.web.reactive.result.method.InvocableHandlerMethod#invoke
