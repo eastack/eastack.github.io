@@ -1,36 +1,12 @@
 = Redis 流水线
 :description: Redis 流水线。 \ 
 
-====
-Request/Response protocols and RTT
-
-Redis is a TCP server using the client-server model and what is called a Request/Response protocol.
-
-This means that usually a request is accomplished with the following steps:
-
-* The client sends a query to the server, and reads from the socket, usually in a blocking way, for the server response.
-* The server processes the command and sends the response back to the client.
-====
-
 Redis 是一个使用 CS 模型和请求/响应协议的 TCP 服务器。
 
 也就是说一般通过下列步骤完成一次请求：
 
 * 客户端向服务器发送请求，之后通常使用阻塞的方式从 socket 中读取服务器响应。
 * 服务处理命令并将响应发送会客户端。
-
-====
-So for instance a four commands sequence is something like this:
-
-Client: INCR X
-Server: 1
-Client: INCR X
-Server: 2
-Client: INCR X
-Server: 3
-Client: INCR X
-Server: 4
-====
 
 比如有如下四条这样的命令：
 
@@ -43,61 +19,28 @@ Server: 4
 * Client: INCR X
 * Server: 4
 
-====
-Clients and Servers are connected via a network link.
-Such a link can be very fast (a loopback interface) or very slow (a connection established over the Internet with many hops between the two hosts).
-Whatever the network latency is, it takes time for the packets to travel from the client to the server, and back from the server to the client to carry the reply.
-====
-
 客户端和服务器通过网络互连。
 像这样的连接可以非常快（例如本地回环接口）也可以非常慢（两台中间间隔很多跳的主机通过互联网相连）。
 不管网络延迟如何，将数据包从客户端发送到服务器，然后再从服务器返回响应都需要耗费时间。
 
-====
-This time is called RTT (Round Trip Time).
-It is very easy to see how this can affect performance when a client needs to perform many requests in a row (for instance adding many elements to the same list, or populating a database with many keys).
-For instance if the RTT time is 250 milliseconds (in the case of a very slow link over the Internet), even if the server is able to process 100k requests per second, we'll be able to process at max four requests per second.
-====
 这段耗时被称为 *RTT* （往返时间）
 当一个客户端要连续执行大量请求时（比如，添加大量元素到同一列表，再或者向数据库中填充大量键）可以很明显的看到其对性能的影响。
 比如，RTT 为 250 毫秒时（这在互联网上算是很慢的连接速度了），即便服务器的性能每秒能处理10万个请求，但实际上我们每秒只能处理4个请求。
 
 NOTE: 1000 毫秒 = 1 秒
 
-====
-If the interface used is a loopback interface, the RTT is much shorter (for instance my host reports 0,044 milliseconds pinging 127.0.0.1), but it is still a lot if you need to perform many writes in a row.
-
-Fortunately there is a way to improve this use case.
-====
 如果使用的是本地回环接口，那么RTT会非常短（比如，在我自己的机器上ping 127.0.0.1时显示44毫秒）
 
 幸运的是我们还有办法进行改进。
 
 == Redis 流水线（Redis Pipelining）
 
-====
-A Request/Response server can be implemented so that it is able to process new requests even if the client hasn't already read the old responses.
-This way it is possible to send multiple commands to the server without waiting for the replies at all, and finally read the replies in a single step.
-====
 可以实现一个基于请求/响应将的服务器，这样一来即使客户端还没有读取之前的响应，也能处理心请求。
 这样我们就可以在不等待回复的情况下向服务器发送多个命令，最后一次性读取所有响应。
 
-====
-This is called pipelining, and is a technique widely in use for many decades.
-For instance many POP3 protocol implementations already support this feature, dramatically speeding up the process of downloading new emails from the server.
-====
 这一技术称为流水线，而且是一种广泛使用了几十年的技术了。
 比如，许多 POP3 协议的实现已经支持这一功能，从而显著提高了从服务器下载新邮件的速度。
 
-====
-Redis has supported pipelining since the very early days, so whatever version you are running, you can use pipelining with Redis.
-This is an example using the raw netcat utility:
-
-$ (printf "PING\r\nPING\r\nPING\r\n"; sleep 1) | nc localhost 6379
-+PONG
-+PONG
-+PONG
-====
 Redis 在很早的时候就支持了流水线，所以不管你用的是那个版本，都可以在 Redis 中使用流水线。
 下边是使用原始 netcat （netcat有好多变体）的一个 demo：
 
@@ -109,20 +52,6 @@ $ (printf "PING\r\nPING\r\nPING\r\n"; sleep 1) | nc localhost 6379
 +PONG
 ----
 
-====
-This time we are not paying the cost of RTT for every call, but just once for the three commands.
-
-To be very explicit, with pipelining the order of operations of our very first example will be the following:
-
-Client: INCR X
-Client: INCR X
-Client: INCR X
-Client: INCR X
-Server: 1
-Server: 2
-Server: 3
-Server: 4
-====
 这次我们不必再为每次调用付出RTT的代价，而是只为三个命令付出一次这样的代价。
 明确地说，通过流水线操作，我们第一个示例的操作顺序如下：
 
@@ -135,42 +64,23 @@ Server: 4
 * Server: 3
 * Server: 4
 
-====
-IMPORTANT NOTE: While the client sends commands using pipelining, the server will be forced to queue the replies, using memory.
-So if you need to send a lot of commands with pipelining, it is better to send them as batches each containing a reasonable number, for instance 10k commands, read the replies, and then send another 10k commands again, and so forth.
-The speed will be nearly the same, but the additional memory used will be at max the amount needed to queue the replies for these 10k commands.
-====
 重要说明：当客户端使用流水线发送命令时，服务器将被迫使用内存对回复进行排队。
 所以，如果你要用流水线发送大量命令，最好是分批发送，每一批包含一个合理的数字，比如1万条命令，然后读取回复，然后再发送1万条命令，依次类推。
 速递几乎不变，但是额外使用的内存量将达到存储1万个命令响应所需要的最大内存用量。
 
 == 这一切不只是RTT的问题
 
-====
-Pipelining is not just a way to reduce the latency cost associated with the round trip time, it actually greatly improves the number of operations you can perform per second in a given Redis server.
-This is the result of the fact that, without using pipelining, serving each command is very cheap from the point of view of accessing the data structures and producing the reply, but it is very costly from the point of view of doing the socket I/O.
-This involves calling the read() and write() syscall, that means going from user land to kernel land.
-The context switch is a huge speed penalty.
-====
 流水线不只可以减少RTT成本，它实际上极大的提高了在给定 Redis 服务器中每秒可以执行的操作数量。
 实际上，不使用流水线的话，从访问数据结构和生成回复的角度看，执行每个命令的开销是非常低的，但从套接字I/O的角度看成本则是非常高的。
 其中涉及到 `read()` 和 `write()` 系统调用，这也就意味这从用户态到内核态的切换。
 上下文切换是非常拖慢速度的。
 
-====
-When pipelining is used, many commands are usually read with a single read() system call, and multiple replies are delivered with a single write() system call.
-Because of this, the number of total queries performed per second initially increases almost linearly with longer pipelines, and eventually reaches 10 times the baseline obtained without pipelining, as you can see from the following graph:
-====
-当使用流水线时，通常会使用单个 `read()` 系统调用一次性读取大量命令，通过单个 `write()` 系统调用分发多个回复。
 正应如此，每秒执行的总查询数最开始随着管道内容纳元素数量的几乎成线性增长，最终达到不使用流水线的大约10倍左右，如下图所示：
 
 image::https://redis.io/images/redisdoc/pipeline_iops.png[pipeline_iops]
 
 == 一份真实世界的代码样例
 
-====
-In the following benchmark we'll use the Redis Ruby client, supporting pipelining, to test the speed improvement due to pipelining:
-====
 在下面的基准测试中，我们将使用支持流水线特性的 Ruby 客户端来测试流水线带来的性能提升。
 
 [source, ruby]
@@ -208,9 +118,6 @@ bench("with pipelining") {
 }
 ----
 
-====
-Running the above simple script yields the following figures on my Mac OS X system, running over the loopback interface, where pipelining will provide the smallest improvement as the RTT is already pretty low:
-====
 在我的 Mac OS X 系统上运行上面的简单脚本会产生下图，在环回接口上运行时流水线将提供最小的性能改进，因为这时候 RTT 已经很低了：
 
 [source]
@@ -219,32 +126,18 @@ without pipelining 1.185238 seconds
 with pipelining 0.250783 seconds
 ----
 
-====
-As you can see, using pipelining, we improved the transfer by a factor of five.
-====
 正如你所见，使用流水线，我们将传输性能提高了五倍。
 
 == 流水线和脚本
 
-====
-Using Redis scripting (available in Redis version 2.6 or greater) a number of use cases for pipelining can be addressed more efficiently using scripts that perform a lot of the work needed at the server side.
-A big advantage of scripting is that it is able to both read and write data with minimal latency, making operations like read, compute, write very fast (pipelining can't help in this scenario since the client needs the reply of the read command before it can call the write command).
-====
 当需要在服务端做大量工作时的很多场景中，使用 Redis 脚本可以比流水线更有效的解决问题。
 使用脚本的一大优势是可以以非常低的延迟读取和写入数据，从而让读，写，计算等操作非常快（流水线在这种情况下无能为力，因为客户端在调用写命令前需要读取命令的回复）。
 
-====
-Sometimes the application may also want to send EVAL or EVALSHA commands in a pipeline.
-This is entirely possible and Redis explicitly supports it with the SCRIPT LOAD command (it guarantees that EVALSHA can be called without the risk of failing).
-====
 有时应用可能还想在流水线中发送 `EVAL` 或者 `EVALSHA` 命令。
 这是完全可行的， Redis 使用 `SCRIPT LOAD` 命令明确支持此操作（其保证可以调用 `EVALSHA` 而没有失败的风险）。
 
 == 附录: 为什么即便是在本地环回接口上调用，使用忙循环还是很慢？
 
-====
-Even with all the background covered in this page, you may still wonder why a Redis benchmark like the following (in pseudo code), is slow even when executed in the loopback interface, when the server and the client are running in the same physical machine:
-====
 即便本页面涵盖了所有背景知识，你可能仍然想知道为什么像下面这样的 Redis 基准测试（伪代码），即便在环回接口中执行，且服务器和客户端运行在同一台物理机器上时，速度仍旧很慢 ： 
 [source]
 ----
@@ -253,22 +146,12 @@ FOR-ONE-SECOND:
 END
 ----
 
-====
-After all if both the Redis process and the benchmark are running in the same box, isn't this just copying messages in memory from one place to another without any actual latency or networking involved?
-====
 毕竟，如果 Redis 进程和基准测试都在同一机器中运行，这不就是将内存中的消息从一个地方复制到另一个地方而不涉及任何实际延迟或网络吗？
 
-====
-The reason is that processes in a system are not always running, actually it is the kernel scheduler that let the process run, so what happens is that, for instance, the benchmark is allowed to run, reads the reply from the Redis server (related to the last command executed), and writes a new command.
-The command is now in the loopback interface buffer, but in order to be read by the server, the kernel should schedule the server process (currently blocked in a system call) to run, and so forth.
-So in practical terms the loopback interface still involves network-like latency, because of how the kernel scheduler works.
-====
 原因是系统中的进程并不总是在运行，实际上是内核调度程序让进程运行，所以实际发生的事情是，基准测试被允许运行，读取来自 Redis 服务器的回复（与上次执行的命令相关），并写入一个新命令。
 该命令现在在环回接口缓冲区中，但为了被服务器读取，内核应该调度服务器进程（当前在系统调用中被阻止）运行，依此类推。
 所以，实际上，由于内核调度程序的工作方式，本地环回接口仍然涉及类似网络的延迟。
 
-====
-Basically a busy loop benchmark is the silliest thing that can be done when metering performances in a networked server. The wise thing is just avoiding benchmarking in this way.
-====
 基本上，在测试网络服务器性能时，使忙循环做基准测试是最蠢的事。 
 明智的做法是避免以这种方式进行基准测试。
+

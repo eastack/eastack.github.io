@@ -65,6 +65,9 @@ dev.miku.r2dbc.mysql.TextParametrizedStatement#execute
 
 org.springframework.web.reactive.result.method.InvocableHandlerMethod#invoke
 
+== 服务器初始化
+org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory#createHttpServer
+
 == Bean的注册和装配（wiring）
 
 1. 通过 `@Component` 注解及包含 `@Component` 注解的注解对要注册的 `bean` 进行标记。
