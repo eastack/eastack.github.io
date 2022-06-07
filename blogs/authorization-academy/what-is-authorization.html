@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<title>什么是授权？</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href=".asciidoctor/asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>什么是授权？</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">目录</div>
+<ul class="sectlevel1">
+<li><a href="#_认证authentication与授权authorization">认证（Authentication）与授权（Authorization）</a></li>
+<li><a href="#_授权在应用中看起来是什么样的">授权在应用中看起来是什么样的</a>
+<ul class="sectlevel2">
+<li><a href="#_网站架构">网站架构</a></li>
+<li><a href="#_数据模型">数据模型</a></li>
+<li><a href="#_我们的授权目标">我们的授权目标</a></li>
+</ul>
+</li>
+<li><a href="#_在那里放置我们的授权逻辑">在那里放置我们的授权逻辑</a>
+<ul class="sectlevel2">
+<li><a href="#_初始化连接">初始化连接</a></li>
+<li><a href="#_在代理中">在代理中</a></li>
+<li><a href="#_在应用路由中">在应用路由中</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>授权是在应用中控制谁可以做什么的机制。
+是你保证用户可以访问他自己所拥有的数据，而不允许查看不属于他数据的方式。
+有一套通用授权架构模式其适应任何应用架构 —— 了解这些模式可以让你编写授权代码更加容易。
+本指南将教给你这些模式。</p>
+</div>
+<div class="paragraph">
+<p>授权是每个应用中非常关键的一部分，但它几乎不会被用户察觉到。
+它通常也和你正在处理的特性和业务逻辑无关。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_认证authentication与授权authorization">认证（Authentication）与授权（Authorization）</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>许多人经常使用术语 ”auth“ 来指代认证和授权，他是应用程序安全中稍微有些重叠的机制。
+但他不是一回事。</p>
+</div>
+<div class="paragraph">
+<p>认证是验证用户身份的机制。
+他是应用程序的大门。
+例如用户名和密码共同构成身份（identity）（用户名）和认证方式（你知道密码吗）
+其他形式的认证方式包括 OAuth 以及 OpenID Connect（OIDC）（它们通常用来添加”使用谷歌登录“或”使用脸书登录“等功能），
+以及 SAML 这是企业用来为员工提供跨应用单点登录的标准。</p>
+</div>
+<div class="paragraph">
+<p>授权是控制用户可以做什么的机制。
+如果认证是大门，那授权就控制你进来之后可以打开那些门。</p>
+</div>
+<div class="paragraph">
+<p>授权通常构建于认证之上，并且当以用户是谁来决定其可以做什么时，两者最为接近。
+比如，一旦用户认证通过，我们可以用他的用户名来查看他有那些权限，
+或者我们可以通过一些我们可以获取到的其他属性推断她的权限。</p>
+</div>
+<div class="paragraph">
+<p>本教程聚焦于授权，并且只在必要时会涉及到认证。
+我们假设你有一个或者可以通过其他地方的指南部署一个认证系统。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_授权在应用中看起来是什么样的">授权在应用中看起来是什么样的</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>我们想向你展示现实生活中的授权示例，而不仅仅是理论上的。
+为了做到这一点，我们构建一个可以在其中演示每个概念的示例应用程序。</p>
+</div>
+<div class="paragraph">
+<p>我们的这个应用叫 GitClub，一个用来进行源代码托管与协作与版本控制的网站。
+它和现实生活中的 GitHub 和 GitLab 等 Git 托管平台非常类似。
+GitClub 提供了一个纯粹的例子来说明最初是什么催生了授权 —— 保护对资源的访问。
+GitClub 中的一种资源是仓库，并且仓库是访问受限的。
+用户可以或不能去读取或修改一个仓库。
+这意味着我们需要授权。</p>
+</div>
+<div class="sect2">
+<h3 id="_网站架构">网站架构</h3>
+<div class="paragraph">
+<p>基于 GitLab 人员提供的其产品机构的出色文档，我们的服务将从一个恰当的架构开始。
+如果这看起来很复杂 —— 不要担心！
+当我们谈到架构中的授权时，我们将会逐层剥开复杂的地方。</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://assets.website-files.com/5f1483105c9a72fd0a3b662a/6051515dfca17b4dac8d2162_eFvLwOry4DOBdqhLIyjwrPA1B3B9PMtu3m6b0iiBldsLUU-fsr8_xNcHOVqFQDkbvor_gQxlDPZ1x-F2L_-ypm2jFIfZuYMeK3PeTF9rJS96hU_FHZlQSC2TfJmnTGaJ5ON8i99b.png" alt="GitClub Architecture">
+</div>
+</div>
+<div class="paragraph">
+<p>上面的图表包含我们架构的主要部分。
+gitclub.dev 会处理三种不同类型的流量：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>浏览网站。这将为你的浏览器返回 HTML，就像 gitclub.com 的前端页面一样。</p>
+</li>
+<li>
+<p>API 请求。这将处理来自用户或第三方集成发送来的请求并返回 JSON 或其他格式的数据。</p>
+</li>
+<li>
+<p>Git 连接，与你克隆 <a href="https://gitclub.dev/oso/authzacademy" class="bare">https://gitclub.dev/oso/authzacademy</a> 类似。这可以是 SSH 或 HTTP 连接。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>所有的请求都连接到一点：代理，之所以这样命名是因为它代表（”代理“）网络服务器。
+代理会将连接重定向到正确的位置。
+在一个完整的系统中，代理可以由许负载均衡认证代理等多个部分组成。</p>
+</div>
+<div class="paragraph">
+<p>Website 和 API 可以访问（DB），其中保存了用户账户数据等信息。</p>
+</div>
+<div class="paragraph">
+<p>API 和 Git 连接将会访问存储 Git 仓库的文件系统（FS）。</p>
+</div>
+<div class="paragraph">
+<p>对于认证（提醒：请参阅认真与授权简介），我们的 Web 应用将使用简单的用户名和密码的机制来处理用户身份验证。</p>
+</div>
+<div class="paragraph">
+<p>在初始身份验证后，Web 应用将会向用户返回一个令牌，以便在后继的请求中他不再需要再次提交密码。
+Web 应用还允许用户创建 API 令牌用于 API 应用与之交互。
+这些令牌都是 ”Bearer tokens“ —— 授予令牌持有者访问权限的轻量级令牌。</p>
+</div>
+<div class="paragraph">
+<p>Git 服务与 Web 应用使用相同的用户名和密码对进行身份验证。</p>
+</div>
+<div class="paragraph">
+<p><strong>旁白: 单体 VS 微服务</strong></p>
+</div>
+<div class="paragraph">
+<p>我们示例的架构非常单体。
+我们只有几个应用在运行。
+对于微服务，我们会在遇到它们时之处一些差异，我们将在第六章：认证与微服务中进行深入探讨。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_数据模型">数据模型</h3>
+<div class="paragraph">
+<p>在系统中，我们有许多 Git <strong>仓库</strong> 。</p>
+</div>
+<div class="paragraph">
+<p><strong>组织</strong> 允许分组对仓库的访问。
+一个组织（比如一个公司，或一个开源工作组）会拥有许多仓库。
+每个组织可以拥有许多用户。</p>
+</div>
+<div class="paragraph">
+<p>一个人被表示为一个 <strong>用户</strong> 。
+一个用户可以是多个组织的成员。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_我们的授权目标">我们的授权目标</h3>
+<div class="paragraph">
+<p>跨越我们的系统，我们想要执行一个授权规则：
+只有当一个用户是拥有仓库的组织的成员时才可以访问仓库。</p>
+</div>
+<div class="paragraph">
+<p>我们将会在之后添加更多规则！</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_在那里放置我们的授权逻辑">在那里放置我们的授权逻辑</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>现在我们概述了我们的架构，让我们想一下在请求通过我们的应用程序组件时可以在那里进行授权，看看会发生什么。
+我们的一个 GItClub 用户，”<a href="mailto:alice@acme.org">alice@acme.org</a>“ 通过 Web 界面访问应用程序。
+假设他尝试某一个特定仓库的页面，比如：https://gitclub.dev/acme/anvil。
+会发生什么？</p>
+</div>
+<div class="paragraph">
+<p>他之前使用密码进行了身份认证，所以请求将携带令牌作为其凭据。
+在这种情况下，我们的用户被允许访问这个仓库，因为 acme 是一个组织并且当前用户是这个组织的成员。</p>
+</div>
+<div class="paragraph">
+<p>当我们通过基础设施跟踪请求时，我们将坚持授权的三大原则：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>是谁发起的这个请求？</p>
+</li>
+<li>
+<p>他想做什么？</p>
+</li>
+<li>
+<p>他这样做是为了什么？</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_初始化连接">初始化连接</h3>
+<div class="paragraph">
+<p>首先，用户的浏览器与我们的外部代理建立连接。</p>
+</div>
+<div class="paragraph">
+<p><em>是谁发起的这个请求？</em></p>
+</div>
+<div class="paragraph">
+<p>我们还不知道发出请求的用户的身份。
+要做到这点我们需要将令牌从请求中取出。
+或许我们知道他的IP地址。</p>
+</div>
+<div class="paragraph">
+<p><em>他想做什么？</em></p>
+</div>
+<div class="paragraph">
+<p>开启 TLS 连接。</p>
+</div>
+<div class="paragraph">
+<p><em>他这样做是为了什么？</em></p>
+</div>
+<div class="paragraph">
+<p>主机: gitclub.dev 的 443 端口。</p>
+</div>
+<div class="paragraph">
+<p>我们还没有进行应用授权，但可以在这里做一些网络级别的授权。
+可能我们有一个IP地址的放行列表或者甚至需要双向 TLS（虽然这https://twitter.com/colmmacc/status/1057017343438540801[有些争议]）。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_在代理中">在代理中</h3>
+<div class="paragraph">
+<p>代理被配置为根据需要将流量重定向到 Web、API 和 Git 服务器。
+这三者最终都需要进行一定的用户身份认证。
+正如我们之前所说，认证是用户名/密码对或 Bearer 令牌。</p>
+</div>
+<div class="paragraph">
+<p>如果我们有许多下游服务需要进行身份认证，那么添加身份认证代理会更有价值。
+例如，Web 应用和 API 应用都需要令牌才能访问大多数路由。
+如果我们在代理中处理令牌，那么我们可以执行以下授权：</p>
+</div>
+<div class="paragraph">
+<p><em>是谁发起的这个请求？</em></p>
+</div>
+<div class="paragraph">
+<p>代理验证请求中的令牌，其中可能含有用户有关的信息。
+例如，我们可能使用和 JSON Web Token（JWT）中非常相似的 JSON 编码的数据。</p>
+</div>
+<div class="paragraph">
+<p>假设我们解码后的令牌像这样：</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://assets.website-files.com/5f1483105c9a72fd0a3b662a/6051850fd07de863b8b6b99d_carbon%20(15)%201.png" alt="令牌结构">
+</div>
+</div>
+<div class="paragraph">
+<p>然后我们知道了用户是”<a href="mailto:alice@acme.org">alice@acme.org</a>“。</p>
+</div>
+<div class="paragraph">
+<p><em>他想做什么？</em></p>
+</div>
+<div class="paragraph">
+<p>通过检查 HTTP 请求，我们可以了解到用户发出了一个 GET 请求。</p>
+</div>
+<div class="paragraph">
+<p><em>他这样做是为了什么？</em></p>
+</div>
+<div class="paragraph">
+<p>再一次通过检查 HTTP 请求，URL 是 /acme/anvil。</p>
+</div>
+<div class="paragraph">
+<p>我们可以根据我们所知道的进行授权吗？</p>
+</div>
+<div class="paragraph">
+<p>这取决于我们想要执行什么样的授权。
+只提供请求中存在的信息，我们只能进行路由级别的授权。
+ 是否允许 “<a href="mailto:alice@acme.org">alice@acme.org</a>” 向 /acme/anvil 发出 GET 请求？</p>
+</div>
+<div class="paragraph">
+<p>关于用户我们唯一的信息是他的邮箱地址。
+所有用户可以向 /&lt;owner&gt;/&lt;repository&gt; 这种形式的路径发起 GET 请求，所以请求是允许的。</p>
+</div>
+<div class="paragraph">
+<p>但如果我们想要强制执行所有要求 —— 用户必须和仓库在同一个组织中 —— 那么我们没有足够的信息进行判断。
+怎样才能获得这些信息？
+我们可以考虑像令牌中添加越來越多的信息。
+或者我们可以配置我们的代理去访问数据库。
+这种方法为代理引入了相当的复杂性并重复了数据库访问的逻辑。</p>
+</div>
+<div class="paragraph">
+<p>但是代理是解决授权临近问题的理想选择之处，例如限制用户访问频率、
+需要 API 密钥或进行认证以及扫描可能你会在 Web应用防火墙（WAF）中发现的恶意负载。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_在应用路由中">在应用路由中</h3>
+<div class="imageblock">
+<div class="content">
+<img src="https://assets.website-files.com/5f1483105c9a72fd0a3b662a/6051515d26426319072a833b_C5aXBL44aL32YShGH_0c7pbaT6UMu8S4k9gkedJoLf9qpWfVHv0AT7Zsd0zx9i_GtDmT55aAtwAvZXMuWTuIDP_TtTVlgUP2I0pv7-_hMgS3tcB6RMWp56tJbhihLXXdlRJlusZD.png" alt="GitClub 架构高亮 Website 和 Database">
+</div>
+</div>
+<div class="paragraph">
+<p>我们已经介绍了代理！
+让我们转到网站和数据库。</p>
+</div>
+<div class="paragraph">
+<p>最终，我们经过认证的请求到达 Web 应用的路由，由路由决定如何进行处理此请求。
+此时通常将请求中间件中提供的身份转换为从数据库获取的数据模型。</p>
+</div>
+<div class="paragraph">
+<p><em>是谁发起的这个请求？</em></p>
+</div>
+<div class="paragraph">
+<p>假设认证中间件已经将请求中提供的用户身份转换为用户对象，
+这让我们可以访问我们想要知道的用户有关的所有信息。</p>
+</div>
+<div class="paragraph">
+<p><em>他想做什么？</em></p>
+</div>
+<div class="paragraph">
+<p>我们仍然在使用 HTTP 请求对象，并且 HTTP 方法是 GET。</p>
+</div>
+<div class="paragraph">
+<p><em>他这样做是为了什么？</em></p>
+</div>
+<div class="paragraph">
+<p>这里我们仍旧只有请求对象和路径：”/acme/anvil“。</p>
+</div>
+<div class="paragraph">
+<p>由于我们现在可以访问应用程序数据，所以我们可以查看相关信息。
+例如，我们可以使用现有逻辑来查找 /acme/anvil 对应的组织，
+判断我们的用户是否属于改组织。</p>
+</div>
+<div class="paragraph">
+<p>然而，这几乎正是我们下一步在控制器层需要做的事情。
+控制器将接受请求，查询数据，执行任何必要的数据操作并应用业务逻辑。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
