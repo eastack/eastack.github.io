@@ -1,9 +1,9 @@
-= EaStack 的网络日志
+= The EaStack Blog
 :toc!:
-:title: EaStack 的网络日志
+:title: The EaStack Blog
 :author: Wang Heng
 :email: admin@eastack.me
-:description: EaStack 的网络日志，使用 Asciidoctor 和 Make 构建。
+:description: The EaStack Blog build with asciidoctor and make.
 
 [quote, Stewart Brand, Whole Earth Catalog]
 Stay Hungry. Stay Foolish.
