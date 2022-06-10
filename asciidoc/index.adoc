@@ -1,9 +1,9 @@
-= The EaStack Blog
+= EaStack Blog
 :toc!:
-:title: The EaStack Blog
+:title: EaStack Blog
 :author: Wang Heng
 :email: admin@eastack.me
-:description: The EaStack Blog build with asciidoctor and make.
+:description: EaStack Blog build with asciidoctor and make.
 
 [quote, Stewart Brand, Whole Earth Catalog]
 Stay Hungry. Stay Foolish.
@@ -28,3 +28,7 @@ Stay Hungry. Stay Foolish.
 == 2020
 
 * 2020/07/06 link:blogs/java-reflection-in-action.html[[译\] Java 反射实战·第一章]
+
+== About
+
+
