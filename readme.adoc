@@ -1,4 +1,4 @@
-= Personal Notes
+= EaStack Blog
 
 .Clone the repository
 [source, bash]
