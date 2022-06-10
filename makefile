@@ -2,8 +2,8 @@ all: build
 
 build:
 	@find asciidoc/blogs -name '*.adoc' \
-		|sed 's/^asciidoc//;s/.adoc$$/.html/' \
-		|xargs -I {} echo https://www.eastack.me{} \
+		| sed 's/^asciidoc//;s/.adoc$$/.html/' \
+		| xargs -I {} echo https://www.eastack.me{} \
 		> static/sitemap.txt
 	@cp -rT static public
 	@docker run --rm \
