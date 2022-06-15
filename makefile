@@ -1,14 +1,14 @@
-homepage = https://www.eastack.me/
+homepage = https://www.eastack.me
 
 all: build
 
 build:
 	@find asciidoc/blogs -name '*.adoc' \
 		| sed 's/^asciidoc//;s/.adoc$$/.html/' \
-		| xargs -I {} echo https://www.eastack.me{} \
+		| xargs -I {} echo $(homepage){} \
 		| cat - <(echo '$(homepage)') \
-		| cat - <(echo '$(homepage)robots.txt') \
-		| cat - <(echo '$(homepage)sitemap.txt') \
+		| cat - <(echo '$(homepage)/robots.txt') \
+		| cat - <(echo '$(homepage)/sitemap.txt') \
 		> static/sitemap.txt
 	@cp -rT static public
 	@docker run --rm \
