@@ -12,3 +12,6 @@ https://www.eastack.me/blogs/protocol-buffers.html
 https://www.eastack.me/blogs/data-structure-alignment.html
 https://www.eastack.me/blogs/java-reflection-in-action.html
 https://www.eastack.me/blogs/yubikey-guide.html
+https://www.eastack.me/
+https://www.eastack.me/robots.txt
+https://www.eastack.me/sitemap.txt

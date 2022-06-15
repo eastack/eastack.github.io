@@ -1,9 +1,14 @@
+homepage = https://www.eastack.me/
+
 all: build
 
 build:
 	@find asciidoc/blogs -name '*.adoc' \
 		| sed 's/^asciidoc//;s/.adoc$$/.html/' \
 		| xargs -I {} echo https://www.eastack.me{} \
+		| cat - <(echo '$(homepage)') \
+		| cat - <(echo '$(homepage)robots.txt') \
+		| cat - <(echo '$(homepage)sitemap.txt') \
 		> static/sitemap.txt
 	@cp -rT static public
 	@docker run --rm \
@@ -23,6 +28,8 @@ build:
 	    --attribute=linkcss \
 	    --attribute=stylesdir=.asciidoctor \
 	    --attribute=copycss \
+	    --attribute=author=Wang\ Heng \
+	    --attribute=email=admin@eastack.me \
 	    --require asciidoctor-diagram \
 	    --require asciidoctor-mathematical
 	@rm -rf \?
