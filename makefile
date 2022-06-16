@@ -1,17 +1,19 @@
+author = Wang\ Heng
+email = admin@eastack.me
 homepage = https://www.eastack.me
 
 all: build
 
 build:
-	@find asciidoc/blogs -name '*.adoc' \
+	find asciidoc/blogs -name '*.adoc' \
 		| sed 's/^asciidoc//;s/.adoc$$/.html/' \
-		| xargs -I {} echo $(homepage){} \
+		| xargs -I {} echo '$(homepage){}' \
 		| cat - <(echo '$(homepage)') \
 		| cat - <(echo '$(homepage)/robots.txt') \
 		| cat - <(echo '$(homepage)/sitemap.txt') \
 		> static/sitemap.txt
-	@cp -rT static public
-	@docker run --rm \
+	cp -rT static public
+	docker run --rm \
 	  --user $(shell id -u):$(shell id -g) \
 	  --volume $(shell pwd):/documents \
 	  asciidoctor/docker-asciidoctor \
@@ -28,8 +30,8 @@ build:
 	    --attribute=linkcss \
 	    --attribute=stylesdir=.asciidoctor \
 	    --attribute=copycss \
-	    --attribute=author=Wang\ Heng \
-	    --attribute=email=admin@eastack.me \
+	    --attribute=author=$(author) \
+	    --attribute=email=$(email) \
 	    --require asciidoctor-diagram \
 	    --require asciidoctor-mathematical
 	@rm -rf \?
