@@ -2,18 +2,20 @@ author = Wang\ Heng
 email = admin@eastack.me
 homepage = https://www.eastack.me
 
+SHELL = /usr/bin/env bash
+
 all: build
 
 build:
-	find asciidoc/blogs -name '*.adoc' \
+	@find asciidoc/blogs -name '*.adoc' \
 		| sed 's/^asciidoc//;s/.adoc$$/.html/' \
 		| xargs -I {} echo '$(homepage){}' \
 		| cat - <(echo '$(homepage)') \
 		| cat - <(echo '$(homepage)/robots.txt') \
 		| cat - <(echo '$(homepage)/sitemap.txt') \
 		> static/sitemap.txt
-	cp -rT static public
-	docker run --rm \
+	@cp -rT static public
+	@docker run --rm \
 	  --user $(shell id -u):$(shell id -g) \
 	  --volume $(shell pwd):/documents \
 	  asciidoctor/docker-asciidoctor \
