@@ -1,6 +1,5 @@
 User-agent: *
-#Disallow: /about
-#Disallow: /draft
-#Disallow: /notes
-Allow: /
+Disallow: /about
+Disallow: /draft
+Disallow: /notes
 Sitemap: https://www.eastack.me/sitemap.txt
