@@ -5,6 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Wang Heng">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <title>基于角色的访问控制（RBAC）</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -14,6 +15,10 @@
 <body class="article toc2 toc-left">
 <div id="header">
 <h1>基于角色的访问控制（RBAC）</h1>
+<div class="details">
+<span id="author" class="author">Wang Heng</span><br>
+<span id="email" class="email"><a href="mailto:admin@eastack.me">admin@eastack.me</a></span><br>
+</div>
 <div id="toc" class="toc2">
 <div id="toctitle">目录</div>
 <ul class="sectlevel1">
@@ -21,6 +26,12 @@
 <ul class="sectlevel2">
 <li><a href="#_实施">实施</a></li>
 <li><a href="#_为什么使用授权模型">为什么使用授权模型</a></li>
+</ul>
+</li>
+<li><a href="#_基于角色的访问控制rbac模型">基于角色的访问控制（RBAC）模型</a>
+<ul class="sectlevel2">
+<li><a href="#_组织角色">组织角色</a></li>
+<li><a href="#_授权模型是什么">授权模型是什么</a></li>
 </ul>
 </li>
 </ul>
@@ -120,6 +131,74 @@ GitClub 提供了一个纯粹的例子来说明最初是什么催生了授权 �
 这也是在我们向我们的用户展示他们可以在我们的应用中做什么时，教给用户的心智模型。
 通过拥有一个清晰的授权模型，我们可以告诉我们的用户，“这是您在我们的应用中预期的权责”。</p>
 </div>
+<div class="paragraph">
+<p>做的不好的样子大家都非常熟悉 —— 一个巨大的权限表，这需要你对使用的应用非常了解才能知道需要那些权限：
+image::https://assets.website-files.com/5f1483105c9a72fd0a3b662a/606ce859fa17da4f83d7e638_Ddipp1Y9xjsLOAWSu6E7o1OefyBd7NYCYV7jfXmCT_pm3wUycd9W1fq24hf3jk-qY7SqAS_NlcMDCgurxNECOfXGYr-FIfZU9WiughoC3DGyTGhhrFZ49suNzGkOl4ySz-mPsvmJ.png[一个复杂的权限选择界面]</p>
+</div>
+<div class="paragraph">
+<p>或者一个让你去联系管理员的对话框：
+image::https://assets.website-files.com/5f1483105c9a72fd0a3b662a/606ce859c2c812534227afcc_cM0wNQABGXJ2Jr41pMfPJtAwO6ibnysv5TFzy_C0eUz_8N603AqyUoXQOwoHHQNkK0MaIxd4Ou-FHr5z3rMSSp6-3yrum1wV0E3oe-Yd6Sn2YsX2OEJMUeH69_pPFDoub5lcxgBv.png[一个授权警告对话框]</p>
+</div>
+<div class="paragraph">
+<p>所以我们如何避免这种情况那？</p>
+</div>
+<div class="paragraph">
+<p>通过使用适合我们当前需要的授权模型，并且足够灵活，可以随着时间的退役而增长以适应我们出现的新问题。</p>
+</div>
+<div class="paragraph">
+<p>随着时间退役适应新的需求是最难的部分，这就是我们看到的团队这是我们看到团队努力解决的部分。
+我们将在本章中通过确保我们的模型建立在彼此之上并平衡灵活性和简单性来解决这个问题。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_基于角色的访问控制rbac模型">基于角色的访问控制（RBAC）模型</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>角色是广泛使用的授权模型。
+又被称为“基于角色的访问控制” 角色是对实现和用户简化授权逻辑的有效方式。</p>
+</div>
+<div class="paragraph">
+<p><strong>角色</strong> 只是一种对权限进行分组的方式，以便将他们分配给用户。</p>
+</div>
+<div class="paragraph">
+<p>当一个用户被分配了一个权限，用户将被授予此角色所包含的所有权限。</p>
+</div>
+<div class="paragraph">
+<p><strong>权限</strong> 指定用户可以对资源执行的动作。
+例如，组织中的用户有 <em>权</em> 读取仓库。
+一个角色的权限不是随意挑选的。
+通常，角色应该与用户是谁、他们现在应用中做什么、甚至他们在组织中的角色或头衔保持一致。</p>
+</div>
+<div class="paragraph">
+<p>例如，在 GitClub 中主要的用户是开发者 —— 这将会是我们系统中的一个 “角色”。
+当然也有其他角色：我们可能有负责配置组织的 IT 管理员或负责计费的财务用户。
+所有这些用户都有在使用我们的应用时所需要的的不同权限集合。
+这些每一个都将和我们 GitClub 授权模型中的一个角色相对应。</p>
+</div>
+<div class="paragraph">
+<p>分配到“记账”角色的人自然会期望可以为组织配置计费 —— 新会员付费，更新付款信息等。</p>
+</div>
+<div class="paragraph">
+<p>通过使用角色，我们减少了需要向终端用户暴露的权限信息的表面积。
+与其要求用户配置大量权限来使用该应用程序，不如从少数选项中进行选择。</p>
+</div>
+<div class="paragraph">
+<p>角色非常灵活 —— 我们将在本章中看到几种不同的方式来使用他们来实现不同的功能 —— 并且可以在任何 B2B 应用中使用。</p>
+</div>
+<div class="sect2">
+<h3 id="_组织角色">组织角色</h3>
+<div class="paragraph">
+<p>在 GitClub，我们正在构建我们的应用，就像许多其他多租户应用程序一样。
+这意味着我们有一个单一版本的应用程序，使用多实例来为我们所有用户和组织的请求进行服务。
+自然，我们需要确保用户无法查看他们不数据的组织的资源。
+所以我们怎么做到这一点那？</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_授权模型是什么">授权模型是什么</h3>
+
 </div>
 </div>
 </div>
