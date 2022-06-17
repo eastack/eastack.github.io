@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
-<meta name="description" content="Redis 流水线。">
-<meta name="author" content="Redis 是一个使用 CS 模型和请求/响应协议的 TCP 服务器。">
+<meta name="description" content="本文讲解了 Redis 流水线（Pipelining）的原理，并简单对比了与脚本相比各自的优缺点。">
+<meta name="author" content="Wang Heng">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <title>Redis 流水线</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -35,6 +35,9 @@
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
+<div class="paragraph">
+<p>Redis 是一个使用 CS 模型和请求/响应协议的 TCP 服务器。</p>
+</div>
 <div class="paragraph">
 <p>也就是说一般通过下列步骤完成一次请求：</p>
 </div>
