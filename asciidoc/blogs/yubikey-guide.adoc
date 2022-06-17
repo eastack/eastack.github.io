@@ -1,5 +1,6 @@
 = YubiKey 使用指南
 :createdate: 2022-02-09
+:description: 本文记录了自己在使用 YubiKey 时的一些操作，主要内容包括 GPG 密钥和 SSH 密钥的使用，并介绍了如何重置你的 YubiKey。
 
 image::https://www.yubico.com/wp-content/uploads/2021/10/OneHandBanner4-green-bg-sizing-1-scaled.jpg[Yubikey Pointer]
 YubiKey 是由 Yubico 生产的身份认证设备，支持一次性密码（OTP）、公钥加密和身份认证，以及由FIDO联盟（FIDO U2F）开发的通用第二因素（U2F）等协议。

@@ -1,5 +1,5 @@
 = Redis 流水线
-:description: Redis 流水线。 \ 
+:description: 本文讲解了 Redis 流水线（Pipelining）的原理，并简单对比了与脚本相比各自的优缺点。
 
 Redis 是一个使用 CS 模型和请求/响应协议的 TCP 服务器。
 
