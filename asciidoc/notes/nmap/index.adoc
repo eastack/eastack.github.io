@@ -1,0 +1,7 @@
+= Nmap
+
+.探测主机类型，并假设主机在线，不 ping 直接扫描
+[source, bash]
+----
+sudo nmap -v -Pn -O lingdinggroup.com
+----
