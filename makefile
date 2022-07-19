@@ -1,42 +1,25 @@
-author = Wang\ Heng
-email = admin@eastack.me
-homepage = https://www.eastack.me
+all: clean build
 
-SHELL = /usr/bin/env bash
-
-all: build
-
-build:
-	@find asciidoc/blogs -name '*.adoc' \
-		| sed 's/^asciidoc//;s/.adoc$$/.html/' \
-		| xargs -I {} echo '$(homepage){}' \
-		| cat - <(echo '$(homepage)') \
-		| cat - <(echo '$(homepage)/robots.txt') \
-		| cat - <(echo '$(homepage)/sitemap.txt') \
-		> static/sitemap.txt
-	@cp -rT static public
+build: clean
 	@docker run --rm \
+          --interactive --tty \
 	  --user $(shell id -u):$(shell id -g) \
 	  --volume $(shell pwd):/documents \
 	  asciidoctor/docker-asciidoctor \
-	  asciidoctor 'asciidoc/**/*.adoc' \
-	    --source-dir=asciidoc \
-	    --destination-dir=public \
-	    --attribute=favicon=/favicon.ico \
-	    --attribute=lang=zh-Hans \
-	    --attribute=source-highlighter=rouge \
-	    --attribute=icons=font \
-	    --attribute=toc=left@ \
-	    --attribute=toc-title=目录 \
-	    --attribute=nofooter \
-	    --attribute=linkcss \
-	    --attribute=stylesdir=.asciidoctor \
-	    --attribute=copycss \
-	    --attribute=author=$(author) \
-	    --attribute=email=$(email) \
-	    --require asciidoctor-diagram \
-	    --require asciidoctor-mathematical
-	@rm -rf \?
+	  bash -c './main.sh build'
 
 clean:
 	@rm -rf public
+
+serve: clean build
+	@docker run --rm --detach \
+	  --name asciidocker \
+          --publish 8000:8000 \
+	  --user $(shell id -u):$(shell id -g) \
+	  --volume $(shell pwd):/documents \
+	  asciidoctor/docker-asciidoctor \
+	  bash -c './main.sh serve'
+
+stop:
+	@docker stop asciidocker
+

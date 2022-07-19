@@ -2,7 +2,6 @@
 :toc!:
 :title: EaStack Blog
 :description: EaStack Blog build with asciidoctor and make.
-
 [quote, Stewart Brand, Whole Earth Catalog]
 Stay Hungry. Stay Foolish.
 
@@ -10,19 +9,19 @@ Stay Hungry. Stay Foolish.
 
 '''
 
-* 2022/06/07 link:blogs/authorization-academy/index.html[[译\] OSO 授权学院]
-* 2022/02/11 link:blogs/yubikey-guide.html[YubiKey 使用指南]
-* 2022/01/20 link:blogs/protocol-buffers.html[[译\] Protocol Buffers 语言指南]
+* 2022/06/07 link:trans/authorization-academy/index.html[[译\] OSO 授权学院]
+* 2022/02/11 link:posts/publish/yubikey-guide.html[YubiKey 使用指南]
+* 2022/01/20 link:posts/publish/protocol-buffers.html[[译\] Protocol Buffers 语言指南]
 
 == 2021
 
 '''
 
-* 2021/11/28 link:blogs/raspberry-pi.html[配置树莓派]
-* 2021/09/04 link:blogs/redis-pipeline.html[[译\] Redis 流水线]
-* 2021/08/30 link:blogs/redis-transactions.html[[译\] Redis 事务]
-* 2021/08/17 link:blogs/data-structure-alignment.html[[译\] 数据结构对齐]
+* 2021/11/28 link:posts/publish/raspberry-pi.html[配置树莓派]
+* 2021/09/04 link:posts/publish/redis-pipeline.html[[译\] Redis 流水线]
+* 2021/08/30 link:posts/publish/redis-transactions.html[[译\] Redis 事务]
+* 2021/08/17 link:posts/publish/data-structure-alignment.html[[译\] 数据结构对齐]
 
 == 2020
 
-* 2020/07/06 link:blogs/java-reflection-in-action.html[[译\] Java 反射实战·第一章]
+* 2020/07/06 link:posts/publish/java-reflection-in-action.html[[译\] Java 反射实战·第一章]
