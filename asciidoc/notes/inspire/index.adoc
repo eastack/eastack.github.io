@@ -57,6 +57,7 @@
 * 国际化想做好还是很难的，货币、语言、单位
 * 涉及到钱的一定要严谨，测试，熔断。
 * sentence analyzer/英文句子结构分析
+* 在对你实现的东西施加不同维度的限制之后你会逐渐趋近于，“原子”的部分，从而做出更好的决策，做出更灵活的实现
 
 == 编程范式(Paradigm)
 
@@ -100,3 +101,7 @@ API: read, write
 API: write, read + poll / select
 在调用后直接返回
 // todo
+
+== Company
+
+https://www.typefox.io/[TypeFox]

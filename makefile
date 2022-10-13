@@ -1,4 +1,4 @@
-all: clean build
+all: build
 
 build: clean
 	@docker run --rm \

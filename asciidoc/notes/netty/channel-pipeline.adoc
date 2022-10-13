@@ -1,0 +1,173 @@
+= Channel Pipeline
+
+一个 `ChannelHandler` 列表处理或拦截一个 `Channel` 的入站事件及出站操作。
+`ChannelPipeline` 实现了一个高级版的 https://www.oracle.com/java/technologies/intercepting-filter.html[Intercepting Filter Pattern] 模式
+为用户对事件如何处理及 `ChannelHandler` 在流水线中如何相互交互提供全面控制。
+
+== 流水线的创建
+
+每个通道都有自己的流水线并且是在创建通道是自动创建的。
+
+== 流水线中的事件流是什么样的
+
+下图展示了在一个典型的 `ChannelPipeline` 中 I/O 事件如何被 `ChannelHandler` 进行处理的。
+一个 I/O 事件被一个 `ChannelInboundHandler` 或一个 `ChannelOutboundHandler` 处理并通过
+调用定义在 `ChannelHandlerContext` 中定义的事件传播方法将其转发到距离最近的处理器，
+例如 `ChannelHandlerContext.fireChannelRead(Object)` 和 `ChannelHandlerContext.write(Object)`。
+
+[source, plantext]
+----
+                                               I/O Request
+                                          via Channel or
+                                      ChannelHandlerContext
+                                                    |
++---------------------------------------------------+---------------+
+|                           ChannelPipeline         |               |
+|                                                  \|/              |
+|    +---------------------+            +-----------+----------+    |
+|    | Inbound Handler  N  |            | Outbound Handler  1  |    |
+|    +----------+----------+            +-----------+----------+    |
+|              /|\                                  |               |
+|               |                                  \|/              |
+|    +----------+----------+            +-----------+----------+    |
+|    | Inbound Handler N-1 |            | Outbound Handler  2  |    |
+|    +----------+----------+            +-----------+----------+    |
+|              /|\                                  .               |
+|               .                                   .               |
+| ChannelHandlerContext.fireIN_EVT() ChannelHandlerContext.OUT_EVT()|
+|        [ method call]                       [method call]         |
+|               .                                   .               |
+|               .                                  \|/              |
+|    +----------+----------+            +-----------+----------+    |
+|    | Inbound Handler  2  |            | Outbound Handler M-1 |    |
+|    +----------+----------+            +-----------+----------+    |
+|              /|\                                  |               |
+|               |                                  \|/              |
+|    +----------+----------+            +-----------+----------+    |
+|    | Inbound Handler  1  |            | Outbound Handler  M  |    |
+|    +----------+----------+            +-----------+----------+    |
+|              /|\                                  |               |
++---------------+-----------------------------------+---------------+
+                |                                  \|/
++---------------+-----------------------------------+---------------+
+|               |                                   |               |
+|       [ Socket.read() ]                    [ Socket.write() ]     |
+|                                                                   |
+|  Netty Internal I/O Threads (Transport Implementation)            |
++-------------------------------------------------------------------+
+----
+
+一个入站事件按照图中左侧所示从下到上的顺序被入站处理器处理。
+一个入站处理器通常处理图中底部 I/O 线程生成的入站数据。
+入站数据通常通过实际的读取操作如 `SocketChannel.read(ByteBuffer)` 从远程节点读取。
+如果入站事件越过了顶部的入站处理器，它会被默默的丢弃，或在需要你注意时记录下来。
+
+一个出站事件按照图中右侧所示从上到下的顺序被出站处理器处理。
+一个出站处理器通常生成或站换出站流量，例如一个写请求。
+如果一个出站事件越过了底部的出站处理器，它会被一个和 `Channel` 关联的 I/O 线程处理。
+这个 I/O 线程通常执行实际的输出操作比如 `SocketChannel.write(ByteBuffer)`。
+
+例如，让我们假设我们创建了下面的流水线：
+
+[source, java]
+----
+ChannelPipeline p = ...;
+p.addLast("1", new InboundHandlerA());
+p.addLast("2", new InboundHandlerB());
+p.addLast("3", new OutboundHandlerA());
+p.addLast("4", new OutboundHandlerB());
+p.addLast("5", new InboundOutboundHandlerX());
+----
+
+在上面这个例子中，名字以 `Inbound` 开头的类表示它是一个入站处理器。
+名字以 `Outbound` 开头的类表示它是一个出站处理器。
+
+按照给定示例的配置，当一个个事件入站时处理器的执行顺序是 1，2，3，4，5。
+当一个事件出站时，顺序是 5，4，3，2，1。
+基于这个原则，`ChannelPipeline` 跳过了某些处理器来减少堆栈深度。
+
+* 3 和 4 没有实现 `ChannelInboundHandler`，所以对一个入站请求的实际执行顺序是 1，2，和 5。
+* 1 和 2 没有实现 `ChannelOutboundHandler` 所以对一个出站请求的实际执行顺序是 5，4，和 3。
+* 如果 5 同时实现了 `ChannelInboundHandler` 和 `ChannelOutboundHandler` 则入站和出站事件的执行顺序分别可以是 125 和 543。
+
+== 转发一个事件到下一个处理器
+
+你可能注意到了在图中一个处理器不得不调用 `ChannelHandlerContext` 中的事件传播方法来转发事件到下一个处理器。
+这些方法包括：
+
+* 入站事件传递方法：
+** ChannelHandlerContext.fireChannelRegistered()
+** ChannelHandlerContext.fireChannelActive()
+** ChannelHandlerContext.fireChannelRead(Object)
+** ChannelHandlerContext.fireChannelReadComplete()
+** ChannelHandlerContext.fireExceptionCaught(Throwable)
+** ChannelHandlerContext.fireUserEventTriggered(Object)
+** ChannelHandlerContext.fireChannelWritabilityChanged()
+** ChannelHandlerContext.fireChannelInactive()
+** ChannelHandlerContext.fireChannelUnregistered()
+* 出站事件传递方法：
+** ChannelHandlerContext.bind(SocketAddress, ChannelPromise)
+** ChannelHandlerContext.connect(SocketAddress, SocketAddress, ChannelPromise)
+** ChannelHandlerContext.write(Object, ChannelPromise)
+** ChannelHandlerContext.flush()
+** ChannelHandlerContext.read()
+** ChannelHandlerContext.disconnect(ChannelPromise)
+** ChannelHandlerContext.close(ChannelPromise)
+** ChannelHandlerContext.deregister(ChannelPromise)
+
+下面示例展示了事件传播通常是如何完成的：
+[source, java]
+----
+public class MyInboundHandler extends ChannelInboundHandlerAdapter {
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+        System.out.println("Connected!");
+	ctx.fireChannelActive();
+    }
+}
+
+public class MyOutboundHandler extends ChannelOutboundHandlerAdapter {
+    @Override
+    public void close(ChannelHandlerContext ctx, ChannelPromise promise) {
+        System.out.println("Closing ...");
+	ctx.close(promise);
+    }
+}
+----
+
+== 构建一个流水线
+
+用户应该在流水线中有一个或多个 `ChannelHandler` 来接收 `I/O` 事件（如，读取）和请求 I/O 操作（如，写入和关闭）.
+例如，一个典型的服务器将会在流水线中包含一下处理器，但你的流程可能非常依赖协议和业务逻辑复杂性和特征：
+
+1. Protocol Decoder - 转换二进制数据（如，ByteBuf）为一个 Java 对象。
+2. Protocol Encoder - 转换 Java 对象为二进制数据。
+3. Business Logic Handler - 执行实际的业务逻辑（如，数据库访问）。
+
+这可以被表示为下列示例：
+[source, java]
+----
+static final EventExecutorGroup group = new DefaultEventExecutorGroup(16);
+...
+
+ChannelPipeline pipeline = ch.pipeline();
+
+pipeline.addLast("decoder", new MyProtocolDecoder());
+pipeline.addLast("encoder", new MyProtocolEncoder());
+
+// 告诉流水线在与 I/O 线程不同的另一个线程中运行 MyBusinessLogicHandler 事件处理器方法，
+// 所以 I/O 线程不会被耗时任务所阻塞。
+// 如果你的业务逻辑是全异步的或完成的非常快，你就不需要指定一个分组了。
+pipeline.addLast(group, "handler", new MyBusinessLogicHandler());
+----
+
+要注意虽然使用 `DefaultEventExecutorGroup` 将操作从 `EventLoop` 中卸载了
+但其仍会按 `ChannelHandlerContext` 以串行方式处理任务以保证顺序。
+因为排序它依旧可能成为一个瓶颈。
+如果对你的用例来说顺序不是必须的你可以考虑使用 `UnorderedThreadPool
+EventExecutor` 来最大化任务执行的并行性。
+
+== 线程安全
+
+一个 `ChannelHandler` 可以在任何时间添加或移除因为 `ChannelPipeline` 是线程安全的。
+例如，你可以在即将交换敏感信息时插入一个加密处理器，并在交换后移除它。

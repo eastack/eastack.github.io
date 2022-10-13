@@ -38,3 +38,10 @@ docker run -it --network some-network --rm mysql mysql -hsome-mysql -uexample-us
 docker run -it --rm mysql mysql -hsome.mysql.host -usome-mysql-user -p
 ----
 
+=== 中间件
+
+https://github.com/database-mesh/pisanix
+https://github.com/XiaoMi/Gaea
+https://vitess.io/
+https://github.com/sysown/proxysql
+

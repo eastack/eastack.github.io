@@ -14,3 +14,8 @@ SELECT pg_terminate_backend(14459); /terminate
 POSTGRES_USER=hello
 POSTGRES_PASSWORD=world
 POSTGRES_DB=gwp
+
+[source, bash]
+----
+docker run --name pg -p 5432:5432 -i -t -d -e POSTGRES_PASSWORD=helloworld -e POSTGRES_USER=eastack -e POSTGRES_DB=scala postgres:14.4
+----

@@ -46,3 +46,18 @@ git remote set-url origin [url]
 git remote rm origin
 git remote add origin [url]
 ----
++
+* 想把当前未提交的打补丁，到另一个仓库应用怎么操作？
++
+.当前仓库
+[source, bash]
+----
+git diff --cached > lambda.patch
+----
++
+.其他仓库
+[source, bash]
+----
+git apply lambda.patch
+----
+

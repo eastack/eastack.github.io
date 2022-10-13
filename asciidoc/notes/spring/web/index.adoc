@@ -1,0 +1,16 @@
+= Spring WebFlux
+
+/**
+ * 处理 Web 请求的契约。
+ */
+class WebHandler {
+    Mono<Void> handle(ServerWebExchange exchange);
+}
+
+/**
+ * HTTP 请求-响应交互的契约。
+ * 提供对 HTTP 请求和响应的访问，并公开其他与服务器段处理相关的属性和特性，例如请求属性。
+ */
+class ServerWebExchange {
+    
+}
