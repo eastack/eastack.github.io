@@ -136,6 +136,8 @@
 
 * https://www.cnblogs.com/symbol441/articles/957950.html[正则表达式分组]
 
+* https://www.runoob.com/w3cnote/reg-lookahead-lookbehind.html[正则表达式先行断言和后行断言]
+
 * https://my.oschina.net/superpdm/blog/129715[]
 
 * https://www.baeldung.com/java-annotation-processing-builder[]
@@ -143,3 +145,7 @@
 * https://juejin.cn/post/6870162226032934926[]
 
 * https://www.atlassian.com/git/tutorials[]
+
+* https://rustcc.cn/article?id=08bc71ca-7aa1-4fce-93aa-614712430c66[UTF-8编码相关]
+
+* https://regexlearn.com/zh-cn/learn/regex101[Regex101]

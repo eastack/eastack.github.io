@@ -1,0 +1,7 @@
+= Clojure Resources
+
+https://github.com/funcool
+https://github.com/ptaoussanis
+https://www.braveclojure.com/writing-macros/
+https://ericnormand.me/mini-guide/when-to-use-a-macro-in-clojure
+https://clojure.org/reference/macros

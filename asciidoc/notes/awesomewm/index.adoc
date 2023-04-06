@@ -1,0 +1,3 @@
+= AwesomeWM
+
+https://blog.lilydjwg.me/2014/1/11/inspect-lua-and-awesome-memory-leakage-solved.42421.html[使用 inspect.lua 查找 Awesome 配置引入的内存泄漏]
